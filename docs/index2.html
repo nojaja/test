@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='UTF-8'>
+  <title>Html2ReactComponent</title>
+  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/uikit.min.css">
+  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/components/notify.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+
+<script>
+
+
+const ORIGIN = location.protocol + '//' + location.hostname + ':' + location.port;
+
+const STATIC_CACHE_KEY = '1';
+const STATIC_FILES = [
+  'https://s3-us-west-2.amazonaws.com/s.cdpn.io/789087/profile/profile-80.jpg?5'
+];
+
+caches.delete(STATIC_CACHE_KEY);
+
+    caches.open(STATIC_CACHE_KEY).then(cache => {
+var debug = {hello: "world"};
+var myBlob = new Blob([JSON.stringify(debug, null, 2)], {type : 'application/javascript; charset=UTF-8'});
+      
+var init = { "status" : 200 , "statusText" : "OK" };
+var myResponse = new Response(myBlob,init);
+cache.put(ORIGIN + "/js/test/"+"hoge.txt", myResponse);
+      return Promise.all(
+        STATIC_FILES.map(url => {
+          return fetch(new Request(url, { cache: 'no-cache', mode: 'no-cors' })).then(response => {
+            console.log(url,response);
+            console.log(url,JSON.stringify(response));
+            return cache.put(url, response);
+          });
+        })
+      );
+    })
+
+
+
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.register('/js/ws.js', { scope: '/js/test/' }).then(function(registraion) {
+    registraion.update();
+  });
+}
+
+
+</script>
+</body></html>
