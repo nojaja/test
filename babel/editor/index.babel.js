@@ -181,7 +181,7 @@ function localDraft() {
 
 
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('/js/ws.js', { scope: '/js/test/' }).then(function(registraion) {
+  navigator.serviceWorker.register('/ws.js', { scope: '/js/test/' }).then(function(registraion) {
     registraion.update();
   });
 }
