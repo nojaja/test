@@ -40,9 +40,171 @@ $("#edittab > li").on("click", function(event) {
   changeTab(editor,$(this).attr("id"));
 });
 
+
+/**
+  ファイル管理
+*/
+class FileContainer  {
+  constructor() {
+    this.container = {
+        id:"",
+        files:{},
+        "public": true,
+        "created_at": "2017-10-29T05:45:01Z",
+        "updated_at": "2017-11-14T12:41:14Z",
+        "description": ""
+    };
+  }
+
+  getFiles() {
+    // 配列のキーを取り出す
+    var ret = []
+    for (var key in this.container["files"]) {
+      if(!this.container["files"][key]["truncated"]){
+        ret.push(key);
+      }
+    }
+    return ret;
+  }
+
+  getFile(filename) {
+    if (filename in this.container["files"]) {
+      return new FileData(this.container["files"][filename]);
+    }
+  }
+
+  putFile(file) {
+    var filename = file.getFilename();
+    this.container["files"][filename] = file.getFileData();
+    return true;
+  }
+
+  removeFile(filename) {
+    var file = getFile(filename);
+    file.remove();
+    putFile(file);
+  }
+
+  setPublic(bool) {
+    this.container["public"] = bool;
+  }
+  getPublic() {
+    return this.container["public"];
+  }
+  setDescription(description) {
+    this.container["description"] = description;
+  }
+  getDescription() {
+    return this.container["description"];
+  }
+
+  setContainer(container) {
+    this.container = container;
+  }
+  getContainer() {
+    return this.container;
+  }
+
+  setContainerJson(container) {
+    this.setContainer(JSON.parse(container));
+  }
+  getContainerJson() {
+    return JSON.stringify(this.getContainer());
+  }
+
+  getGistData() {
+    var gistdata = {
+       "description": this.container["description"],
+       "public": this.container["public"],
+       "files": this.container["files"]
+    };
+    return gistdata;
+  }
+  getGistJsonData() {
+    return JSON.stringify(this.getGistData());
+  }
+}
+
+
+
+class FileData  {
+  constructor(file) {
+    if(file instanceof FileData){
+      this.file = file.getFileData
+    }else{
+      this.file = {
+          "filename": file&&file["filename"]?file["filename"]:"",
+          "type":  file&&file["type"]?file["type"]:"text/plain",
+          "language":  file&&file["language"]?file["language"]:"Markdown",
+          "size":  file&&file["size"]?file["size"]:0,
+          "truncated":  file&&file["truncated"]?file["truncated"]:false,
+          "content":  file&&file["content"]?file["content"]:""
+      };
+    }
+  }
+
+  setLanguage(language) {
+    this.file["language"] = language;
+  }
+  getLanguage() {
+    return this.file["language"];
+  }
+  setType(type) {
+    this.file["type"] = type;
+  }
+  getType() {
+    return this.file["type"];
+  }
+  getSize(){
+    return this.file["size"];
+  }
+  setContent(content) {
+    this.file["content"] = content;
+  }
+  getContent() {
+    return this.file["content"];
+  }
+  setFilename(filename) {
+    this.file["filename"] = filename;
+  }
+  getFilename() {
+    return this.file["filename"];
+  }
+
+  getFileData() {
+    return this.file;
+  }
+  getFileDataJson() {
+    return JSON.stringify(this.getFileData());
+  }
+
+  remove(){
+    this.file["content"] = "";
+    this.file["truncated"] = true;
+  };
+}
+
+
+
+
+var fileContainer = new FileContainer();
+var test = new FileContainer();
+
+  $.ajax({
+    url: "https://api.github.com/gists/84f22257f330b23ee0ba751468e40f49",
+    dataType: "html"
+  }).done(function(d) {
+    var test = new FileContainer();
+    test.setContainer(d);
+    console.log(test);
+  });
+
+
+
+
+
 function changeSrc(url,cb) {
 $("#child-frame").attr("srcdoc", "");
-//$("#child-frame").attr("src", "./blank.html");
   var frame = document.getElementById("child-frame");
   frame.onload = function(){};
 
@@ -65,6 +227,7 @@ $("#child-frame").attr("srcdoc", "");
       return (cb)?cb():true;
   });
 }
+
 $(".samples").on("click", function(event) {
   changeSrc($(this).attr("data-url"),function () {
     $.UIkit.notify("load..", {status:'success',timeout : 1000});
@@ -72,26 +235,26 @@ $(".samples").on("click", function(event) {
 });
 
 
-var gasUrl="https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/";
-
+//File一覧取得
+var gasUrl="https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/";
 function projectjsonCallback(json){
   $("#prjlist").empty();
 
   var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
     prj.on("click", function (event) {
       $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
-      $.ajax(gasUrl + $(event.target).attr("data-url") + '/', {
+      $.ajax(gasUrl + $(event.target).attr("data-url"), {
         type: 'get',
         data: { t: '1' },
         dataType: 'jsonp',
-        jsonpCallback: "filesjsonCallback"
+        jsonpCallback: "filescontentjsonCallback"
       });
     });
 
   json.rows.forEach(function(val, i) {
     var _prj = prj.clone(true);
-    _prj.children('.project').attr('data-url',val);
-    _prj.children('.project').append(val);
+    _prj.children('.project').attr('data-url',val[6]+'/'+val[1]+val[2]);
+    _prj.children('.project').append(val[1]);
     $("#prjlist").append(_prj);
   });
 }
@@ -104,37 +267,47 @@ $.ajax(gasUrl+'',{
   });
 
 
-
+//ファイル取得時の処理
 function filescontentjsonCallback(json){
     console.log(json); 
   $("#child-frame").attr("srcdoc", "");
   var frame = document.getElementById("child-frame");
   frame.onload = function(){};
-  data.source.model.setValue(json.content);
+
+  if(json.ext == "fileContainer" ){
+    fileContainer.setContainerJson(json.content);
+  }else{
+    var file = new FileData();
+    file.setFilename("index.html");
+    file.setContent(json.content);
+    fileContainer.putFile(file);
+  }
+  var _file = fileContainer.getFile(fileContainer.getFiles()[0]);
+  var source = _file.getContent();
+
+  data.source.model.setValue(source);
+  filesjsonCallback();
 }
 
 
-function filesjsonCallback(json){
-  console.log(json);
+//File一覧のcallback
+function filesjsonCallback(){
   $("#filelist").empty();
 
   var file = $('<li ><a  class="file" data-url=""><i class="uk-icon-file"></i></a></li>');
     file.on("click", function (event) {
       $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
-      $.ajax(gasUrl + $(event.target).attr("data-url"), {
-        type: 'get',
-        data: { t: '1' },
-        dataType: 'jsonp',
-        jsonpCallback: "filescontentjsonCallback"
-      });
+      var _file = fileContainer.getFile($(event.target).attr("data-uri"));
+      var source = _file.getContent();
+      data.source.model.setValue(source);
     });
 
-
-  json.rows.forEach(function(val, i) {
+  
+  fileContainer.getFiles().forEach(function(val, i) {
     console.log(i, val); 
     var _file = file.clone(true);
-    _file.children('.file').attr('data-url',val[6]+'/'+val[1]+val[2]);
-    _file.children('.file').append(val[1]);
+    _file.children('.file').attr('data-uri',val);
+    _file.children('.file').append(val);
     $("#filelist").append(_file);
   });
 }
@@ -148,33 +321,35 @@ function saveDraftCallback(json){
 function saveDraft(source) {
   // ローカルストレージに最新の状態を保存
 
-  var name = 'draft'+location.pathname.replace(/\//g, '.');
+  var name = 'draftContainer'+location.pathname.replace(/\//g, '.');
 
-  //localStorage.setItem(name, JSON.stringify(source));
+  localStorage.setItem(name, fileContainer.getContainerJson());
 
-  console.log("draft:" + JSON.stringify(source));
+  console.log("draftContainer:" + fileContainer.getContainerJson());
   $.UIkit.notify("save..", {status:'success',timeout : 1000});
-
-  var datafilecontents = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode(source), 'SJIS'));
-  //var datafilefilename = Encoding.base64Encode(Encoding.convert(Encoding.stringToCode('draft.html'), 'SJIS'));
-  var datafilefilename = Encoding.urlEncode(Encoding.convert(Encoding.stringToCode('draft.html'), 'UNICODE')) ;
-  var datafiletype = 'text/html';
-  var datafilelength = source.length;
-    
-
-  $.ajax( {url:gasUrl +'reactcomponent/' +datafilefilename+'&callback=test' ,
-    type: 'POST',
-    data: { t: '1', datafilecontents:datafilecontents,datafilefilename:datafilefilename,datafiletype:datafiletype, datafilelength:datafilelength},
-    dataType: 'json',
-//    jsonpCallback: "saveDraftCallback"
-  });
 
 }
 function localDraft() {
   // ページが読み込まれたら、ローカルストレージから状態を読み込む
-  var name = 'draft'+location.pathname.replace(/\//g, '.');
-  var source = JSON.parse(localStorage.getItem(name)) || null;
+  var name1 = 'draftContainer'+location.pathname.replace(/\//g, '.');
+
+  var name2 = 'draft'+location.pathname.replace(/\//g, '.');
+  var source = "";
+
+  if(localStorage.getItem(name1)){
+    fileContainer.setContainerJson(localStorage.getItem(name1));
+    var file = fileContainer.getFile(fileContainer.getFiles()[0]);
+    source = file.getContent();
+  }else{
+    source = JSON.parse(localStorage.getItem(name2)) || null;
+    var file = new FileData();
+    file.setFilename("index.html");
+    file.setContent(source);
+    fileContainer.putFile(file);
+  }
   console.log("source:" + JSON.stringify(source));
+  console.log("fileContainer:" + fileContainer.getContainerJson());
+  filesjsonCallback();
   return source;
 }
 
@@ -249,10 +424,14 @@ $(function() {
       automaticLayout: true,
       model: data.source.model
     });
-    var url = (arg["q"])?arg["q"] : "";
+
+    var url = (arg["q"])?arg["q"] : (arg["g"])?arg["g"] : "";
+
     changeSrc(url,function(){
       compile();
     });
+
+
   });
 
   function compile() {
