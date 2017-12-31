@@ -469,7 +469,7 @@ function localDraft() {
 キャッシュファイルの制御を可能にする
 */
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('/ws.js', { scope: '/test/' }).then(function (registraion) {
+  navigator.serviceWorker.register('./ws.js', { scope: '/test/' }).then(function (registraion) {
     registraion.update();
   });
 }
