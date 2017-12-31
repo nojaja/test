@@ -641,28 +641,41 @@ $(function() {
   });
 
 
+function saveGist(token){
+    $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
+    $.ajax({
+      url: 'https://api.github.com/gists',
+      type: 'POST',
+      dataType: 'json',
+      beforeSend: function beforeSend(xhr) {
+        xhr.setRequestHeader("Authorization", "token " + token);
+      },
+      data: fileContainer.getGistJsonData()
+    }).success(function (e) {
+      console.log(e);
+      $.UIkit.notify("complete!", { status: 'success', timeout: 1000 });
+    }).error(function (e) {
+      console.warn("gist save error", e);
+      $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
+    });
+}
+
   $("#gist").on("click", function(event) {
-    var gistdata = {
-       "description": "posting gist test",
-       "public": true,
-       "files": {
-         "test.html": {
-           "content": data.source.model.getValue()
-         }
-       }
-     }
-     $.ajax({
-       url: 'https://api.github.com/gists',
-       type: 'POST',
-       dataType: 'json',
-       data: fileContainer.getGistJsonData()
-     })
-     .success( function(e) {
-       console.log(e);
-     })
-     .error( function(e) {
-       console.warn("gist save error", e);
-     });
+    var token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
+    var token = localStorage.getItem(token_key);
+    if(!token){
+      UIkit.modal.prompt('<p>Gist</p><br><p>Personal access tokens:</p>', '',function (newtoken) {
+        console.log('Confirmed.'+newtoken);
+       token = newtoken;
+       localStorage.setItem(token_key, token);
+       saveGist(token);
+      }, function () {
+        console.log('Rejected.');
+        return;
+      });
+    }else{
+       saveGist(token);
+    }
   });
 
   $(window).keydown(function(e) {
