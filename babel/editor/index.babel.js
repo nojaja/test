@@ -412,7 +412,7 @@ function localDraft() {
 キャッシュファイルの制御を可能にする
 */
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('/ws.js', { scope: '/js/test/' }).then(function(registraion) {
+  navigator.serviceWorker.register('/ws.js', { scope: '/test/' }).then(function(registraion) {
     registraion.update();
   });
 }
@@ -424,11 +424,11 @@ const STATIC_CACHE_KEY = '1';
 caches.delete(STATIC_CACHE_KEY);
 function saveCache(url,source,type) {
   var _type = type || 'application/javascript; charset=UTF-8';
-  var _url = location.href.substr(0,location.href.length-location.pathname.length);//URLの最初のパスまで
+  var _url = location.href.substr(0,location.href.substr(0,location.href.length-location.search.length).lastIndexOf("/"));//URLの最初のパスまで
   caches.open(STATIC_CACHE_KEY).then(cache => {
     var blob = new Blob([source], {type : _type});
     var response = new Response(blob,{ "status" : 200 , "statusText" : "OK" });
-    cache.put(_url + "/js/test/"+url, response);
+    cache.put(_url + "/test/"+url, response);
   })
 }
 
