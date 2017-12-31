@@ -55,7 +55,6 @@ class FileContainer  {
 
   putFile(file) {
     var filename = file.getFilename();
-    //this.fileObjects[filename] = file;
     this.container["files"][filename] = file.getFileData();
     return true;
   }
@@ -324,7 +323,6 @@ function refreshFileList(){
       currentFile = fileContainer.getFile($(event.target).attr("data-uri"));
       var source = currentFile.getContent();
       var data = currentFile.getEditorData();
-      //data.source.model.setValue(source);
       editor.setModel(data['source'].model);
       editor.restoreViewState(data['source'].state);
       editor.focus();
@@ -388,12 +386,9 @@ function localDraft() {
   var name1 = 'draftContainer'+location.pathname.replace(/\//g, '.');
 
   var name2 = 'draft'+location.pathname.replace(/\//g, '.');
-  //var source = "";
 
   if(localStorage.getItem(name1)){
     fileContainer.setContainerJson(localStorage.getItem(name1));
-    //var file = fileContainer.getFile(fileContainer.getFiles()[0]);
-    //source = file.getContent();
   }else{
     var source = JSON.parse(localStorage.getItem(name2)) || null;
     var file = new FileData();
@@ -401,9 +396,7 @@ function localDraft() {
     file.setContent(source);
     fileContainer.putFile(file);
   }
-  //console.log("source:" + JSON.stringify(source));
   console.log("fileContainer:" + fileContainer.getContainerJson());
-  //refreshFileList();
   return fileContainer.getContainerJson();
 }
 
@@ -473,18 +466,6 @@ $(function() {
     }
   });
   require(["vs/editor/editor.main"], function() {
-/*
-    data.source.model = monaco.editor.createModel("", "html");
-    data.dom.model = monaco.editor.createModel("", "json");
-    data.component.model = monaco.editor.createModel("", "javascript");
-    data.app.model = monaco.editor.createModel("", "javascript");
-    data.html.model = monaco.editor.createModel("html", "html");
-
-    editor = monaco.editor.create(editorContainer, {
-      automaticLayout: true,
-      model: data.source.model
-    });
-*/
     editor = monaco.editor.create(editorContainer, {
       automaticLayout: true,
       model: null
