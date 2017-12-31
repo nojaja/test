@@ -727,7 +727,6 @@ $(function () {
       dataType: 'json',
       data: fileContainer.getGistJsonData()
     }).success(function (e) {
-
       console.log(e);
     }).error(function (e) {
       console.warn("gist save error", e);
@@ -741,6 +740,7 @@ $(function () {
     }
     if (e.ctrlKey) {
       if (e.keyCode === 83) {
+        var data = currentFile.getEditorData();
         saveDraft(data.source.model.getValue());
         return false;
       }
