@@ -81,11 +81,19 @@ var FileContainer = function () {
       return true;
     }
   }, {
+    key: "renameFile",
+    value: function renameFile(filename, newName) {
+      var file = this.getFile(filename);
+      file.setFilename(newName);
+      this.putFile(file);
+      delete this.container["files"][filename];
+    }
+  }, {
     key: "removeFile",
     value: function removeFile(filename) {
-      var file = getFile(filename);
+      var file = this.getFile(filename);
       file.remove();
-      putFile(file);
+      this.putFile(file);
     }
   }, {
     key: "init",
@@ -401,7 +409,7 @@ $(".samples").on("click", function (event) {
 function refreshFileList() {
   $("#filelist").empty();
 
-  var file = $('<li ><a  class="file" data-url=""><input type="checkbox"  class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
+  var file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
   file.on("click", function (event) {
     currentFile = fileContainer.getFile($(event.target).attr("data-uri"));
     var source = currentFile.getContent();
@@ -417,7 +425,7 @@ function refreshFileList() {
   fileContainer.getFiles().forEach(function (val, i) {
     console.log(i, val);
     var _file = file.clone(true);
-    _file.children('.fileSelect').attr('data-uri', val);
+    _file.find('.fileSelect').attr('data-uri', val);
     _file.children('.file').attr('data-uri', val);
     _file.children('.file').append(val);
     $("#filelist").append(_file);
@@ -759,6 +767,35 @@ $(function () {
     } else {
       saveGist(token);
     }
+  });
+
+  $("#fileRename").on("click", function (event) {
+    $('.fileSelect:checkbox:checked').each(function () {
+      var filename = $(this).attr("data-uri");
+      UIkit.modal.prompt('<p>Rename File Name</p>', filename, function (newName) {
+        console.log('newName ' + newName);
+
+        fileContainer.renameFile(filename, newName);
+        refreshFileList();
+      }, function () {
+        console.log('Rejected.');
+        return;
+      });
+    });
+  });
+
+  $("#fileDelete").on("click", function (event) {
+    $('.fileSelect:checkbox:checked').each(function () {
+      var filename = $(this).attr("data-uri");
+      UIkit.modal.confirm('<p>Delete ' + filename + ' File </p>', function () {
+        console.log('filename ' + filename);
+        fileContainer.removeFile(filename);
+        refreshFileList();
+      }, function () {
+        console.log('Rejected.');
+        return;
+      });
+    });
   });
 
   $("#newfile").on("click", function (event) {
