@@ -478,6 +478,16 @@
   var editor = null;
   var currentFile = null;
 
+  /**
+  サービスワーカーの登録
+  キャッシュファイルの制御を可能にする
+  */
+  if (navigator.serviceWorker) {
+    navigator.serviceWorker.register('./ws.js', { scope: './test/' }).then(function (registraion) {
+      registraion.update();
+    });
+  }
+
   /* タブ切り替え処理 */
   function changeTab(editor, desiredModelId) {
     var currentState = editor.saveViewState();
@@ -494,33 +504,50 @@
     editor.restoreViewState(data[desiredModelId].state);
     editor.focus();
   }
-
-  //タブの切替
-  $("#edittab > li").on("click", function (event) {
-    changeTab(editor, $(this).attr("id"));
-  });
-
+  //１つ目のファイルを開く
   function openFirst() {
-    currentFile = fileContainer.getFile(fileContainer.getFiles()[0]);
+    fileOpen(fileContainer.getFiles()[0]);
+    $("#filelist").children("li").removeClass("uk-active");
+    $("#filelist li:first").addClass("uk-active");
+  }
+
+  //Fileを開く
+  function fileOpen(filename) {
+    currentFile = fileContainer.getFile(filename);
     var source = currentFile.getContent();
     var data = currentFile.getEditorData();
     editor.setModel(data['source'].model);
     editor.restoreViewState(data['source'].state);
     editor.focus();
     $.UIkit.switcher('#edittab').show(0);
-
-    $("#filelist").children("li").removeClass("uk-active");
-    $("#filelist li:first").addClass("uk-active");
   }
+
+  // iframe内のコンテンツを更新
+  function refreshView(content) {
+    // iframe内のコンテンツを更新
+    $("#child-frame").attr("srcdoc", "");
+    //$("#child-frame").attr("src", "./blank.html");
+    var frame = document.getElementById("child-frame");
+    frame.src = "./blank.html";
+    frame.onload = function () {
+      frame.onload = function () {};
+      frame.contentDocument.open();
+      frame.contentDocument.write(content);
+      frame.contentDocument.close();
+    };
+  }
+
+  //タブの切替
+  $("#edittab > li").on("click", function (event) {
+    changeTab(editor, $(this).attr("id"));
+  });
 
   //プロジェクトファイルの読み込み
   function loadProject(url, type, cb) {
     $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
     $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
     //iframeの初期化
-    $("#child-frame").attr("srcdoc", "");
-    var frame = document.getElementById("child-frame");
-    frame.onload = function () {};
+    refreshView("");
     //localから取得
     if (!url) {
       var doc = localDraft();
@@ -579,13 +606,7 @@
 
     var file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
     file.on("click", function (event) {
-      currentFile = fileContainer.getFile($(event.target).attr("data-uri"));
-      var source = currentFile.getContent();
-      var data = currentFile.getEditorData();
-      editor.setModel(data['source'].model);
-      editor.restoreViewState(data['source'].state);
-      editor.focus();
-      $.UIkit.switcher('#edittab').show(0);
+      fileOpen($(event.target).attr("data-uri"));
       $("#filelist").children("li").removeClass("uk-active");
       $(event.target.parentElement).addClass("uk-active");
     });
@@ -600,7 +621,7 @@
     });
   }
 
-  //File一覧の更新
+  //ファイルキャッシュの更新
   function refreshCache() {
     fileContainer.getFiles().forEach(function (filename, i) {
       var _file = fileContainer.getFile(filename);
@@ -608,7 +629,7 @@
     });
   }
 
-  //File一覧表示
+  //プロジェクト一覧表示
   var gasUrl = "https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/";
   function projectjsonCallback(json) {
     $("#prjlist").empty();
@@ -628,7 +649,7 @@
     });
   }
 
-  //File一覧取得
+  //プロジェクト一覧取得
   $.getJSON(gasUrl + "&callback=?", { t: '1' }, function (json) {
     projectjsonCallback(json);
   });
@@ -660,16 +681,6 @@
     }
     console.log("fileContainer:" + fileContainer.getContainerJson());
     return fileContainer.getContainerJson();
-  }
-
-  /**
-  サービスワーカーの登録
-  キャッシュファイルの制御を可能にする
-  */
-  if (navigator.serviceWorker) {
-    navigator.serviceWorker.register('./ws.js', { scope: './test/' }).then(function (registraion) {
-      registraion.update();
-    });
   }
 
   /**
@@ -749,17 +760,16 @@
         automaticLayout: true,
         model: null
       });
-
       var url = arg["q"] ? arg["q"] : arg["g"] ? arg["g"] : "";
-
       fileContainer.setMonaco(monaco);
-
       loadProject(url, "localStorage", function () {
+        refreshCache();
         compile();
       });
     });
 
-    function compile() {
+    function compile(targetFile) {
+
       var webComponentParser = new WebComponentParser({
         builder: ReactComponentBuilder
       });
@@ -778,10 +788,13 @@
       //var compiler3 = new Compiler([builder2], {});
 
       //-ここからDemo用処理----------------------------------
-      var data = currentFile.getEditorData();
+      var data = targetFile ? fileContainer.getFile(targetFile).getEditorData() : currentFile.getEditorData();
+      var filename = targetFile ? fileContainer.getFile(targetFile).getFilename() : currentFile.getFilename();
+      filename = filename.substr(0, filename.lastIndexOf("."));
+
       var parseData = parseHtml(data.source.model.getValue().trim());
       data.dom.model.setValue(stringify(parseData));
-      saveCache('dom.json', stringify(parseData), 'application/json');
+      saveCache(filename + '_dom.json', stringify(parseData), 'application/json');
       compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
 
       //editor4.setValue(cssbuilder.getNodes());
@@ -791,10 +804,10 @@
       reactRootParser.build(); //react化処理の実行
       //変換されたコードはwindowに読み込まれ実行可能になります。
       data.component.model.setValue(webComponentParser.getResult());
-      saveCache('component.js', webComponentParser.getResult());
+      saveCache(filename + '_component.js', webComponentParser.getResult());
 
       data.app.model.setValue(reactRootParser.getResult());
-      saveCache('app.js', reactRootParser.getResult());
+      saveCache(filename + '_app.js', reactRootParser.getResult());
 
       currentFile.setEditorData(data);
 
@@ -868,26 +881,14 @@
       compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
       //compiler3.compile(bodyElements[0].children); //jsonオブジェクトを各種コードに変換します
       data.html.model.setValue(builder.getNodes());
-      saveCache('index.html', builder.getNodes(), 'text/html; charset=UTF-8');
+      saveCache(filename + '.html', builder.getNodes(), 'text/html; charset=UTF-8');
 
-      // iframe内のコンテンツのdocumentオブジェクト追加
-      //$("#child-frame").attr("srcdoc", builder.getNodes());
-
-      // iframe内のコンテンツを更新
-      $("#child-frame").attr("srcdoc", "");
-      //$("#child-frame").attr("src", "./blank.html");
-      var frame = document.getElementById("child-frame");
-      frame.src = "./blank.html";
-      frame.onload = function () {
-        frame.onload = function () {};
-        frame.contentDocument.open();
-        frame.contentDocument.write(builder.getNodes());
-        frame.contentDocument.close();
-        $.UIkit.notify("compile..", { status: 'success', timeout: 1000 });
-      };
+      refreshView(builder.getNodes());
+      $.UIkit.notify("compile..", { status: 'success', timeout: 1000 });
     }
 
     $("#run").on("click", function (event) {
+      refreshCache();
       compile();
     });
 
@@ -994,6 +995,7 @@
 
     $(window).keydown(function (e) {
       if (e.keyCode === 120) {
+        refreshCache();
         compile();
         return false;
       }
