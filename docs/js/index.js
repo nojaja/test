@@ -50,40 +50,30 @@
       } else {
         this.file = {
           "filename": file && file["filename"] ? file["filename"] : "",
+          "fileType": file && file["fileType"] ? file["fileType"] : "txt",
           "type": file && file["type"] ? file["type"] : "text/plain",
           "language": file && file["language"] ? file["language"] : "Markdown",
           "size": file && file["size"] ? file["size"] : 0,
           "truncated": file && file["truncated"] ? file["truncated"] : false,
           "content": file && file["content"] ? file["content"] : ""
         };
-        this.editorData = {
-          source: {
-            model: monaco ? monaco.editor.createModel("", "html") : null,
-            state: null
-          },
-          dom: {
-            model: monaco ? monaco.editor.createModel("", "json") : null,
-            state: null
-          },
-          component: {
-            model: monaco ? monaco.editor.createModel("", "javascript") : null,
-            state: null
-          },
-          app: {
-            model: monaco ? monaco.editor.createModel("", "javascript") : null,
-            state: null
-          },
-          html: {
-            model: monaco ? monaco.editor.createModel("", "html") : null,
-            state: null
-          }
-        };
+        this.editorData = {};
+        this.setFilename(file["filename"]);
         if (monaco) this.editorData.source.model.setValue(this.file["content"]);
         this.monaco = monaco;
       }
     }
 
     _createClass(FileData, [{
+      key: "addEditorData",
+      value: function addEditorData(key, caption, type) {
+        this.editorData[key] = {
+          caption: caption,
+          model: monaco ? monaco.editor.createModel("", type) : null,
+          state: null
+        };
+      }
+    }, {
       key: "setLanguage",
       value: function setLanguage(language) {
         this.file["language"] = language;
@@ -92,6 +82,16 @@
       key: "getLanguage",
       value: function getLanguage() {
         return this.file["language"];
+      }
+    }, {
+      key: "setFileType",
+      value: function setFileType(fileType) {
+        this.file["fileType"] = fileType;
+      }
+    }, {
+      key: "getFileType",
+      value: function getFileType() {
+        return this.file["fileType"];
       }
     }, {
       key: "setType",
@@ -126,21 +126,46 @@
       key: "setFilename",
       value: function setFilename(filename) {
         this.file["filename"] = filename;
+        if (filename.match(/md$/)) {
+          this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
+        }
+        if (filename.match(/markdown$/)) {
+          this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
+        }
         if (filename.match(/txt$/)) {
           this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
         }
         if (filename.match(/json$/)) {
           this.setType("application/json");
+          this.addEditorData("source", filename, "json");
+          return;
         }
         if (filename.match(/htm.?$/)) {
           this.setType("text/html");
+          this.addEditorData("source", filename, "html");
+          this.addEditorData("dom", "dom tree", "json");
+          this.addEditorData("component", "js component.js", "javascript");
+          this.addEditorData("app", "js app.js", "javascript");
+          this.addEditorData("html", "result(html)", "html");
         }
         if (filename.match(/js$/)) {
           this.setType("text/javascript");
+          this.addEditorData("source", filename, "javascript");
+          return;
         }
         if (filename.match(/css$/)) {
           this.setType("text/css");
+          this.addEditorData("source", filename, "css");
+          return;
         }
+        this.addEditorData("source", filename, "txt");
+        return;
       }
     }, {
       key: "getFilename",
@@ -477,6 +502,7 @@
   //var monaco = null;
   var editor = null;
   var currentFile = null;
+  var currentModelId = "source";
 
   /**
   サービスワーカーの登録
@@ -493,15 +519,12 @@
     var currentState = editor.saveViewState();
     var currentModel = editor.getModel();
     var data = currentFile.getEditorData();
-    for (var key in data) {
-      if (currentModel === data[key].model) {
-        data[key].state = currentState;
-      }
-    }
+    data[currentModelId].state = currentState;
     currentFile.setEditorData(data);
 
     editor.setModel(data[desiredModelId].model);
     editor.restoreViewState(data[desiredModelId].state);
+    currentModelId = desiredModelId;
     editor.focus();
   }
   //１つ目のファイルを開く
@@ -516,9 +539,27 @@
     currentFile = fileContainer.getFile(filename);
     var source = currentFile.getContent();
     var data = currentFile.getEditorData();
-    editor.setModel(data['source'].model);
-    editor.restoreViewState(data['source'].state);
-    editor.focus();
+    $("#edittab").empty();
+    var tab = $('<li><a></a></li>');
+    tab.on("click", function (event) {
+      //タブの切替
+      changeTab(editor, $(this).attr("id"));
+    });
+
+    for (var key in data) {
+      var i = 0;
+      var _tab = tab.clone(true);
+      _tab.attr('id', key);
+      _tab.children("a").append(data[key].caption);
+      $("#edittab").append(_tab);
+      if (key == currentModelId) {
+        _tab.addClass('uk-active');
+        editor.setModel(data[currentModelId].model);
+        editor.restoreViewState(data[currentModelId].state);
+        editor.focus();
+      }
+      i++;
+    };
     $.UIkit.switcher('#edittab').show(0);
   }
 
@@ -536,11 +577,6 @@
       frame.contentDocument.close();
     };
   }
-
-  //タブの切替
-  $("#edittab > li").on("click", function (event) {
-    changeTab(editor, $(this).attr("id"));
-  });
 
   //プロジェクトファイルの読み込み
   function loadProject(url, type, cb) {
@@ -983,11 +1019,7 @@
         var currentState = editor.saveViewState();
         var currentModel = editor.getModel();
         var data = currentFile.getEditorData();
-        for (var key in data) {
-          if (currentModel === data[key].model) {
-            data[key].state = currentState;
-          }
-        }
+        data[currentModelId].state = currentState;
         currentFile.setEditorData(data);
         fileContainer.putFile(currentFile);
       }
@@ -1286,40 +1318,30 @@
       } else {
         this.file = {
           "filename": file && file["filename"] ? file["filename"] : "",
+          "fileType": file && file["fileType"] ? file["fileType"] : "txt",
           "type": file && file["type"] ? file["type"] : "text/plain",
           "language": file && file["language"] ? file["language"] : "Markdown",
           "size": file && file["size"] ? file["size"] : 0,
           "truncated": file && file["truncated"] ? file["truncated"] : false,
           "content": file && file["content"] ? file["content"] : ""
         };
-        this.editorData = {
-          source: {
-            model: monaco ? monaco.editor.createModel("", "html") : null,
-            state: null
-          },
-          dom: {
-            model: monaco ? monaco.editor.createModel("", "json") : null,
-            state: null
-          },
-          component: {
-            model: monaco ? monaco.editor.createModel("", "javascript") : null,
-            state: null
-          },
-          app: {
-            model: monaco ? monaco.editor.createModel("", "javascript") : null,
-            state: null
-          },
-          html: {
-            model: monaco ? monaco.editor.createModel("", "html") : null,
-            state: null
-          }
-        };
+        this.editorData = {};
+        this.setFilename(file["filename"]);
         if (monaco) this.editorData.source.model.setValue(this.file["content"]);
         this.monaco = monaco;
       }
     }
 
     _createClass(FileData, [{
+      key: "addEditorData",
+      value: function addEditorData(key, caption, type) {
+        this.editorData[key] = {
+          caption: caption,
+          model: monaco ? monaco.editor.createModel("", type) : null,
+          state: null
+        };
+      }
+    }, {
       key: "setLanguage",
       value: function setLanguage(language) {
         this.file["language"] = language;
@@ -1328,6 +1350,16 @@
       key: "getLanguage",
       value: function getLanguage() {
         return this.file["language"];
+      }
+    }, {
+      key: "setFileType",
+      value: function setFileType(fileType) {
+        this.file["fileType"] = fileType;
+      }
+    }, {
+      key: "getFileType",
+      value: function getFileType() {
+        return this.file["fileType"];
       }
     }, {
       key: "setType",
@@ -1362,21 +1394,46 @@
       key: "setFilename",
       value: function setFilename(filename) {
         this.file["filename"] = filename;
+        if (filename.match(/md$/)) {
+          this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
+        }
+        if (filename.match(/markdown$/)) {
+          this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
+        }
         if (filename.match(/txt$/)) {
           this.setType("text/plain");
+          this.addEditorData("source", filename, "txt");
+          return;
         }
         if (filename.match(/json$/)) {
           this.setType("application/json");
+          this.addEditorData("source", filename, "json");
+          return;
         }
         if (filename.match(/htm.?$/)) {
           this.setType("text/html");
+          this.addEditorData("source", filename, "html");
+          this.addEditorData("dom", "dom tree", "json");
+          this.addEditorData("component", "js component.js", "javascript");
+          this.addEditorData("app", "js app.js", "javascript");
+          this.addEditorData("html", "result(html)", "html");
         }
         if (filename.match(/js$/)) {
           this.setType("text/javascript");
+          this.addEditorData("source", filename, "javascript");
+          return;
         }
         if (filename.match(/css$/)) {
           this.setType("text/css");
+          this.addEditorData("source", filename, "css");
+          return;
         }
+        this.addEditorData("source", filename, "txt");
+        return;
       }
     }, {
       key: "getFilename",

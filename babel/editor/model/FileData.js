@@ -13,44 +13,37 @@ class FileData {
     }else{
       this.file = {
           "filename": file&&file["filename"]?file["filename"]:"",
+          "fileType":  file&&file["fileType"]?file["fileType"]:"txt",
           "type":  file&&file["type"]?file["type"]:"text/plain",
           "language":  file&&file["language"]?file["language"]:"Markdown",
           "size":  file&&file["size"]?file["size"]:0,
           "truncated":  file&&file["truncated"]?file["truncated"]:false,
           "content":  file&&file["content"]?file["content"]:""
       };
-      this.editorData = {
-        source: {
-          model: (monaco)?monaco.editor.createModel("", "html"):null,
-          state: null
-        },
-        dom: {
-          model: (monaco)?monaco.editor.createModel("", "json"):null,
-          state: null
-        },
-        component: {
-          model: (monaco)?monaco.editor.createModel("", "javascript"):null,
-          state: null
-        },
-        app: {
-          model: (monaco)?monaco.editor.createModel("", "javascript"):null,
-          state: null
-        },
-        html: {
-          model: (monaco)?monaco.editor.createModel("", "html"):null,
-          state: null
-        }
-      };
+      this.editorData = {};
+      this.setFilename(file["filename"]);
       if(monaco)this.editorData.source.model.setValue(this.file ["content"]);
       this.monaco = monaco;
     }
   }
-
+  addEditorData(key,caption,type){
+    this.editorData[key] = {
+          caption : caption,
+          model: (monaco)?monaco.editor.createModel("", type):null,
+          state: null
+        }
+  }
   setLanguage(language) {
     this.file["language"] = language;
   }
   getLanguage() {
     return this.file["language"];
+  }
+  setFileType(fileType) {
+    this.file["fileType"] = fileType;
+  }
+  getFileType() {
+    return this.file["fileType"];
   }
   setType(type) {
     this.file["type"] = type;
@@ -73,11 +66,44 @@ class FileData {
   }
   setFilename(filename) {
     this.file["filename"] = filename;
-    if(filename.match(/txt$/)){this.setType("text/plain")}
-    if(filename.match(/json$/)){this.setType("application/json")}
-    if(filename.match(/htm.?$/)){this.setType("text/html")}
-    if(filename.match(/js$/)){this.setType("text/javascript")}
-    if(filename.match(/css$/)){this.setType("text/css")}
+    if(filename.match(/md$/)){
+      this.setType("text/plain");
+      this.addEditorData("source",filename,"txt");
+      return;
+    }
+    if(filename.match(/markdown$/)){
+      this.setType("text/plain");
+      this.addEditorData("source",filename,"txt");
+      return;
+    }
+    if(filename.match(/txt$/)){this.setType("text/plain")
+      this.addEditorData("source",filename,"txt");
+      return;
+    }
+    if(filename.match(/json$/)){this.setType("application/json")
+      this.addEditorData("source",filename,"json");
+      return;
+    }
+    if(filename.match(/htm.?$/)){
+      this.setType("text/html");
+      this.addEditorData("source",filename,"html");
+      this.addEditorData("dom","dom tree","json");
+      this.addEditorData("component","js component.js","javascript");
+      this.addEditorData("app","js app.js","javascript");
+      this.addEditorData("html","result(html)","html");
+    }
+    if(filename.match(/js$/)){
+      this.setType("text/javascript")
+      this.addEditorData("source",filename,"javascript");
+      return;
+    }
+    if(filename.match(/css$/)){
+      this.setType("text/css")
+      this.addEditorData("source",filename,"css");
+      return;
+    }
+    this.addEditorData("source",filename,"txt");
+    return;
   }
   getFilename() {
     return this.file["filename"];
@@ -85,7 +111,7 @@ class FileData {
 
   setEditorData(data) {
     this.editorData = data;
-    if(monaco)this.file ["content"]=this.editorData.source.model.getValue();
+    if(monaco)this.file["content"]=this.editorData.source.model.getValue();
   }
   getEditorData() {
     return this.editorData;

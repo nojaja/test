@@ -1,6 +1,7 @@
 //var monaco = null;
 var editor = null;
 var currentFile = null;
+var currentModelId = "source";
 
 import FileData from './model/FileData.js'
 import FileContainer from './model/FileContainer.js'
@@ -21,15 +22,12 @@ function changeTab(editor, desiredModelId) {
   var currentState = editor.saveViewState();
   var currentModel = editor.getModel();
   var data = currentFile.getEditorData();
-  for (var key in data) {
-    if (currentModel === data[key].model) {
-      data[key].state = currentState;
-    }
-  }
+  data[currentModelId].state = currentState;
   currentFile.setEditorData(data);
 
   editor.setModel(data[desiredModelId].model);
   editor.restoreViewState(data[desiredModelId].state);
+  currentModelId = desiredModelId;
   editor.focus();
 }
 //１つ目のファイルを開く
@@ -41,13 +39,31 @@ function openFirst() {
 
 //Fileを開く
 function fileOpen(filename){
-      currentFile = fileContainer.getFile(filename);
-      var source = currentFile.getContent();
-      var data = currentFile.getEditorData();
-      editor.setModel(data['source'].model);
-      editor.restoreViewState(data['source'].state);
+  currentFile = fileContainer.getFile(filename);
+  var source = currentFile.getContent();
+  var data = currentFile.getEditorData();
+  $("#edittab").empty();
+  var tab = $('<li><a></a></li>');
+  tab.on("click", function (event) {
+    //タブの切替
+    changeTab(editor,$(this).attr("id"));
+  });
+  
+  for (var key in data) {
+    var i = 0;
+    var _tab = tab.clone(true);
+    _tab.attr('id',key);
+    _tab.children("a").append(data[key].caption);
+    $("#edittab").append(_tab);
+    if(key==currentModelId){
+      _tab.addClass('uk-active');
+      editor.setModel(data[currentModelId].model);
+      editor.restoreViewState(data[currentModelId].state);
       editor.focus();
-      $.UIkit.switcher('#edittab').show(0);
+    }
+    i++;
+  };
+  $.UIkit.switcher('#edittab').show(0);
 }
 
 // iframe内のコンテンツを更新
@@ -65,10 +81,6 @@ function refreshView(content){
     }
 }
 
-//タブの切替
-$("#edittab > li").on("click", function(event) {
-  changeTab(editor,$(this).attr("id"));
-});
 
 
 //プロジェクトファイルの読み込み
@@ -526,11 +538,7 @@ function saveGist(token){
           var currentState = editor.saveViewState();
           var currentModel = editor.getModel();
           var data = currentFile.getEditorData();
-          for (var key in data) {
-            if (currentModel === data[key].model) {
-              data[key].state = currentState;
-            }
-          }
+          data[currentModelId].state = currentState;
           currentFile.setEditorData(data);
           fileContainer.putFile(currentFile);
         }
