@@ -332,11 +332,15 @@ function openFirst() {
   editor.restoreViewState(data['source'].state);
   editor.focus();
   $.UIkit.switcher('#edittab').show(0);
+
+  $("#filelist").children("li").removeClass("uk-active");
+  $("#filelist li:first").addClass("uk-active");
 }
 
 //プロジェクトファイルの読み込み
 function loadProject(url, type, cb) {
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
+  $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
   $("#child-frame").attr("srcdoc", "");
   var frame = document.getElementById("child-frame");
@@ -396,20 +400,9 @@ $(".samples").on("click", function (event) {
 //File一覧の更新
 function refreshFileList() {
   $("#filelist").empty();
-  var file = $('<li ><a  class="file" data-url=""><i class="uk-icon-file"></i></a></li>');
+
+  var file = $('<li ><a  class="file" data-url=""><input type="checkbox"  class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
   file.on("click", function (event) {
-    if (currentFile) {
-      var currentState = editor.saveViewState();
-      var currentModel = editor.getModel();
-      var data = currentFile.getEditorData();
-      for (var key in data) {
-        if (currentModel === data[key].model) {
-          data[key].state = currentState;
-        }
-      }
-      currentFile.setEditorData(data);
-      fileContainer.putFile(currentFile);
-    }
     currentFile = fileContainer.getFile($(event.target).attr("data-uri"));
     var source = currentFile.getContent();
     var data = currentFile.getEditorData();
@@ -417,11 +410,14 @@ function refreshFileList() {
     editor.restoreViewState(data['source'].state);
     editor.focus();
     $.UIkit.switcher('#edittab').show(0);
+    $("#filelist").children("li").removeClass("uk-active");
+    $(event.target.parentElement).addClass("uk-active");
   });
 
   fileContainer.getFiles().forEach(function (val, i) {
     console.log(i, val);
     var _file = file.clone(true);
+    _file.children('.fileSelect').attr('data-uri', val);
     _file.children('.file').attr('data-uri', val);
     _file.children('.file').append(val);
     $("#filelist").append(_file);
@@ -431,7 +427,6 @@ function refreshFileList() {
 //File一覧の更新
 function refreshCache() {
   fileContainer.getFiles().forEach(function (filename, i) {
-    console.log(i, filename);
     var _file = fileContainer.getFile(filename);
     saveCache('src/' + filename, _file.getContent(), _file.getType());
   });
@@ -780,6 +775,21 @@ $(function () {
     });
   });
 
+  $('#container').bind('blur keydown keyup keypress change', function () {
+    if (currentFile) {
+      var currentState = editor.saveViewState();
+      var currentModel = editor.getModel();
+      var data = currentFile.getEditorData();
+      for (var key in data) {
+        if (currentModel === data[key].model) {
+          data[key].state = currentState;
+        }
+      }
+      currentFile.setEditorData(data);
+      fileContainer.putFile(currentFile);
+    }
+  });
+
   $(window).keydown(function (e) {
     if (e.keyCode === 120) {
       compile();
@@ -787,19 +797,6 @@ $(function () {
     }
     if (e.ctrlKey) {
       if (e.keyCode === 83) {
-
-        if (currentFile) {
-          var currentState = editor.saveViewState();
-          var currentModel = editor.getModel();
-          var data = currentFile.getEditorData();
-          for (var key in data) {
-            if (currentModel === data[key].model) {
-              data[key].state = currentState;
-            }
-          }
-          currentFile.setEditorData(data);
-          fileContainer.putFile(currentFile);
-        }
         saveDraft();
         refreshCache();
         return false;
