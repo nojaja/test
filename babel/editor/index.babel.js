@@ -316,7 +316,12 @@ $(function() {
     async function _compileAll() {
       function compileResolve(filename) {
         return new Promise(function(resolve) {
-          resolve(compile(filename));
+          var language = fileContainer.getFile(filename).getLanguage();
+          if(language=="ahtml"){
+            resolve(compile(filename));
+          }else{
+            resolve(true);
+          }
         });
       }
       const array = fileContainer.getFiles();
@@ -479,9 +484,17 @@ $(function() {
 
 function saveGist(token){
     $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
+    
+    var sendType = "POST";
+    var gisturl = 'https://api.github.com/gists';
+    if(fileContainer.getId()){
+      sendType = "PATCH";
+      gisturl = gisturl + "/"+fileContainer.getId();
+    }
+
     $.ajax({
-      url: 'https://api.github.com/gists',
-      type: 'POST',
+      url: gisturl,
+      type: sendType,
       dataType: 'json',
       beforeSend: function beforeSend(xhr) {
         xhr.setRequestHeader("Authorization", "token " + token);

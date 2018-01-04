@@ -11,7 +11,7 @@ class FileContainer {
   constructor(monaco) {
     this.monaco = monaco;
     this.container = {
-        id:"",
+        id:null,
         files:{},
         "public": true,
         "created_at": "2017-10-29T05:45:01Z",
@@ -20,7 +20,12 @@ class FileContainer {
     };
     this.fileObjects={};
   }
-
+  setId(id) {
+    this.container['id'] = id;
+  }
+  getId() {
+    return this.container['id'];
+  }
   setMonaco(monaco) {
     this.monaco = monaco;
   }
