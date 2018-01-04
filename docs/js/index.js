@@ -70,7 +70,8 @@
         this.editorData[key] = {
           caption: caption,
           model: monaco ? monaco.editor.createModel("", type) : null,
-          state: null
+          state: null,
+          decorations: []
         };
       }
     }, {
@@ -130,12 +131,14 @@
           this.setType("text/plain");
           this.setLanguage("Markdown");
           this.addEditorData("source", filename, "txt");
+          this.addEditorData("html", "result(html)", "html");
           return;
         }
         if (filename.match(/markdown$/)) {
           this.setType("text/plain");
           this.setLanguage("Markdown");
           this.addEditorData("source", filename, "txt");
+          this.addEditorData("html", "result(html)", "html");
           return;
         }
         if (filename.match(/txt$/)) {
@@ -170,6 +173,21 @@
           this.setType("text/javascript");
           this.setLanguage("JavaScript");
           this.addEditorData("source", filename, "javascript");
+          this.addEditorData("compiled", "JS Compiled", "javascript");
+          return;
+        }
+        if (filename.match(/es6$/)) {
+          this.setType("text/javascript");
+          this.setLanguage("JavaScript");
+          this.addEditorData("source", filename, "javascript");
+          this.addEditorData("compiled", "JS Compiled", "javascript");
+          return;
+        }
+        if (filename.match(/scss$/)) {
+          this.setType("text/scss");
+          this.setLanguage("scss");
+          this.addEditorData("source", filename, "scss");
+          this.addEditorData("compiled", "CSS Compiled", "css");
           return;
         }
         if (filename.match(/css$/)) {
@@ -687,7 +705,7 @@
   function refreshCache() {
     fileContainer.getFiles().forEach(function (filename, i) {
       var _file = fileContainer.getFile(filename);
-      saveCache('src/' + filename, _file.getContent(), _file.getType()).then();
+      saveCache('src/' + filename, _file.getContent(), _file.getType());
     });
   }
 
@@ -845,10 +863,18 @@
       async function _compileAll() {
         function compileResolve(filename) {
           return new Promise(function (resolve) {
-            var language = fileContainer.getFile(filename).getLanguage();
+            var language = fileContainer.getFile(filename).getLanguage().toLowerCase();
             if (language == "ahtml") {
               resolve(compile(filename));
+            } else if (language == "markdown") {
+              resolve(mdcompile(filename));
+            } else if (language == "javascript") {
+              resolve(es6compile(filename));
+            } else if (language == "sass" || language == "scss") {
+              resolve(sasscompile(filename));
             } else {
+              var _file = fileContainer.getFile(filename);
+              saveCache('./' + filename, _file.getContent(), _file.getType());
               resolve(true);
             }
           });
@@ -977,6 +1003,56 @@
       await saveCache(filename + '.html', builder.getNodes(), 'text/html; charset=UTF-8');
     }
 
+    /* */
+    async function mdcompile(targetFile) {
+      var data = targetFile ? fileContainer.getFile(targetFile).getEditorData() : currentFile.getEditorData();
+      var filename = targetFile ? fileContainer.getFile(targetFile).getFilename() : currentFile.getFilename();
+      filename = filename.substr(0, filename.lastIndexOf("."));
+
+      var parseData = marked(data.source.model.getValue().trim());
+      data.html.model.setValue(parseData);
+      await saveCache(filename + '.html', parseData, 'text/html; charset=UTF-8');
+    }
+
+    /* */
+    async function es6compile(targetFile) {
+      var data = targetFile ? fileContainer.getFile(targetFile).getEditorData() : currentFile.getEditorData();
+      var filename = targetFile ? fileContainer.getFile(targetFile).getFilename() : currentFile.getFilename();
+      filename = filename.substr(0, filename.lastIndexOf("."));
+      try {
+        var parseData = Babel.transform(data.source.model.getValue().trim(), { "babelrc": false, "filename": filename, presets: ['es2015'] });
+        data.compiled.model.setValue(parseData.code);
+        await saveCache(filename + '.js', parseData.code, 'text/javascript; charset=UTF-8');
+        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1, 1, 1, 1), options: {} });
+      } catch (e) {
+        console.log(e);
+        UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
+        //エラー箇所の表示
+        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [{ range: new monaco.Range(e.loc.line, 1, e.loc.line, 1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' } }]);
+      }
+    }
+
+    /* */
+    async function sasscompile(targetFile) {
+      var data = targetFile ? fileContainer.getFile(targetFile).getEditorData() : currentFile.getEditorData();
+      var filename = targetFile ? fileContainer.getFile(targetFile).getFilename() : currentFile.getFilename();
+      filename = filename.substr(0, filename.lastIndexOf("."));
+
+      Sass.options('defaults');
+      Sass.compile(data.source.model.getValue().trim(), async function (result) {
+        if (result.status == 0) {
+          console.log(result);
+          data.compiled.model.setValue(result.text);
+          data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1, 1, 1, 1), options: {} });
+          await saveCache(filename + '.css', result.text, 'text/css; charset=UTF-8');
+        } else {
+          UIkit.notify(result.message, { status: 'warning', timeout: 1000 });
+          //エラー箇所の表示
+          data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [{ range: new monaco.Range(result.line, 1, result.line, 1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' } }]);
+        }
+      });
+    }
+
     $("#run").on("click", function (event) {
       refreshCache();
       compileAll();
@@ -1061,8 +1137,7 @@
     });
 
     $("#newfile").on("click", function (event) {
-      UIkit.modal.prompt('<p>File Name</p>', '', function (newFile) {
-        console.log('newFile ' + newFile);
+      UIkit.modal.prompt('\n<h3>New File</h3>\n<h4>File Types Cheatsheet</h4>\n<ul class="uk-list uk-list-striped uk-width-medium-1-3">\n    <li><b>HTML</b> <span>.html</span> <span title="Markdown">.md</span> <span title="ReactHtml">.ahtml</span></li>\n    <li><b>CSS</b> <span>.css</span> <span>.scss</span></li>\n    <li><b>JavaScript</b> <span>.js</span> <span title="ECMASCRIPT6">.es6</span></li>\n</ul>\n<p>File Name:</p>', '', function (newFile) {
         var file = new _FileData2.default();
         file.setFilename(newFile);
         file.setContent("");
@@ -1408,7 +1483,8 @@
         this.editorData[key] = {
           caption: caption,
           model: monaco ? monaco.editor.createModel("", type) : null,
-          state: null
+          state: null,
+          decorations: []
         };
       }
     }, {
@@ -1468,12 +1544,14 @@
           this.setType("text/plain");
           this.setLanguage("Markdown");
           this.addEditorData("source", filename, "txt");
+          this.addEditorData("html", "result(html)", "html");
           return;
         }
         if (filename.match(/markdown$/)) {
           this.setType("text/plain");
           this.setLanguage("Markdown");
           this.addEditorData("source", filename, "txt");
+          this.addEditorData("html", "result(html)", "html");
           return;
         }
         if (filename.match(/txt$/)) {
@@ -1508,6 +1586,21 @@
           this.setType("text/javascript");
           this.setLanguage("JavaScript");
           this.addEditorData("source", filename, "javascript");
+          this.addEditorData("compiled", "JS Compiled", "javascript");
+          return;
+        }
+        if (filename.match(/es6$/)) {
+          this.setType("text/javascript");
+          this.setLanguage("JavaScript");
+          this.addEditorData("source", filename, "javascript");
+          this.addEditorData("compiled", "JS Compiled", "javascript");
+          return;
+        }
+        if (filename.match(/scss$/)) {
+          this.setType("text/scss");
+          this.setLanguage("scss");
+          this.addEditorData("source", filename, "scss");
+          this.addEditorData("compiled", "CSS Compiled", "css");
           return;
         }
         if (filename.match(/css$/)) {

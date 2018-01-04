@@ -30,7 +30,8 @@ class FileData {
     this.editorData[key] = {
           caption : caption,
           model: (monaco)?monaco.editor.createModel("", type):null,
-          state: null
+          state: null,
+          decorations : []
         }
   }
   setLanguage(language) {
@@ -70,12 +71,14 @@ class FileData {
       this.setType("text/plain");
       this.setLanguage("Markdown");
       this.addEditorData("source",filename,"txt");
+      this.addEditorData("html","result(html)","html");
       return;
     }
     if(filename.match(/markdown$/)){
       this.setType("text/plain");
       this.setLanguage("Markdown");
       this.addEditorData("source",filename,"txt");
+      this.addEditorData("html","result(html)","html");
       return;
     }
     if(filename.match(/txt$/)){
@@ -110,6 +113,21 @@ class FileData {
       this.setType("text/javascript");
       this.setLanguage("JavaScript");
       this.addEditorData("source",filename,"javascript");
+      this.addEditorData("compiled","JS Compiled","javascript");
+      return;
+    }
+    if(filename.match(/es6$/)){
+      this.setType("text/javascript");
+      this.setLanguage("JavaScript");
+      this.addEditorData("source",filename,"javascript");
+      this.addEditorData("compiled","JS Compiled","javascript");
+      return;
+    }
+    if(filename.match(/scss$/)){
+      this.setType("text/scss")
+      this.setLanguage("scss");
+      this.addEditorData("source",filename,"scss");
+      this.addEditorData("compiled","CSS Compiled","css");
       return;
     }
     if(filename.match(/css$/)){

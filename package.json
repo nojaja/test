@@ -6,7 +6,9 @@
   "scripts": {
     "start": "http-server docs -o ",
     "build": "npm-run-all --parallel build:*",
-    "init": "cpx node_modules/monaco-editor/min/**/*.* docs/js/monaco-editor/min/",
+    "init": "npm-run-all --parallel init:*",
+    "init:a": "cpx node_modules/monaco-editor/min/**/*.* docs/js/monaco-editor/min/",
+    "init:b": "cpx node_modules/marked/marked.min.js docs/js/marked/",
     "build:a": "babel babel/editor/model/FileData.js babel/editor/model/FileContainer.js babel/editor/index.babel.js  -o docs/js/index.js --watch",
     "build:b": "babel babel/dashboard -o docs/js/index0.js --watch",
     "build:c": "babel babel/ws.js -o docs/ws.js --watch"
@@ -23,6 +25,7 @@
   "homepage": "https://nojaja.github.io/SiteEditor/",
   "dependencies": {
     "cssom": "git+https://github.com/nojaja/CSSOM",
+    "marked": "^0.3.9",
     "monaco-editor": "^0.8.3"
   },
   "devDependencies": {
