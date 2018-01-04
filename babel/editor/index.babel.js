@@ -12,7 +12,7 @@ import FileContainer from './model/FileContainer.js'
 キャッシュファイルの制御を可能にする
 */
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('./ws.js', { scope: './test/' }).then(function(registraion) {
+  navigator.serviceWorker.register('./ws.js', { scope: './' }).then(function(registraion) {
     registraion.update();
   });
 }
@@ -69,16 +69,19 @@ function fileOpen(filename){
 // iframe内のコンテンツを更新
 function refreshView(content){
     // iframe内のコンテンツを更新
-    $("#child-frame").attr("srcdoc", "");
+    $("#child-frame").attr("src", content);
+  /*
+    //$("#child-frame").attr("srcdoc", "");
     //$("#child-frame").attr("src", "./blank.html");
-      var frame = document.getElementById("child-frame");
-      frame.src = "./blank.html";
-      frame.onload = function(){
-         frame.onload=function(){};
-         frame.contentDocument.open();
-         frame.contentDocument.write(content);
-         frame.contentDocument.close();
+    var frame = document.getElementById("child-frame");
+    frame.src = "./blank.html";
+    frame.onload = function(){
+       frame.onload=function(){};
+       frame.contentDocument.open();
+       frame.contentDocument.write(content);
+       frame.contentDocument.close();
     }
+ */
 }
 
 
@@ -88,7 +91,7 @@ function loadProject(url,type,cb) {
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
   $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
-  refreshView("");
+  refreshView("./blank.html");
   //localから取得
   if(!url){
     var doc = localDraft();
@@ -138,7 +141,6 @@ function loadProject(url,type,cb) {
 
 $(".samples").on("click", function(event) {
   loadProject($(this).attr("data-url"),"html",function () {
-    $.UIkit.notify("load..", {status:'success',timeout : 1000});
   });
 });
 
@@ -168,7 +170,7 @@ function refreshFileList(){
 function refreshCache(){
   fileContainer.getFiles().forEach(function(filename, i) {
     var _file = fileContainer.getFile(filename);
-    saveCache('src/'+filename,_file.getContent(),_file.getType());
+    saveCache('src/'+filename,_file.getContent(),_file.getType()).then();
   });
 }
 
@@ -179,9 +181,7 @@ function projectjsonCallback(json){
 
   var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
     prj.on("click", function (event) {
-      loadProject(gasUrl + $(event.target).attr("data-url"),"gas",function () {
-        $.UIkit.notify("load..", {status:'success',timeout : 1000});
-      });
+      loadProject(gasUrl + $(event.target).attr("data-url"),"gas",function () {});
     });
 
   json.rows.forEach(function(val, i) {
@@ -234,14 +234,17 @@ function localDraft() {
 */
 const STATIC_CACHE_KEY = '1';
 caches.delete(STATIC_CACHE_KEY);
-function saveCache(url,source,type) {
-  var _type = type || 'application/javascript; charset=UTF-8';
-  var _url = location.href.substr(0,location.href.substr(0,location.href.length-location.search.length).lastIndexOf("/"));//URLの最初のパスまで
-  caches.open(STATIC_CACHE_KEY).then(cache => {
-    var blob = new Blob([source], {type : _type});
-    var response = new Response(blob,{ "status" : 200 , "statusText" : "OK" });
-    cache.put(_url + "/test/"+url, response);
-  })
+var saveCache = async function(url,source,type){
+    return new Promise(function(resolve, reject){
+      var _type = type || 'application/javascript; charset=UTF-8';
+      var _url = location.href.substr(0,location.href.substr(0,location.href.length-location.search.length).lastIndexOf("/"));//URLの最初のパスまで
+      caches.open(STATIC_CACHE_KEY).then(cache => {
+        var blob = new Blob([source], {type : _type});
+        var response = new Response(blob,{ "status" : 200 , "statusText" : "OK" });
+        cache.put(_url + "/test/"+url, response);
+        resolve();
+      })
+    });
 }
 
 
@@ -293,13 +296,35 @@ $(function() {
     fileContainer.setMonaco(monaco);
     loadProject(url,"localStorage",function () {
       refreshCache();
-      compile();
+      compileAll();
     });
 
   });
 
-  function compile(targetFile) {
+  //全てのsourceのcompile
+  function compileAll() {
+    $.UIkit.notify("compile..", {status:'success',timeout : 1000});
+    async function _compileAll() {
+      function compileResolve(filename) {
+        return new Promise(function(resolve) {
+          resolve(compile(filename));
+        });
+      }
+      const array = fileContainer.getFiles();
+      const promiseAll = await Promise.all(
+        array.map(async function(filename) {
+          return await compileResolve(filename);
+        })
+      );
+      return promiseAll;
+    }
+    _compileAll().then(function() {
+      $.UIkit.notify("success..", {status:'success',timeout : 1000});
+      refreshView("./test/index.html");
+    });
+  }
 
+  async function compile(targetFile) {
     var webComponentParser = new WebComponentParser({
       builder: ReactComponentBuilder
     });
@@ -310,7 +335,7 @@ $(function() {
 
     var builder = new HtmlBuilder({});
     //var builder2 = new HtmlBuilder({});
-    var debugBuilder = new DebugBuilder({});
+    //var debugBuilder = new DebugBuilder({});
     var cssbuilder = new CSSBuilder({});
     var reactComponentBuilder = new ReactComponentBuilder({});
     var compiler1 = new Compiler(
@@ -318,7 +343,6 @@ $(function() {
       {}
     );
     var compiler2 = new Compiler([builder], {});
-    //var compiler3 = new Compiler([builder2], {});
 
     //-ここからDemo用処理----------------------------------
     var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
@@ -327,7 +351,7 @@ $(function() {
 
     var parseData = parseHtml(data.source.model.getValue().trim());
     data.dom.model.setValue(stringify(parseData));
-    saveCache(filename+'_dom.json',stringify(parseData),'application/json');
+    await saveCache(filename+'_dom.json',stringify(parseData),'application/json');
     compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
 
     //editor4.setValue(cssbuilder.getNodes());
@@ -337,13 +361,12 @@ $(function() {
     reactRootParser.build(); //react化処理の実行
     //変換されたコードはwindowに読み込まれ実行可能になります。
     data.component.model.setValue(webComponentParser.getResult());
-    saveCache(filename+'_component.js',webComponentParser.getResult());
+    await saveCache(filename+'_component.js',webComponentParser.getResult());
 
     data.app.model.setValue(reactRootParser.getResult());
-    saveCache(filename+'_app.js',reactRootParser.getResult());
+    await saveCache(filename+'_app.js',reactRootParser.getResult());
 
-    currentFile.setEditorData(data);
-
+    (targetFile)?fileContainer.getFile(targetFile).setEditorData(data):currentFile.setEditorData(data);
     var bodyElements = parseData.getElementsByTagName("body");
     if (parseData.getElementsByTagName("head").length == 0) {
       var $html = parseData.getElementsByTagName("html");
@@ -429,25 +452,19 @@ $(function() {
       }
     }, this);
     compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
-    //compiler3.compile(bodyElements[0].children); //jsonオブジェクトを各種コードに変換します
     data.html.model.setValue(builder.getNodes());
-    saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
-
-    refreshView(builder.getNodes());
-    $.UIkit.notify("compile..", {status:'success',timeout : 1000});
+    await saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
   }
 
 
 
   $("#run").on("click", function(event) {
     refreshCache();
-    compile();
+    compileAll();
   });
 
   $("#test").on("click", function(event) {
-    loadProject("https://api.github.com/gists/8e670a377e30a60520705d916a434a22", "gist", function () {
-      $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
-    });
+    loadProject("https://api.github.com/gists/8e670a377e30a60520705d916a434a22", "gist", function () {});
   });
 
 
@@ -547,7 +564,7 @@ function saveGist(token){
   $(window).keydown(function(e) {
     if(e.keyCode === 120){
         refreshCache();
-        compile();
+        compileAll();
         return false;
       }
     if(e.ctrlKey){

@@ -21,7 +21,7 @@ class FileData {
           "content":  file&&file["content"]?file["content"]:""
       };
       this.editorData = {};
-      this.setFilename(file["filename"]);
+      if( file&&file["filename"])this.setFilename(file["filename"]);
       if(monaco)this.editorData.source.model.setValue(this.file ["content"]);
       this.monaco = monaco;
     }
