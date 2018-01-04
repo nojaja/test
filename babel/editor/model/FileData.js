@@ -84,13 +84,17 @@ class FileData {
       this.addEditorData("source",filename,"json");
       return;
     }
-    if(filename.match(/htm.?$/)){
+    if(filename.match(/ahtml$/)){
       this.setType("text/html");
       this.addEditorData("source",filename,"html");
       this.addEditorData("dom","dom tree","json");
       this.addEditorData("component","js component.js","javascript");
       this.addEditorData("app","js app.js","javascript");
       this.addEditorData("html","result(html)","html");
+    }
+    if(filename.match(/htm.?$/)){
+      this.setType("text/html");
+      this.addEditorData("source",filename,"html");
     }
     if(filename.match(/js$/)){
       this.setType("text/javascript")

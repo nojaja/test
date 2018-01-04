@@ -40,6 +40,7 @@ function openFirst() {
 //Fileを開く
 function fileOpen(filename){
   currentFile = fileContainer.getFile(filename);
+  currentModelId = "source";
   var source = currentFile.getContent();
   var data = currentFile.getEditorData();
   $("#edittab").empty();
@@ -107,7 +108,7 @@ function loadProject(url,type,cb) {
     $.getJSON(url+ "&callback=?",  { t: '1' }, function(json){
       fileContainer.init();
       var file = new FileData();
-      file.setFilename("index.html");
+      file.setFilename("index.ahtml");
       file.setContent(json.content);
       fileContainer.putFile(file);
  
@@ -292,9 +293,17 @@ $(function() {
       automaticLayout: true,
       model: null
     });
-    var url = (arg["q"])?arg["q"] : (arg["g"])?arg["g"] : "";
     fileContainer.setMonaco(monaco);
-    loadProject(url,"localStorage",function () {
+    var url = "";
+    var type = "localStorage";
+    if(arg["q"]){
+      type = "html";
+      url  = arg["q"];
+    }else if(arg["g"]){
+      type = "gist";
+      url  = "https://api.github.com/gists/" + arg["g"];
+    }
+    loadProject(url,type,function () {
       refreshCache();
       compileAll();
     });

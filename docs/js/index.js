@@ -146,13 +146,17 @@
           this.addEditorData("source", filename, "json");
           return;
         }
-        if (filename.match(/htm.?$/)) {
+        if (filename.match(/ahtml$/)) {
           this.setType("text/html");
           this.addEditorData("source", filename, "html");
           this.addEditorData("dom", "dom tree", "json");
           this.addEditorData("component", "js component.js", "javascript");
           this.addEditorData("app", "js app.js", "javascript");
           this.addEditorData("html", "result(html)", "html");
+        }
+        if (filename.match(/htm.?$/)) {
+          this.setType("text/html");
+          this.addEditorData("source", filename, "html");
         }
         if (filename.match(/js$/)) {
           this.setType("text/javascript");
@@ -537,6 +541,7 @@
   //Fileを開く
   function fileOpen(filename) {
     currentFile = fileContainer.getFile(filename);
+    currentModelId = "source";
     var source = currentFile.getContent();
     var data = currentFile.getEditorData();
     $("#edittab").empty();
@@ -602,7 +607,7 @@
       $.getJSON(url + "&callback=?", { t: '1' }, function (json) {
         fileContainer.init();
         var file = new _FileData2.default();
-        file.setFilename("index.html");
+        file.setFilename("index.ahtml");
         file.setContent(json.content);
         fileContainer.putFile(file);
 
@@ -798,9 +803,17 @@
         automaticLayout: true,
         model: null
       });
-      var url = arg["q"] ? arg["q"] : arg["g"] ? arg["g"] : "";
       fileContainer.setMonaco(monaco);
-      loadProject(url, "localStorage", function () {
+      var url = "";
+      var type = "localStorage";
+      if (arg["q"]) {
+        type = "html";
+        url = arg["q"];
+      } else if (arg["g"]) {
+        type = "gist";
+        url = "https://api.github.com/gists/" + arg["g"];
+      }
+      loadProject(url, type, function () {
         refreshCache();
         compileAll();
       });
@@ -1428,13 +1441,17 @@
           this.addEditorData("source", filename, "json");
           return;
         }
-        if (filename.match(/htm.?$/)) {
+        if (filename.match(/ahtml$/)) {
           this.setType("text/html");
           this.addEditorData("source", filename, "html");
           this.addEditorData("dom", "dom tree", "json");
           this.addEditorData("component", "js component.js", "javascript");
           this.addEditorData("app", "js app.js", "javascript");
           this.addEditorData("html", "result(html)", "html");
+        }
+        if (filename.match(/htm.?$/)) {
+          this.setType("text/html");
+          this.addEditorData("source", filename, "html");
         }
         if (filename.match(/js$/)) {
           this.setType("text/javascript");
