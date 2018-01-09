@@ -16,6 +16,7 @@ class FileContainer {
         "public": true,
         "created_at": "2017-10-29T05:45:01Z",
         "updated_at": "2017-11-14T12:41:14Z",
+        "projectName": "",
         "description": ""
     };
     this.fileObjects={};
@@ -31,6 +32,12 @@ class FileContainer {
   }
   getMonaco() {
     return this.monaco;
+  }
+  setProjectName(projectName) {
+    this.container['projectName'] = projectName;
+  }
+  getProjectName() {
+    return this.container['projectName'];
   }
 
   getFiles() {
@@ -121,7 +128,7 @@ class FileContainer {
 
   getGistData() {
     var gistdata = {
-       "description": this.container["description"],
+       "description":  this.container["projectName"] +"\n" + this.container["description"],
        "public": this.container["public"],
        "files": this.container["files"]
     };

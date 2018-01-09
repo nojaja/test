@@ -99,6 +99,7 @@ function loadProject(url,type,cb) {
     var doc = localDraft();
     if (doc){
       fileContainer.setContainerJson(doc);
+      fileContainer.setProjectName(doc.projectName||"new project");
       refreshFileList();
       openFirst();
       return (cb)?cb(doc):true;
@@ -112,6 +113,7 @@ function loadProject(url,type,cb) {
         return loadProject(json.content,"gist",cb);
       }else{
         fileContainer.init();
+        fileContainer.setProjectName(json.filename||"new project");
         var file = new FileData();
         file.setFilename("index.ahtml");
         file.setContent(json.content);
@@ -125,6 +127,7 @@ function loadProject(url,type,cb) {
   }else if(type == "gist"){
     $.getJSON(gistUrl+url).done(function(data) {
       fileContainer.setContainer(data);
+      fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
       refreshFileList();
       openFirst();
       return (cb)?cb():true;
@@ -134,6 +137,8 @@ function loadProject(url,type,cb) {
       url: url
     }).done(function(data) {
       fileContainer.init();
+      
+      fileContainer.setProjectName($(data).find("title").text()||"new project");
       var file = new FileData();
       file.setFilename("index.html");
       file.setContent(data);
@@ -153,6 +158,9 @@ $(".samples").on("click", function(event) {
 
 //File一覧の更新
 function refreshFileList(){
+  $("#title").empty();
+  $("#title").text(fileContainer.getProjectName());
+
   $("#filelist").empty();
 
   var file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
@@ -577,6 +585,14 @@ function saveGist(token){
       //TODO ここにGASへの登録処理を追加する
       //URL https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/ ファイル名.gist&contents=gistID
 
+
+      /*
+      $.getJSON(gasUrl+filename+ ".gist&contents="+e.id+"&callback=?",  { t: '1' }, function(json){
+        console.log(json);
+      });
+      */
+
+
     }).error(function (e) {
       console.warn("gist save error", e);
       $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
@@ -601,6 +617,18 @@ function saveGist(token){
     }
   });
 
+  $("#titleEdit").on("click", function(event) {
+      var title = $("#title").text();
+      UIkit.modal.prompt('<p>title</p>', title,function (newTitle) {
+        console.log('newTitle '+newTitle);
+        
+        fileContainer.setProjectName(newTitle);
+        refreshFileList();
+      }, function () {
+        console.log('Rejected.');
+        return;
+      });
+  });
 
   $("#fileRename").on("click", function(event) {
     $('.fileSelect:checkbox:checked').each(function(){

@@ -16,3 +16,11 @@
     width: 5px !important;
     left: 3px;
 }
+
+.edit-title {
+    font-size: 70%;
+}
+
+.edit-title:hover {
+    opacity: 0.8;
+}
