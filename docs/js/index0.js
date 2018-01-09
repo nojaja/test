@@ -29,7 +29,7 @@
     json.rows.forEach(function (val, i) {
       console.log(i, val);
       var _file = file.clone(true);
-      _file.children('.file').attr('href', 'index.html?ga=' + val[6] + '/' + val[1] + val[2]);
+      _file.children('.file').attr('href', 'editor.html?ga=' + val[6] + '/' + val[1] + val[2]);
       _file.find('.uk-panel-title').append(val[1]);
       $("#filelist").append(_file);
     });
