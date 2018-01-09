@@ -3,129 +3,44 @@
 <head>
   <meta charset='UTF-8'>
   <title>Html2ReactComponent</title>
-  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/css/uikit.min.css">
-  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/css/components/notify.min.css">
+  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/uikit.min.css">
+  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/css/components/notify.min.css">
   <link rel="stylesheet" href="css/style.css">
+
 </head>
 <body>
-
-<!-- This is the off-canvas sidebar -->
-<div id="offcanvas-1" class="uk-offcanvas" aria-hidden="false">
-  <div class="uk-offcanvas-bar " mode="push">
-
-    <ul id="prjlist" class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
-      <li class="uk-nav-header">プロジェクト</li>
-    </ul>
-  </div>
-</div>
-
 
 <nav class="tm-navbar uk-navbar uk-navbar-attached">
   <div class="uk-container uk-container-center">
     <ul class="uk-navbar-nav uk-hidden-small">
-      <a data-uk-offcanvas="{target:'#offcanvas-1'}" class="uk-navbar-toggle"></a>
       <li><a href="#">Get Started</a></li>
       <li class="uk-active"><a href="#">toReactComponent</a></li>
-
-
     </ul>
-    <div class="uk-navbar-flip">
-      <ul class="uk-navbar-nav uk-hidden-small">
-
-        <li class="uk-parent" data-uk-dropdown="" aria-haspopup="true" aria-expanded="false">
-          <a ><i class="uk-icon-folder-open"></i>Load Sample<i class="uk-icon-caret-down"></i></a>
-          <div class="uk-dropdown uk-dropdown-navbar uk-dropdown-bottom" aria-hidden="true" tabindex="" style="top: 40px; left: 0px;">
-            <ul class="uk-nav uk-nav-navbar">
-              <li><a id="test0" class="samples" data-url="">localStorage</a></li>
-              <li><a id="test1" class="samples" data-url="https://codepen.io/nojaja/pen/mmYdwe.html">Test1 redux sample</a></li>
-              <li><a id="test2" class="samples" data-url="https://codepen.io/nojaja/pen/YVbzRw.html">Test2 uikit-sortable sample</a></li>
-              <li><a id="test3" class="samples" data-url="https://codepen.io/nojaja/pen/ZKNJgG.html">Test3 component sample</a></li>
-              <li><a id="test4" class="samples" data-url="https://codepen.io/nojaja/pen/GmaOqg.html">Test4 uikit-layout sample</a></li>
-              <li><a id="test5" class="samples" data-url="https://codepen.io/nojaja/pen/OgNgyy.html">Test5 uikit component sample</a></li>
-              <li><a id="test6" class="samples" data-url="https://codepen.io/nojaja/pen/weGqej.html">Test6 semantic-ui sample</a></li>
-              <li><a id="test7" class="samples" data-url="https://codepen.io/nojaja/pen/BZKxQJ.html">Test7 Bootstrap v4 sample</a></li>
-              <li><a id="test8" class="samples" data-url="https://codepen.io/nojaja/pen/xrORgq.html">Test8 React Routing v4 sample</a></li>
-              <li><a id="test9" class="samples" data-url="https://codepen.io/nojaja/pen/yXVNKm.html">Test9 w3c sample#2</a></li>
-              <li><a id="test10" class="samples" data-url="./sample/uikit_with_react-router_v4.html">Test10 uikit_with_react-router_v4</a></li>
-              <li><a id="test11" class="samples" data-url="./sample/w3c_my-dashboard.html">Test11 w3c sample#3 dashboard</a></li>
-
-            </ul>
-          </div>
-        </li>
-        <li class="uk-active uk-button-primary"><a id="run"><i class="uk-icon-repeat"></i> RUN</a></li>
-        <li class="uk-active uk-button-primary"><a id="gist"><i class="uk-icon-github"></i> Share Gist</a></li>
-        <li class="uk-active uk-button-primary"><a id="test"><i class="uk-icon-github"></i> test</a></li>
-        <li class="uk-active uk-button-primary"><a target="_blank" href="./test/index.html"><i class="uk-icon-eye"></i> View</a></li>
-
- 
-
-      </ul>
-    </div>
   </div>
 </nav>
-<div class="uk-grid ">
-  <div class="uk-form uk-width-medium-1-6">
-    <div class="uk-panel">
-      <h3 class="uk-panel-title">Files 
-      <a id="fileCopy" class="uk-icon-hover uk-icon-copy "></a>
-      <a id="fileRename" class="uk-icon-hover uk-icon-edit"></a>
-      <a id="fileDelete" class="uk-icon-hover uk-icon-trash "></a>
-      <a id="newfile" class="uk-button uk-button-success uk-button-smal uk-float-right"><i class="uk-icon-plus"></i> ADD File</a></h3>
-      </ul>
-    </div>
 
+<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
+  <div class="uk-grid" data-uk-grid-margin="">
+    <div class="uk-width-1-1 uk-row-first">
+      <div id="filelist" class="uk-grid" data-uk-grid-margin="">
 
-    <ul id="filelist" class="uk-nav uk-nav-side " data-uk-nav="">
-      <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
-    </ul>
+        <div class="uk-width-medium-1-3">
+          <a class="uk-panel uk-panel-hover uk-panel-box" href="">
+            <h3 class="uk-panel-title "><i class="uk-icon-spinner uk-icon-spin"></i> Loading..</h3>
+          </a>
+        </div>
 
-  </div>
-  <div class="uk-width-medium-3-6">
-    <h3 class="uk-panel-title">Files </h3>
-    <div class="uk-panel">
-      <ul id="edittab" class="uk-tab" data-uk-tab>
-        <li id="source" class="uk-active"><a>source html</a></li>
-        <li id="dom"><a>dom tree </a></li>
-        <li id="component"><a>js component.js</a></li>
-        <li id="app"><a>js app.js </a></li>
-        <li id="html"><a>result(html)</a></li>
-      </ul>
-
-      <!-- This is the container of the content items -->
-      <ul id="tab-content" class="uk-switcher uk-margin">
-        <li class="uk-active">
-          <div id="container" class="editor"></div>
-        </li>
-      </ul>
-    </div>
-  </div>
-  <div class="uk-width-medium-2-6">
-    <div class="uk-panel uk-form">
-      <h3 class="uk-panel-title">Preview</h3>
-        <select id="previewFile" class="uk-margin-small-top">
-                                        <option>index.html</option>
-                                        <option>Option 02</option>
-        </select>
-      <iframe id="child-frame" class="editor" src="./blank.html"></iframe>
+      </div>
     </div>
   </div>
 </div>
-<script src="js/Encoding.js"></script>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
-<script src="https://codepen.io/nojaja/pen/GjzRga.js"></script>
-<script src="https://rawgit.com/nojaja/node-htmlcompiler/v1.0.2/lib/htmlcompiler.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/js/uikit.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/js/components/notify.min.js"></script>
-<script src="js/index.js"></script>
-
-<script src="js/marked/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.23.1/babel.js"></script>
-<!-- sass.js を読み込む -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.10.7/sass.sync.min.js"></script>
-
-<script src="js/monaco-editor/min/vs/loader.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/uikit.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.12.0/js/components/notify.min.js"></script>
+<script src="js/index0.js"></script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

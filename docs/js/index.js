@@ -1092,6 +1092,9 @@
       }).success(function (e) {
         console.log(e);
         $.UIkit.notify("complete!", { status: 'success', timeout: 1000 });
+
+        //TODO ここにGASへの登録処理を追加する
+        //URL https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/ ファイル名.gist&contents=gistID
       }).error(function (e) {
         console.warn("gist save error", e);
         $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
