@@ -6,7 +6,8 @@ var currentModelId = "source";
 import FileData from './model/FileData.js'
 import FileContainer from './model/FileContainer.js'
 
-
+var gasUrl="https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
+var gistUrl  = "https://api.github.com/gists/";
 /**
 サービスワーカーの登録
 キャッシュファイルの制御を可能にする
@@ -105,19 +106,24 @@ function loadProject(url,type,cb) {
   }
 
   if(type == "gas"){
-    $.getJSON(url+ "&callback=?",  { t: '1' }, function(json){
-      fileContainer.init();
-      var file = new FileData();
-      file.setFilename("index.ahtml");
-      file.setContent(json.content);
-      fileContainer.putFile(file);
- 
-      refreshFileList();
-      openFirst();
-      return (cb)?cb(json):true;
+    $.getJSON(gasUrl+url+ "&callback=?",  { t: '1' }, function(json){
+      console.log(json);
+      if(json.ext==".gist"){
+        return loadProject(json.content,"gist",cb);
+      }else{
+        fileContainer.init();
+        var file = new FileData();
+        file.setFilename("index.ahtml");
+        file.setContent(json.content);
+        fileContainer.putFile(file);
+     
+        refreshFileList();
+        openFirst();
+        return (cb)?cb(json):true;
+      }
     });
   }else if(type == "gist"){
-    $.getJSON(url).done(function(data) {
+    $.getJSON(gistUrl+url).done(function(data) {
       fileContainer.setContainer(data);
       refreshFileList();
       openFirst();
@@ -176,13 +182,12 @@ function refreshCache(){
 }
 
 //プロジェクト一覧表示
-var gasUrl="https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/";
 function projectjsonCallback(json){
   $("#prjlist").empty();
 
   var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
     prj.on("click", function (event) {
-      loadProject(gasUrl + $(event.target).attr("data-url"),"gas",function () {});
+      loadProject( $(event.target).attr("data-url"),"gas",function () {});
     });
 
   json.rows.forEach(function(val, i) {
@@ -301,7 +306,10 @@ $(function() {
       url  = arg["q"];
     }else if(arg["g"]){
       type = "gist";
-      url  = "https://api.github.com/gists/" + arg["g"];
+      url  = arg["g"];
+    }else if(arg["ga"]){
+      type = "gas";
+      url  = arg["ga"];
     }
     loadProject(url,type,function () {
       refreshCache();

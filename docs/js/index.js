@@ -546,6 +546,8 @@
   var currentFile = null;
   var currentModelId = "source";
 
+  var gasUrl = "https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
+  var gistUrl = "https://api.github.com/gists/";
   /**
   サービスワーカーの登録
   キャッシュファイルの制御を可能にする
@@ -642,19 +644,24 @@
     }
 
     if (type == "gas") {
-      $.getJSON(url + "&callback=?", { t: '1' }, function (json) {
-        fileContainer.init();
-        var file = new _FileData2.default();
-        file.setFilename("index.ahtml");
-        file.setContent(json.content);
-        fileContainer.putFile(file);
+      $.getJSON(gasUrl + url + "&callback=?", { t: '1' }, function (json) {
+        console.log(json);
+        if (json.ext == ".gist") {
+          return loadProject(json.content, "gist", cb);
+        } else {
+          fileContainer.init();
+          var file = new _FileData2.default();
+          file.setFilename("index.ahtml");
+          file.setContent(json.content);
+          fileContainer.putFile(file);
 
-        refreshFileList();
-        openFirst();
-        return cb ? cb(json) : true;
+          refreshFileList();
+          openFirst();
+          return cb ? cb(json) : true;
+        }
       });
     } else if (type == "gist") {
-      $.getJSON(url).done(function (data) {
+      $.getJSON(gistUrl + url).done(function (data) {
         fileContainer.setContainer(data);
         refreshFileList();
         openFirst();
@@ -710,13 +717,12 @@
   }
 
   //プロジェクト一覧表示
-  var gasUrl = "https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/";
   function projectjsonCallback(json) {
     $("#prjlist").empty();
 
     var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
     prj.on("click", function (event) {
-      loadProject(gasUrl + $(event.target).attr("data-url"), "gas", function () {});
+      loadProject($(event.target).attr("data-url"), "gas", function () {});
     });
 
     json.rows.forEach(function (val, i) {
@@ -849,7 +855,10 @@
         url = arg["q"];
       } else if (arg["g"]) {
         type = "gist";
-        url = "https://api.github.com/gists/" + arg["g"];
+        url = arg["g"];
+      } else if (arg["ga"]) {
+        type = "gas";
+        url = arg["ga"];
       }
       loadProject(url, type, function () {
         refreshCache();
@@ -1190,469 +1199,5 @@
       if (key == "parentNode") return;
       return value;
     }, "\t");
-  }
-});
-(function (global, factory) {
-  if (typeof define === "function" && define.amd) {
-    define(["exports", "./FileData.js"], factory);
-  } else if (typeof exports !== "undefined") {
-    factory(exports, require("./FileData.js"));
-  } else {
-    var mod = {
-      exports: {}
-    };
-    factory(mod.exports, global.FileData);
-    global.FileContainer = mod.exports;
-  }
-})(this, function (exports, _FileData) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  var _FileData2 = _interopRequireDefault(_FileData);
-
-  function _interopRequireDefault(obj) {
-    return obj && obj.__esModule ? obj : {
-      default: obj
-    };
-  }
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  }();
-
-  var FileContainer = function () {
-    function FileContainer(monaco) {
-      _classCallCheck(this, FileContainer);
-
-      this.monaco = monaco;
-      this.container = {
-        id: null,
-        files: {},
-        "public": true,
-        "created_at": "2017-10-29T05:45:01Z",
-        "updated_at": "2017-11-14T12:41:14Z",
-        "description": ""
-      };
-      this.fileObjects = {};
-    }
-
-    _createClass(FileContainer, [{
-      key: "setId",
-      value: function setId(id) {
-        this.container['id'] = id;
-      }
-    }, {
-      key: "getId",
-      value: function getId() {
-        return this.container['id'];
-      }
-    }, {
-      key: "setMonaco",
-      value: function setMonaco(monaco) {
-        this.monaco = monaco;
-      }
-    }, {
-      key: "getMonaco",
-      value: function getMonaco() {
-        return this.monaco;
-      }
-    }, {
-      key: "getFiles",
-      value: function getFiles() {
-        // 配列のキーを取り出す
-        var ret = [];
-        for (var key in this.container["files"]) {
-          if (!this.container["files"][key]["truncated"]) {
-            ret.push(key);
-          }
-        }
-        return ret;
-      }
-    }, {
-      key: "getFile",
-      value: function getFile(filename) {
-        if (filename in this.container["files"]) {
-          if (!(filename in this.fileObjects)) {
-            this.fileObjects[filename] = new _FileData2.default(this.container["files"][filename], this.monaco);
-          }
-          return this.fileObjects[filename];
-        }
-      }
-    }, {
-      key: "getFileRaw",
-      value: function getFileRaw(filename) {
-        if (filename in this.container["files"]) {
-          return this.container["files"][filename];
-        }
-      }
-    }, {
-      key: "putFile",
-      value: function putFile(file) {
-        var filename = file.getFilename();
-        this.container["files"][filename] = file.getFileData();
-        return true;
-      }
-    }, {
-      key: "renameFile",
-      value: function renameFile(filename, newName) {
-        var file = this.getFile(filename);
-        file.setFilename(newName);
-        this.putFile(file);
-        delete this.container["files"][filename];
-      }
-    }, {
-      key: "removeFile",
-      value: function removeFile(filename) {
-        var file = this.getFile(filename);
-        file.remove();
-        this.putFile(file);
-      }
-    }, {
-      key: "init",
-      value: function init() {
-        this.container = {
-          id: "",
-          files: {},
-          "public": true,
-          "created_at": "2017-10-29T05:45:01Z",
-          "updated_at": "2017-11-14T12:41:14Z",
-          "description": ""
-        };
-        this.fileObjects = {};
-      }
-    }, {
-      key: "setPublic",
-      value: function setPublic(bool) {
-        this.container["public"] = bool;
-      }
-    }, {
-      key: "getPublic",
-      value: function getPublic() {
-        return this.container["public"];
-      }
-    }, {
-      key: "setDescription",
-      value: function setDescription(description) {
-        this.container["description"] = description;
-      }
-    }, {
-      key: "getDescription",
-      value: function getDescription() {
-        return this.container["description"];
-      }
-    }, {
-      key: "setContainer",
-      value: function setContainer(container) {
-        this.container = container;
-        this.fileObjects = {};
-      }
-    }, {
-      key: "getContainer",
-      value: function getContainer() {
-        return this.container;
-      }
-    }, {
-      key: "setContainerJson",
-      value: function setContainerJson(container) {
-        this.setContainer(JSON.parse(container));
-        this.fileObjects = {};
-      }
-    }, {
-      key: "getContainerJson",
-      value: function getContainerJson() {
-        return JSON.stringify(this.getContainer());
-      }
-    }, {
-      key: "getGistData",
-      value: function getGistData() {
-        var gistdata = {
-          "description": this.container["description"],
-          "public": this.container["public"],
-          "files": this.container["files"]
-        };
-        return gistdata;
-      }
-    }, {
-      key: "getGistJsonData",
-      value: function getGistJsonData() {
-        return JSON.stringify(this.getGistData());
-      }
-    }]);
-
-    return FileContainer;
-  }();
-
-  exports.default = FileContainer;
-
-  if (typeof window != "undefined") {
-    !window.FileContainer && (window.FileContainer = FileContainer);
-  }
-});
-(function (global, factory) {
-  if (typeof define === "function" && define.amd) {
-    define(["exports"], factory);
-  } else if (typeof exports !== "undefined") {
-    factory(exports);
-  } else {
-    var mod = {
-      exports: {}
-    };
-    factory(mod.exports);
-    global.FileData = mod.exports;
-  }
-})(this, function (exports) {
-  "use strict";
-
-  Object.defineProperty(exports, "__esModule", {
-    value: true
-  });
-
-  function _classCallCheck(instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  }
-
-  var _createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
-
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  }();
-
-  var FileData = function () {
-    function FileData(file, monaco) {
-      _classCallCheck(this, FileData);
-
-      if (file instanceof FileData) {
-        this.file = file.getFileData;
-      } else {
-        this.file = {
-          "filename": file && file["filename"] ? file["filename"] : "",
-          "fileType": file && file["fileType"] ? file["fileType"] : "txt",
-          "type": file && file["type"] ? file["type"] : "text/plain",
-          "language": file && file["language"] ? file["language"] : "Markdown",
-          "size": file && file["size"] ? file["size"] : 0,
-          "truncated": file && file["truncated"] ? file["truncated"] : false,
-          "content": file && file["content"] ? file["content"] : ""
-        };
-        this.editorData = {};
-        if (file && file["filename"]) this.setFilename(file["filename"]);
-        if (monaco) this.editorData.source.model.setValue(this.file["content"]);
-        this.monaco = monaco;
-      }
-    }
-
-    _createClass(FileData, [{
-      key: "addEditorData",
-      value: function addEditorData(key, caption, type) {
-        this.editorData[key] = {
-          caption: caption,
-          model: monaco ? monaco.editor.createModel("", type) : null,
-          state: null,
-          decorations: []
-        };
-      }
-    }, {
-      key: "setLanguage",
-      value: function setLanguage(language) {
-        this.file["language"] = language;
-      }
-    }, {
-      key: "getLanguage",
-      value: function getLanguage() {
-        return this.file["language"];
-      }
-    }, {
-      key: "setFileType",
-      value: function setFileType(fileType) {
-        this.file["fileType"] = fileType;
-      }
-    }, {
-      key: "getFileType",
-      value: function getFileType() {
-        return this.file["fileType"];
-      }
-    }, {
-      key: "setType",
-      value: function setType(type) {
-        this.file["type"] = type;
-      }
-    }, {
-      key: "getType",
-      value: function getType() {
-        return this.file["type"];
-      }
-    }, {
-      key: "getSize",
-      value: function getSize() {
-        return this.file["size"];
-      }
-    }, {
-      key: "setContent",
-      value: function setContent(content) {
-        if (this.monaco) {
-          this.editorData.source.model.setValue(content);
-        } else {
-          this.file["content"] = content;
-        }
-      }
-    }, {
-      key: "getContent",
-      value: function getContent() {
-        return this.monaco ? this.editorData.source.model.getValue() : this.file["content"];
-      }
-    }, {
-      key: "setFilename",
-      value: function setFilename(filename) {
-        this.file["filename"] = filename;
-        if (filename.match(/md$/)) {
-          this.setType("text/plain");
-          this.setLanguage("Markdown");
-          this.addEditorData("source", filename, "txt");
-          this.addEditorData("html", "result(html)", "html");
-          return;
-        }
-        if (filename.match(/markdown$/)) {
-          this.setType("text/plain");
-          this.setLanguage("Markdown");
-          this.addEditorData("source", filename, "txt");
-          this.addEditorData("html", "result(html)", "html");
-          return;
-        }
-        if (filename.match(/txt$/)) {
-          this.setType("text/plain");
-          this.setLanguage("text");
-          this.addEditorData("source", filename, "txt");
-          return;
-        }
-        if (filename.match(/json$/)) {
-          this.setType("application/json");
-          this.setLanguage("json");
-          this.addEditorData("source", filename, "json");
-          return;
-        }
-        if (filename.match(/ahtml$/)) {
-          this.setType("text/html");
-          this.setLanguage("ahtml");
-          this.addEditorData("source", filename, "html");
-          this.addEditorData("dom", "dom tree", "json");
-          this.addEditorData("component", "js component.js", "javascript");
-          this.addEditorData("app", "js app.js", "javascript");
-          this.addEditorData("html", "result(html)", "html");
-          return;
-        }
-        if (filename.match(/htm.?$/)) {
-          this.setType("text/html");
-          this.setLanguage("html");
-          this.addEditorData("source", filename, "html");
-          return;
-        }
-        if (filename.match(/js$/)) {
-          this.setType("text/javascript");
-          this.setLanguage("JavaScript");
-          this.addEditorData("source", filename, "javascript");
-          this.addEditorData("compiled", "JS Compiled", "javascript");
-          return;
-        }
-        if (filename.match(/es6$/)) {
-          this.setType("text/javascript");
-          this.setLanguage("JavaScript");
-          this.addEditorData("source", filename, "javascript");
-          this.addEditorData("compiled", "JS Compiled", "javascript");
-          return;
-        }
-        if (filename.match(/scss$/)) {
-          this.setType("text/scss");
-          this.setLanguage("scss");
-          this.addEditorData("source", filename, "scss");
-          this.addEditorData("compiled", "CSS Compiled", "css");
-          return;
-        }
-        if (filename.match(/css$/)) {
-          this.setType("text/css");
-          this.setLanguage("css");
-          this.addEditorData("source", filename, "css");
-          return;
-        }
-        this.addEditorData("source", filename, "txt");
-        return;
-      }
-    }, {
-      key: "getFilename",
-      value: function getFilename() {
-        return this.file["filename"];
-      }
-    }, {
-      key: "setEditorData",
-      value: function setEditorData(data) {
-        this.editorData = data;
-        if (monaco) this.file["content"] = this.editorData.source.model.getValue();
-      }
-    }, {
-      key: "getEditorData",
-      value: function getEditorData() {
-        return this.editorData;
-      }
-    }, {
-      key: "getFileData",
-      value: function getFileData() {
-        return this.file;
-      }
-    }, {
-      key: "getFileDataJson",
-      value: function getFileDataJson() {
-        return JSON.stringify(this.getFileData());
-      }
-    }, {
-      key: "remove",
-      value: function remove() {
-        this.file["content"] = "";
-        this.file["truncated"] = true;
-      }
-    }]);
-
-    return FileData;
-  }();
-
-  exports.default = FileData;
-
-
-  if (typeof window != "undefined") {
-    !window.FileData && (window.FileData = FileData);
   }
 });
