@@ -790,11 +790,12 @@
   キャッシュファイルの登録
   */
   var STATIC_CACHE_KEY = '1';
-  caches.delete(STATIC_CACHE_KEY);
+  if (caches) caches.delete(STATIC_CACHE_KEY);
   var saveCache = async function saveCache(url, source, type) {
     return new Promise(function (resolve, reject) {
       var _type = type || 'application/javascript; charset=UTF-8';
       var _url = location.href.substr(0, location.href.substr(0, location.href.length - location.search.length).lastIndexOf("/")); //URLの最初のパスまで
+      if (!caches) resolve();
       caches.open(STATIC_CACHE_KEY).then(function (cache) {
         var blob = new Blob([source], { type: _type });
         var response = new Response(blob, { "status": 200, "statusText": "OK" });
