@@ -14,6 +14,7 @@ function projectjsonCallback(json){
   </a>
 </div>
 `);
+  // [ROWID, filename, ext, timestamp, uid, scope,projectid]
   json.rows.forEach(function(val, i) {
     console.log(i, val); 
     var _file = file.clone(true);

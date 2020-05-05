@@ -1,4 +1,7 @@
-//var monaco = null;
+"use strict";
+import * as monaco from 'monaco-editor'
+import marked from 'marked'
+
 var editor = null;
 var currentFile = null;
 var currentModelId = "source";
@@ -13,7 +16,7 @@ var gistUrl  = "https://api.github.com/gists/";
 キャッシュファイルの制御を可能にする
 */
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('./ws.js', { scope: './' }).then(function(registraion) {
+  navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
     registraion.update();
   });
 }
@@ -297,12 +300,6 @@ var editorContainer = document.getElementById("container");
 
 //View///////////////////////////////////////////////////
 $(function () {
-  require.config({
-    paths: {
-      vs:"js/monaco-editor/min/vs"
-    }
-  });
-  require(["vs/editor/editor.main"], function() {
     editor = monaco.editor.create(editorContainer, {
       automaticLayout: true,
       model: null
@@ -325,7 +322,6 @@ $(function () {
       compileAll();
     });
 
-  });
 
   //全てのsourceのcompile
   function compileAll () {
