@@ -557,7 +557,7 @@ $(function() {
   });
 
   $("#test").on("click", function(event) {
-    loadProject("https://api.github.com/gists/8e670a377e30a60520705d916a434a22", "gist", function () {});
+    loadProject("8e670a377e30a60520705d916a434a22", "gist", function () {});
   });
 
 
