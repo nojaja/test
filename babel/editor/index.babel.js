@@ -145,7 +145,7 @@ function loadProject(url,type,cb) {
       fileContainer.putFile(file);
       refreshFileList();
       openFirst();
-      return (cb)?cb():true;
+      return (cb)? cb() : true;
     });
   }
 }
@@ -215,7 +215,7 @@ $.getJSON(gasUrl+ "&callback=?",  { t: '1' }, function(json){
 
 var fileContainer = new FileContainer();
 
-function saveDraft(source) {
+function saveDraft (source) {
   // ローカルストレージに最新の状態を保存
   var name = 'draftContainer'+location.pathname.replace(/\//g, '.');
   localStorage.setItem(name, fileContainer.getContainerJson());
@@ -223,7 +223,7 @@ function saveDraft(source) {
   $.UIkit.notify("save..", {status:'success',timeout : 1000});
 }
 
-function localDraft() {
+function localDraft () {
   // ページが読み込まれたら、ローカルストレージから状態を読み込む
   var name1 = 'draftContainer'+location.pathname.replace(/\//g, '.');
 
@@ -265,7 +265,7 @@ var saveCache = async function(url,source,type){
 
 var htmlparser = Tautologistics.NodeHtmlParser;
 
-var parseHtml = function(rawHtml) {
+var parseHtml = function (rawHtml) {
   return htmlparser.parseDOM(rawHtml, {
     enforceEmptyTags: true,
     ignoreWhitespace: true,
@@ -286,17 +286,17 @@ class DebugBuilder extends Builder {
   }
 }
 
-var arg = new Object;
-var pair=location.search.substring(1).split('&');
-for(var i=0;pair[i];i++) {
-    var kv = pair[i].split('=');
-    arg[kv[0]]=kv[1];
+var arg = new Object();
+var pair = location.search.substring(1).split("&");
+for (var i = 0; pair[i]; i++) {
+  var kv = pair[i].split("=");
+  arg[kv[0]] = kv[1];
 }
 
 var editorContainer = document.getElementById("container");
 
 //View///////////////////////////////////////////////////
-$(function() {
+$(function () {
   require.config({
     paths: {
       vs:"js/monaco-editor/min/vs"
@@ -328,7 +328,7 @@ $(function() {
   });
 
   //全てのsourceのcompile
-  function compileAll() {
+  function compileAll () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
     async function _compileAll() {
       function compileResolve(filename) {
@@ -363,7 +363,7 @@ $(function() {
     });
   }
 
-  async function compile(targetFile) {
+  async function compile (targetFile) {
     var webComponentParser = new WebComponentParser({
       builder: ReactComponentBuilder
     });
@@ -472,7 +472,7 @@ $(function() {
       }
     }, this);
 
-    bodyElements.forEach(function(bodyElement) {
+    bodyElements.forEach(function (bodyElement) {
       {
         var newElement = bodyElement.createElement("script");
         var child = newElement.createTextNode(`
@@ -483,9 +483,11 @@ $(function() {
   );
 };
 
-$(function() {
+$(function () {
+  /* render initial component */
   render();
-});`);
+});
+`);
         newElement.appendChild(child);
         bodyElement.appendChild(newElement);
       }
@@ -551,7 +553,7 @@ $(function() {
   }
 
 
-  $("#run").on("click", function(event) {
+  $("#run").on("click", function (event) {
     refreshCache();
     compileAll();
   });
@@ -714,7 +716,7 @@ function stringify(str) {
   var cache = [];
   return JSON.stringify(
     str,
-    function(key, value) {
+    function (key, value) {
       if (typeof value === "object" && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Circular reference found, discard key
