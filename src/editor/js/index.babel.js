@@ -171,16 +171,6 @@ function refreshFileList(){
   });
 }
 
-/*
-//ファイルキャッシュの更新
-function refreshCache(){
-  fileContainer.getFiles().forEach(function(filename, i) {
-    var _file = fileContainer.getFile(filename);
-    saveCache('src/'+filename,_file.getContent(),_file.getType());
-  });
-}
-*/
-
 //プロジェクト一覧表示
 function projectjsonCallback(json){
   $("#prjlist").empty();
@@ -239,28 +229,6 @@ function addEditorData (file) {
     }
     return file
 }
-
-
-/**
-キャッシュファイルの登録
-*/
-/*
-const STATIC_CACHE_KEY = '1';
-if(caches)caches.delete(STATIC_CACHE_KEY);
-var saveCache = async function(url,source,type){
-    return new Promise(function(resolve, reject){
-      var _type = type || 'application/javascript; charset=UTF-8';
-      var _url = location.href.substr(0,location.href.substr(0,location.href.length-location.search.length).lastIndexOf("/"));//URLの最初のパスまで
-      if(!caches) resolve();
-      caches.open(STATIC_CACHE_KEY).then(cache => {
-        var blob = new Blob([source], {type : _type});
-        var response = new Response(blob,{ "status" : 200 , "statusText" : "OK" });
-        cache.put(_url + "/test/"+url, response);
-        resolve();
-      })
-    });
-}
-*/
 
 
 var htmlparser = Tautologistics.NodeHtmlParser;
