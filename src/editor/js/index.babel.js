@@ -9,6 +9,17 @@ var currentModelId = "source";
 import FileData from './model/FileData.js'
 import FileContainer from './model/FileContainer.js'
 
+var fileContainer = new FileContainer();
+import LocalStorage from './fs/localstorage.js'
+import GistStorage from './fs/giststorage.js'
+import GasStorage from './fs/gasstorage.js'
+import HtmlStorage from './fs/htmlstorage.js'
+
+var localstorage = new LocalStorage();
+var gistStorage = new GistStorage();
+var gasStorage = new GasStorage();
+var htmlStorage = new HtmlStorage();
+
 var gasUrl="https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
 var gistUrl  = "https://api.github.com/gists/";
 /**
@@ -93,8 +104,6 @@ function refreshView(content){
  */
 }
 
-
-
 //プロジェクトファイルの読み込み
 function loadProject(url,type,cb) {
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
@@ -103,67 +112,30 @@ function loadProject(url,type,cb) {
   refreshView("./blank.html");
   //localから取得
   if(!url){
-    var doc = localDraft();
-    if (doc){
-      fileContainer.setContainerJson(doc);
-      fileContainer.setProjectName(doc.projectName||"new project");
-      refreshFileList();
-      openFirst();
-      return (cb)?cb(doc):true;
-    }
+    localstorage.loadDraft(fileContainer, (fileContainer) => {
+      refreshFileList()
+      openFirst()
+      return (cb)?cb():true
+    })
   }
-
   if(type == "gas"){
-    $.getJSON(gasUrl+url+ "&callback=?",  { t: '1' }, function(json){
-      console.log(json);
-      if(json.ext==".gist"){
-        return loadProject(json.content,"gist",cb);
-      }else{
-        fileContainer.init();
-        fileContainer.setProjectName(json.filename||"new project");
-        var file = new FileData();
-        file.setFilename("index.ahtml");
-
-        file.addEditorData('source', 'index.ahtml', 'html', monaco.editor.createModel('', 'text/html'))
-        file.addEditorData('dom', 'dom tree', 'json', monaco.editor.createModel('', 'application/json'))
-        file.addEditorData('component', 'js component.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('app', 'js app.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
-
-        file.getEditorData().source.model.setValue(file.setContent(json.content))
-
-        fileContainer.putFile(file);
-     
-        refreshFileList();
-        openFirst();
-        return (cb)?cb(json):true;
-      }
-    });
+      gasStorage.loadDraft(fileContainer, url, (fileContainer) => {
+          refreshFileList();
+          openFirst();
+          return (cb)?cb():true;
+      })
   }else if(type == "gist"){
-    $.getJSON(gistUrl+url).done(function(data) {
-      fileContainer.setContainer(data);
-      fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
-      refreshFileList();
-      openFirst();
-      return (cb)?cb():true;
-    });
+      gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
+          refreshFileList();
+          openFirst();
+          return (cb)?cb():true;
+      })
   }else if(type == "html"){
-    $.ajax({
-      url: url
-    }).done(function(data) {
-      fileContainer.init();
-      
-      fileContainer.setProjectName($(data).find("title").text()||"new project");
-      var file = new FileData();
-      file.setFilename("index.html");
-      file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
-
-      file.getEditorData().source.model.setValue(file.setContent(data))
-      fileContainer.putFile(file);
-      refreshFileList();
-      openFirst();
-      return (cb)? cb() : true;
-    });
+      htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
+          refreshFileList();
+          openFirst();
+          return (cb)?cb():true;
+      })
   }
 }
 
@@ -224,8 +196,8 @@ function projectjsonCallback(json){
 }
 
 //プロジェクト一覧取得
-$.getJSON(gasUrl+ "&callback=?",  { t: '1' }, function(json){
-  projectjsonCallback(json);
+gasStorage.loadList((json) => {
+  projectjsonCallback(json)
 });
 
 function addEditorData (file,filename) {
@@ -261,36 +233,6 @@ function addEditorData (file,filename) {
     }else{
         file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/css'))
     }
-}
-
-var fileContainer = new FileContainer();
-
-function saveDraft (source) {
-  // ローカルストレージに最新の状態を保存
-  var name = 'draftContainer'+location.pathname.replace(/\//g, '.');
-  localStorage.setItem(name, fileContainer.getContainerJson());
-  console.log("draftContainer:" + fileContainer.getContainerJson());
-  $.UIkit.notify("save..", {status:'success',timeout : 1000});
-}
-
-function localDraft () {
-  // ページが読み込まれたら、ローカルストレージから状態を読み込む
-  var name1 = 'draftContainer'+location.pathname.replace(/\//g, '.');
-
-  var name2 = 'draft'+location.pathname.replace(/\//g, '.');
-
-  if(localStorage.getItem(name1)){
-    fileContainer.setContainerJson(localStorage.getItem(name1));
-  }else{
-    var source = JSON.parse(localStorage.getItem(name2)) || null;
-    var file = new FileData();
-    file.setFilename("index.html");
-    file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
-    file.getEditorData().source.model.setValue(file.setContent(source))
-    fileContainer.putFile(file);
-  }
-  console.log("fileContainer:" + fileContainer.getContainerJson());
-  return fileContainer.getContainerJson();
 }
 
 
@@ -610,46 +552,6 @@ $(function () {
     loadProject("8e670a377e30a60520705d916a434a22", "gist", function () {});
   });
 
-
-function saveGist(token){
-    $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
-    
-    var sendType = "POST";
-    var gisturl = 'https://api.github.com/gists';
-    if(fileContainer.getId()){
-      sendType = "PATCH";
-      gisturl = gisturl + "/"+fileContainer.getId();
-    }
-
-    $.ajax({
-      url: gisturl,
-      type: sendType,
-      dataType: 'json',
-      beforeSend: function beforeSend(xhr) {
-        xhr.setRequestHeader("Authorization", "token " + token);
-      },
-      data: fileContainer.getGistJsonData()
-    }).success(function (e) {
-      console.log(e);
-      $.UIkit.notify("complete!", { status: 'success', timeout: 1000 });
-      
-      //TODO ここにGASへの登録処理を追加する
-      //URL https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/ ファイル名.gist&contents=gistID
-
-
-      /*
-      $.getJSON(gasUrl+filename+ ".gist&contents="+e.id+"&callback=?",  { t: '1' }, function(json){
-        console.log(json);
-      });
-      */
-
-
-    }).error(function (e) {
-      console.warn("gist save error", e);
-      $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
-    });
-}
-
   $("#gist").on("click", function(event) {
     var token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
     var token = localStorage.getItem(token_key);
@@ -658,13 +560,13 @@ function saveGist(token){
         console.log('Confirmed.'+newtoken);
        token = newtoken;
        localStorage.setItem(token_key, token);
-       saveGist(token);
+       gistStorage.saveGist(fileContainer,token);
       }, function () {
         console.log('Rejected.');
         return;
       });
     }else{
-       saveGist(token);
+       gistStorage.saveGist(fileContainer,token);
     }
   });
 
@@ -753,7 +655,7 @@ function saveGist(token){
       }
     if(e.ctrlKey){
       if(e.keyCode === 83){
-        saveDraft();
+        localstorage.saveDraft(fileContainer);
         refreshCache();
         return false;
       }
