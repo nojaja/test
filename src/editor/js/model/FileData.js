@@ -30,11 +30,13 @@ export class FileData {
   }
 
   addEditorData (key, caption, type, model) {
-    this.editorData[key] = {
-      caption : caption,
-      model: model,
-      state: null,
-      decorations : []
+    if(!this.editorData[key]) {
+        this.editorData[key] = {
+        caption : caption,
+        model: model,
+        state: null,
+        decorations : []
+        }
     }
   }
 

@@ -45,7 +45,7 @@ export class GistStorage {
     }
 
     loadDraft (fileContainer,url,cb) {
-        $.getJSON(gistUrl+url).done(function(data) {
+        $.getJSON(gistUrl+url).done((data) => {
             fileContainer.setContainer(data);
             fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
             console.log("fileContainer:" + fileContainer.getContainerJson());

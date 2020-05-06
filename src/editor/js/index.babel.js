@@ -14,11 +14,13 @@ import LocalStorage from './fs/localstorage.js'
 import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
 import HtmlStorage from './fs/htmlstorage.js'
+import CachesLogic from './cacheslogic.js'
 
 var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
 var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
+var cachesLogic = new CachesLogic();
 
 var gasUrl="https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
 var gistUrl  = "https://api.github.com/gists/";
@@ -55,8 +57,7 @@ function openFirst() {
 
 //Fileを開く
 function fileOpen(filename){
-  currentFile = fileContainer.getFile(filename);
-  addEditorData(currentFile, filename)
+  currentFile = addEditorData(fileContainer.getFile(filename))
   currentModelId = "source";
   var source = currentFile.getContent();
   currentFile.getEditorData().source.model.setValue(source)
@@ -170,6 +171,7 @@ function refreshFileList(){
   });
 }
 
+/*
 //ファイルキャッシュの更新
 function refreshCache(){
   fileContainer.getFiles().forEach(function(filename, i) {
@@ -177,6 +179,7 @@ function refreshCache(){
     saveCache('src/'+filename,_file.getContent(),_file.getType());
   });
 }
+*/
 
 //プロジェクト一覧表示
 function projectjsonCallback(json){
@@ -200,7 +203,8 @@ gasStorage.loadList((json) => {
   projectjsonCallback(json)
 });
 
-function addEditorData (file,filename) {
+function addEditorData (file) {
+    let filename = file.getFilename()
     if (filename.match(/md$/)) {
         file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
         file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
@@ -233,12 +237,14 @@ function addEditorData (file,filename) {
     }else{
         file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/css'))
     }
+    return file
 }
 
 
 /**
 キャッシュファイルの登録
 */
+/*
 const STATIC_CACHE_KEY = '1';
 if(caches)caches.delete(STATIC_CACHE_KEY);
 var saveCache = async function(url,source,type){
@@ -254,6 +260,7 @@ var saveCache = async function(url,source,type){
       })
     });
 }
+*/
 
 
 var htmlparser = Tautologistics.NodeHtmlParser;
@@ -289,7 +296,7 @@ for (var i = 0; pair[i]; i++) {
 var editorContainer = document.getElementById("container");
 
 //View///////////////////////////////////////////////////
-$(function () {
+$(document).ready(function(){
     editor = monaco.editor.create(editorContainer, {
       automaticLayout: true,
       model: null
@@ -307,8 +314,8 @@ $(function () {
       type = "gas";
       url  = arg["ga"];
     }
-    loadProject(url,type,function () {
-      refreshCache();
+    loadProject(url, type, () => {
+      cachesLogic.refreshCache(fileContainer);
       compileAll();
     });
 
@@ -318,7 +325,7 @@ $(function () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
     async function _compileAll() {
       function compileResolve(filename) {
-        return new Promise(function(resolve) {
+        return new Promise((resolve) => {
           var language = fileContainer.getFile(filename).getLanguage().toLowerCase();
           if(language=="ahtml"){
             resolve(compile(filename));
@@ -330,7 +337,7 @@ $(function () {
             resolve(sasscompile(filename));
           }else {
             var _file = fileContainer.getFile(filename);
-            saveCache('./'+filename,_file.getContent(),_file.getType());
+            cachesLogic.saveCache('./'+filename,_file.getContent(),_file.getType());
             resolve(true);
           }
         });
@@ -370,13 +377,14 @@ $(function () {
     var compiler2 = new Compiler([builder], {});
 
     //-ここからDemo用処理----------------------------------
-    var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
     var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
     filename = filename.substr(0,filename.lastIndexOf("."));
 
     var parseData = parseHtml(data.source.model.getValue().trim());
     data.dom.model.setValue(stringify(parseData));
-    await saveCache(filename+'_dom.json',stringify(parseData),'application/json');
+    await cachesLogic.saveCache(filename+'_dom.json',stringify(parseData),'application/json');
     compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
 
     //editor4.setValue(cssbuilder.getNodes());
@@ -386,10 +394,10 @@ $(function () {
     reactRootParser.build(); //react化処理の実行
     //変換されたコードはwindowに読み込まれ実行可能になります。
     data.component.model.setValue(webComponentParser.getResult());
-    await saveCache(filename+'_component.js',webComponentParser.getResult());
+    await cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
 
     data.app.model.setValue(reactRootParser.getResult());
-    await saveCache(filename+'_app.js',reactRootParser.getResult());
+    await cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
 
     const file = (targetFile)? fileContainer.getFile(targetFile) : currentFile
 
@@ -484,29 +492,33 @@ $(function () {
     }, this);
     compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
     data.html.model.setValue(builder.getNodes());
-    await saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
+    await cachesLogic.saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
   }
 
   /* */
   async function mdcompile(targetFile) {
-    var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
     var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
     filename = filename.substr(0,filename.lastIndexOf("."));
+    console.log('mdcompile', targetFile, data)
 
     var parseData = marked(data.source.model.getValue().trim());
     data.html.model.setValue(parseData);
-    await saveCache(filename+'.html',parseData,'text/html; charset=UTF-8');
+    await cachesLogic.saveCache(filename+'.html',parseData,'text/html; charset=UTF-8');
   }
 
   /* */
   async function es6compile(targetFile) {
-    var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
     var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
     filename = filename.substr(0,filename.lastIndexOf("."));
+    console.log('es6compile', targetFile, data)
     try {
       var parseData = Babel.transform(data.source.model.getValue().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
       data.compiled.model.setValue(parseData.code);
-      await saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
+      await cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
       data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
     } catch (e) {
       console.log(e);
@@ -521,17 +533,18 @@ $(function () {
 
   /* */
   async function sasscompile(targetFile) {
-    var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
+    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
     var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
     filename = filename.substr(0,filename.lastIndexOf("."));
     
     Sass.options('defaults');
-    Sass.compile(data.source.model.getValue().trim(), async function(result) {
+    // Sass.compile(data.source.model.getValue().trim(), async function(result) {
+    Sass.compile(data.trim(), async function(result) {
       if(result.status==0){
         console.log(result);
         data.compiled.model.setValue(result.text);
         data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
-        await saveCache(filename+'.css',result.text,'text/css; charset=UTF-8');
+        await cachesLogic.saveCache(filename+'.css',result.text,'text/css; charset=UTF-8');
       }else{
         UIkit.notify(result.message, { status: 'warning', timeout: 1000 });
         //エラー箇所の表示
@@ -543,24 +556,26 @@ $(function () {
   }
 
 
-  $("#run").on("click", function (event) {
-    refreshCache();
+  $("#run").on("click", (event) => {
+    cachesLogic.refreshCache(fileContainer);
     compileAll();
   });
 
   $("#test").on("click", function(event) {
-    loadProject("8e670a377e30a60520705d916a434a22", "gist", function () {});
+    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {
+        console.log(fileContainer)
+    });
   });
 
-  $("#gist").on("click", function(event) {
+  $("#gist").on("click", (event) => {
     var token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
     var token = localStorage.getItem(token_key);
     if(!token){
-      UIkit.modal.prompt('<p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>', '',function (newtoken) {
+      UIkit.modal.prompt('<p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>', '', (newtoken) => {
         console.log('Confirmed.'+newtoken);
-       token = newtoken;
-       localStorage.setItem(token_key, token);
-       gistStorage.saveGist(fileContainer,token);
+        token = newtoken;
+        localStorage.setItem(token_key, token);
+        gistStorage.saveGist(fileContainer,token);
       }, function () {
         console.log('Rejected.');
         return;
@@ -570,49 +585,48 @@ $(function () {
     }
   });
 
-  $("#titleEdit").on("click", function(event) {
+  $("#titleEdit").on("click", (event) => {
       var title = $("#title").text();
-      UIkit.modal.prompt('<p>title</p>', title,function (newTitle) {
+      UIkit.modal.prompt('<p>title</p>', title, (newTitle) => {
         console.log('newTitle '+newTitle);
-        
         fileContainer.setProjectName(newTitle);
         refreshFileList();
-      }, function () {
+      }, () => {
         console.log('Rejected.');
         return;
       });
   });
 
-  $("#fileRename").on("click", function(event) {
-    $('.fileSelect:checkbox:checked').each(function(){
+  $("#fileRename").on("click", (event) => {
+    $('.fileSelect:checkbox:checked').each( () => {
       var filename = $(this).attr("data-uri");
-      UIkit.modal.prompt('<p>Rename File Name</p>', filename,function (newName) {
+      UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
         console.log('newName '+newName);
         
         fileContainer.renameFile(filename,newName);
         refreshFileList();
-      }, function () {
+      }, () => {
         console.log('Rejected.');
         return;
       });
     });
   });
 
-  $("#fileDelete").on("click", function(event) {
-    $('.fileSelect:checkbox:checked').each(function(){
+  $("#fileDelete").on("click", (event) => {
+    $('.fileSelect:checkbox:checked').each(() => {
       var filename = $(this).attr("data-uri");
-      UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', function () {
+      UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
         console.log('filename '+filename);
         fileContainer.removeFile(filename);
         refreshFileList();
-      }, function () {
+      }, () => {
         console.log('Rejected.');
         return;
       });
     });
   });
 
-  $("#newfile").on("click", function(event) {
+  $("#newfile").on("click", (event) => {
       UIkit.modal.prompt(`
 <h3>New File</h3>
 <h4>File Types Cheatsheet</h4>
@@ -621,21 +635,21 @@ $(function () {
     <li><b>CSS</b> <span>.css</span> <span>.scss</span></li>
     <li><b>JavaScript</b> <span>.js</span> <span title="ECMASCRIPT6">.es6</span></li>
 </ul>
-<p>File Name:</p>`, '',function (newFile) {
+<p>File Name:</p>`, '', (newFile) => {
         var file = new FileData();
         file.setFilename(newFile);
-        addEditorData(file, newFile)
+        file = addEditorData(file)
         file.getEditorData().source.model.setValue(file.setContent(''))
         fileContainer.putFile(file);
         refreshFileList();
-      }, function () {
+      }, () => {
         console.log('Rejected.');
         return;
       });
   });
 
 
-  $('#container').bind('blur keydown keyup keypress change',function(){
+  $('#container').bind('blur keydown keyup keypress change', () => {
         if(currentFile){
           var currentState = editor.saveViewState();
           var currentModel = editor.getModel();
@@ -647,16 +661,16 @@ $(function () {
         }
   });
 
-  $(window).keydown(function(e) {
+  $(window).keydown( (e) => {
     if(e.keyCode === 120){
-        refreshCache();
+        cachesLogic.refreshCache(fileContainer);
         compileAll();
         return false;
       }
     if(e.ctrlKey){
       if(e.keyCode === 83){
         localstorage.saveDraft(fileContainer);
-        refreshCache();
+        cachesLogic.refreshCache(fileContainer);
         return false;
       }
     }
