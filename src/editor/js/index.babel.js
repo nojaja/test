@@ -1,6 +1,5 @@
 "use strict";
 import * as monaco from 'monaco-editor'
-import marked from 'marked'
 
 var editor = null;
 var currentFile = null;
