@@ -28,6 +28,7 @@ function changeTab(editor, desiredModelId) {
   var data = currentFile.getEditorData();
   data[currentModelId].state = currentState;
   currentFile.setEditorData(data);
+  currentFile.setContent(data.source.model.getValue())
 
   editor.setModel(data[desiredModelId].model);
   editor.restoreViewState(data[desiredModelId].state);
@@ -44,8 +45,11 @@ function openFirst() {
 //Fileを開く
 function fileOpen(filename){
   currentFile = fileContainer.getFile(filename);
+  addEditorData(currentFile, filename)
   currentModelId = "source";
   var source = currentFile.getContent();
+  currentFile.getEditorData().source.model.setValue(source)
+  //var source = currentFile.getEditorData().source.model.getValue()
   var data = currentFile.getEditorData();
   $("#edittab").empty();
   var tab = $('<li><a></a></li>');
@@ -119,7 +123,15 @@ function loadProject(url,type,cb) {
         fileContainer.setProjectName(json.filename||"new project");
         var file = new FileData();
         file.setFilename("index.ahtml");
-        file.setContent(json.content);
+
+        file.addEditorData('source', 'index.ahtml', 'html', monaco.editor.createModel('', 'text/html'))
+        file.addEditorData('dom', 'dom tree', 'json', monaco.editor.createModel('', 'application/json'))
+        file.addEditorData('component', 'js component.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('app', 'js app.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
+
+        file.getEditorData().source.model.setValue(file.setContent(json.content))
+
         fileContainer.putFile(file);
      
         refreshFileList();
@@ -144,7 +156,9 @@ function loadProject(url,type,cb) {
       fileContainer.setProjectName($(data).find("title").text()||"new project");
       var file = new FileData();
       file.setFilename("index.html");
-      file.setContent(data);
+      file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
+
+      file.getEditorData().source.model.setValue(file.setContent(data))
       fileContainer.putFile(file);
       refreshFileList();
       openFirst();
@@ -214,7 +228,40 @@ $.getJSON(gasUrl+ "&callback=?",  { t: '1' }, function(json){
   projectjsonCallback(json);
 });
 
-
+function addEditorData (file,filename) {
+    if (filename.match(/md$/)) {
+        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
+        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
+    } else if (filename.match(/markdown$/)) {
+        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
+        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
+    } else if (filename.match(/txt$/)) {
+        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
+    } else if (filename.match(/json$/)) {
+        file.addEditorData('source', filename, 'json', monaco.editor.createModel('', 'application/json'))
+    } else if (filename.match(/ahtml$/)) {
+        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/html'))
+        file.addEditorData('dom', 'dom tree', 'json', monaco.editor.createModel('', 'application/json'))
+        file.addEditorData('component', 'js component.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('app', 'js app.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
+    } else if (filename.match(/htm.?$/)) {
+        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/html'))
+    } else if (filename.match(/js$/)) {
+        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('compiled', 'JS Compiled', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+    } else if (filename.match(/es6$/)) {
+        file.addEditorData('source', filename, 'javascript', monaco.editor.createModel('', 'text/javascript'))
+        file.addEditorData('compiled', 'JS Compiled', 'javascript', monaco.editor.createModel('', 'text/javascript'))
+    } else if (filename.match(/scss$/)) {
+        file.addEditorData('source', filename, 'scss', monaco.editor.createModel('', 'text/scss'))
+        file.addEditorData('compiled', 'CSS Compiled', 'css', monaco.editor.createModel('', 'text/css'))
+    } else if (filename.match(/css$/)) {
+        file.addEditorData('source', filename, 'css', monaco.editor.createModel('', 'text/css'))
+    }else{
+        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/css'))
+    }
+}
 
 var fileContainer = new FileContainer();
 
@@ -238,7 +285,8 @@ function localDraft () {
     var source = JSON.parse(localStorage.getItem(name2)) || null;
     var file = new FileData();
     file.setFilename("index.html");
-    file.setContent(source);
+    file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
+    file.getEditorData().source.model.setValue(file.setContent(source))
     fileContainer.putFile(file);
   }
   console.log("fileContainer:" + fileContainer.getContainerJson());
@@ -304,7 +352,7 @@ $(function () {
       automaticLayout: true,
       model: null
     });
-    fileContainer.setMonaco(monaco);
+    // fileContainer.setMonaco(monaco);
     var url = "";
     var type = "localStorage";
     if(arg["q"]){
@@ -401,7 +449,11 @@ $(function () {
     data.app.model.setValue(reactRootParser.getResult());
     await saveCache(filename+'_app.js',reactRootParser.getResult());
 
-    (targetFile)?fileContainer.getFile(targetFile).setEditorData(data):currentFile.setEditorData(data);
+    const file = (targetFile)? fileContainer.getFile(targetFile) : currentFile
+
+    file.setEditorData(data)
+    file.setContent(data.source.model.getValue())
+
     var bodyElements = parseData.getElementsByTagName("body");
     if (parseData.getElementsByTagName("head").length == 0) {
       var $html = parseData.getElementsByTagName("html");
@@ -670,7 +722,8 @@ function saveGist(token){
 <p>File Name:</p>`, '',function (newFile) {
         var file = new FileData();
         file.setFilename(newFile);
-        file.setContent("");
+        addEditorData(file, newFile)
+        file.getEditorData().source.model.setValue(file.setContent(''))
         fileContainer.putFile(file);
         refreshFileList();
       }, function () {
@@ -687,6 +740,7 @@ function saveGist(token){
           var data = currentFile.getEditorData();
           data[currentModelId].state = currentState;
           currentFile.setEditorData(data);
+          currentFile.setContent(data.source.model.getValue())
           fileContainer.putFile(currentFile);
         }
   });
