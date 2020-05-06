@@ -15,15 +15,21 @@ import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
 import HtmlStorage from './fs/htmlstorage.js'
 import CachesLogic from './cacheslogic.js'
+import AHtmlCompiler from './compiler/ahtmlcompiler.js'
+import ES6Compiler from './compiler/es6compiler.js'
+import MDCompiler from './compiler/mdcompiler.js'
+import SassCompiler from './compiler/sasscompiler.js'
 
 var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
 var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
 var cachesLogic = new CachesLogic();
+var aHtmlCompiler = new AHtmlCompiler(cachesLogic);
+var es6Compiler = new ES6Compiler(cachesLogic);
+var mdCompiler = new MDCompiler(cachesLogic);
+var sassCompiler = new SassCompiler(cachesLogic);
 
-var gasUrl="https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
-var gistUrl  = "https://api.github.com/gists/";
 /**
 サービスワーカーの登録
 キャッシュファイルの制御を可能にする
@@ -140,7 +146,6 @@ function loadProject(url,type,cb) {
   }
 }
 
-
 $(".samples").on("click", function(event) {
   loadProject($(this).attr("data-url"),"html",function () {
   });
@@ -230,18 +235,6 @@ function addEditorData (file) {
     return file
 }
 
-
-var htmlparser = Tautologistics.NodeHtmlParser;
-
-var parseHtml = function (rawHtml) {
-  return htmlparser.parseDOM(rawHtml, {
-    enforceEmptyTags: true,
-    ignoreWhitespace: true,
-    caseSensitiveTags: true,
-    caseSensitiveAttr: true,
-    verbose: false
-  });
-};
 class DebugBuilder extends Builder {
   beforeCompile(src) {
     console.log("DebugBuilder", stringify(src));
@@ -295,16 +288,18 @@ $(document).ready(function(){
       function compileResolve(filename) {
         return new Promise((resolve) => {
           var language = fileContainer.getFile(filename).getLanguage().toLowerCase();
-          if(language=="ahtml"){
-            resolve(compile(filename));
-          }else if(language=="markdown"){
-            resolve(mdcompile(filename));
-          }else if(language=="javascript"){
-            resolve(es6compile(filename));
-          }else if(language=="sass"||language=="scss"){
-            resolve(sasscompile(filename));
-          }else {
-            var _file = fileContainer.getFile(filename);
+          console.log(filename)
+          let _file = (filename)? addEditorData(fileContainer.getFile(filename)) : currentFile
+          if (language=="ahtml") {
+            //resolve(compile(filename));
+            resolve(aHtmlCompiler.compile(_file))
+          } else if (language=="markdown") {
+            resolve(mdCompiler.compile(_file))
+          } else if (language=="javascript") {
+            resolve(es6Compiler.compile(_file))
+          } else if (language=="sass"||language=="scss") {
+            resolve(sassCompiler.compile(_file))
+          } else {
             cachesLogic.saveCache('./'+filename,_file.getContent(),_file.getType());
             resolve(true);
           }
@@ -323,206 +318,6 @@ $(document).ready(function(){
       refreshView("./test/index.html");
     });
   }
-
-  async function compile (targetFile) {
-    var webComponentParser = new WebComponentParser({
-      builder: ReactComponentBuilder
-    });
-
-    var reactRootParser = new ReactRootComponentBuilder({
-      builder: ReactComponentBuilder
-    });
-
-    var builder = new HtmlBuilder({});
-    //var builder2 = new HtmlBuilder({});
-    //var debugBuilder = new DebugBuilder({});
-    var cssbuilder = new CSSBuilder({});
-    var reactComponentBuilder = new ReactComponentBuilder({});
-    var compiler1 = new Compiler(
-      [cssbuilder, webComponentParser, reactRootParser],
-      {}
-    );
-    var compiler2 = new Compiler([builder], {});
-
-    //-ここからDemo用処理----------------------------------
-    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
-    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
-    var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
-    filename = filename.substr(0,filename.lastIndexOf("."));
-
-    var parseData = parseHtml(data.source.model.getValue().trim());
-    data.dom.model.setValue(stringify(parseData));
-    await cachesLogic.saveCache(filename+'_dom.json',stringify(parseData),'application/json');
-    compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
-
-    //editor4.setValue(cssbuilder.getNodes());
-
-    webComponentParser.build(); //react化処理の実行
-    //変換されたコードはwindowに読み込まれ実行可能になります。
-    reactRootParser.build(); //react化処理の実行
-    //変換されたコードはwindowに読み込まれ実行可能になります。
-    data.component.model.setValue(webComponentParser.getResult());
-    await cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
-
-    data.app.model.setValue(reactRootParser.getResult());
-    await cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
-
-    const file = (targetFile)? fileContainer.getFile(targetFile) : currentFile
-
-    file.setEditorData(data)
-    file.setContent(data.source.model.getValue())
-
-    var bodyElements = parseData.getElementsByTagName("body");
-    if (parseData.getElementsByTagName("head").length == 0) {
-      var $html = parseData.getElementsByTagName("html");
-      var newElement = $html[0].createElement("head");
-      $html[0].insertBefore(newElement, bodyElements[0]);
-    }
-    var headElements = parseData.getElementsByTagName("head");
-    headElements.forEach(function(headElement) {
-      //head配下に追加
-      var addpoint = headElement.getElementsByTagName("script")[0];
-      {
-        var newElement = headElement.createElement("script");
-        var child = newElement.createTextNode(reactRootParser.getResult()+"\n//# sourceURL=app.js");
-        newElement.appendChild(child);
-        headElement.insertBefore(newElement, addpoint);
-        addpoint = newElement;
-      }
-      {
-        var newElement = headElement.createElement("script");
-        var child = newElement.createTextNode(webComponentParser.getResult()+"\n//# sourceURL=Component.js");
-        newElement.appendChild(child);
-        headElement.insertBefore(newElement, addpoint);
-        addpoint = newElement;
-      }
-      {
-        var newElement = headElement.createElement("script");
-        newElement.attributes = {
-          src: [
-            {
-              type: "text",
-              data: "https://unpkg.com/react-dom@16/umd/react-dom.development.js"
-            }
-          ]
-        };
-        headElement.insertBefore(newElement, addpoint);
-        addpoint = newElement;
-      }
-      {
-        var newElement = headElement.createElement("script");
-        newElement.attributes = {
-          src: [
-            {
-              type: "text",
-              data: "https://unpkg.com/react@16/umd/react.development.js"
-            }
-          ]
-        };
-        headElement.insertBefore(newElement, addpoint);
-        addpoint = newElement;
-      }
-      {
-        var newElement = headElement.createElement("script");
-        newElement.attributes = {
-          src: [
-            {
-              type: "text",
-              data:
-                "//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"
-            }
-          ]
-        };
-        headElement.insertBefore(newElement, addpoint);
-        addpoint = newElement;
-      }
-    }, this);
-
-    bodyElements.forEach(function (bodyElement) {
-      {
-        var newElement = bodyElement.createElement("script");
-        var child = newElement.createTextNode(`
- var render = function render() {
-  ReactDOM.render(
-    React.createElement(App, null),
-    document.querySelector("#app")
-  );
-};
-
-$(function () {
-  /* render initial component */
-  render();
-});
-`);
-        newElement.appendChild(child);
-        bodyElement.appendChild(newElement);
-      }
-    }, this);
-    compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
-    data.html.model.setValue(builder.getNodes());
-    await cachesLogic.saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
-  }
-
-  /* */
-  async function mdcompile(targetFile) {
-    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
-    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
-    var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
-    filename = filename.substr(0,filename.lastIndexOf("."));
-    console.log('mdcompile', targetFile, data)
-
-    var parseData = marked(data.source.model.getValue().trim());
-    data.html.model.setValue(parseData);
-    await cachesLogic.saveCache(filename+'.html',parseData,'text/html; charset=UTF-8');
-  }
-
-  /* */
-  async function es6compile(targetFile) {
-    // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
-    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
-    var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
-    filename = filename.substr(0,filename.lastIndexOf("."));
-    console.log('es6compile', targetFile, data)
-    try {
-      var parseData = Babel.transform(data.source.model.getValue().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
-      data.compiled.model.setValue(parseData.code);
-      await cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
-      data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
-    } catch (e) {
-      console.log(e);
-      UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
-      //エラー箇所の表示
-      data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [
-         { range: new monaco.Range(e.loc.line,1,e.loc.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
-      ]);
-    }
-  }
-
-
-  /* */
-  async function sasscompile(targetFile) {
-    var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
-    var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
-    filename = filename.substr(0,filename.lastIndexOf("."));
-    
-    Sass.options('defaults');
-    // Sass.compile(data.source.model.getValue().trim(), async function(result) {
-    Sass.compile(data.trim(), async function(result) {
-      if(result.status==0){
-        console.log(result);
-        data.compiled.model.setValue(result.text);
-        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
-        await cachesLogic.saveCache(filename+'.css',result.text,'text/css; charset=UTF-8');
-      }else{
-        UIkit.notify(result.message, { status: 'warning', timeout: 1000 });
-        //エラー箇所の表示
-        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [
-           { range: new monaco.Range(result.line,1,result.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
-        ]);
-      }
-    });
-  }
-
 
   $("#run").on("click", (event) => {
     cachesLogic.refreshCache(fileContainer);
