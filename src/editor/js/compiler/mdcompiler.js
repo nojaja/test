@@ -10,7 +10,7 @@ export class MDCompiler {
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."));
 
-        var parseData = marked(data.source.model.getValue().trim());
+        let parseData = marked(data.source.model.getValue().trim());
         data.html.model.setValue(parseData);
         await this.cachesLogic.saveCache(filename+'.html',parseData,'text/html; charset=UTF-8');
     }

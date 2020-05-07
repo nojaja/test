@@ -35,16 +35,16 @@ var sassCompiler = new SassCompiler(cachesLogic);
 キャッシュファイルの制御を可能にする
 */
 if (navigator.serviceWorker) {
-  navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
+    navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
     registraion.update();
   });
 }
 
 /* タブ切り替え処理 */
 function changeTab(editor, desiredModelId) {
-  var currentState = editor.saveViewState();
-  var currentModel = editor.getModel();
-  var data = currentFile.getEditorData();
+  let currentState = editor.saveViewState();
+  let currentModel = editor.getModel();
+  let data = currentFile.getEditorData();
   data[currentModelId].state = currentState;
   currentFile.setEditorData(data);
 
@@ -65,19 +65,18 @@ function openFirst() {
 function fileOpen(filename){
   currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
   currentModelId = "source";
-  // var source = currentFile.getContent();
-  var data = currentFile.getEditorData();
+  let data = currentFile.getEditorData();
 
   $("#edittab").empty();
-  var tab = $('<li><a></a></li>');
-  tab.on("click", function (event) {
+  const tab = $('<li><a></a></li>');
+  tab.on("click", (event) => {
     //タブの切替
-    changeTab(editor,$(this).attr("id"));
+    changeTab(editor,$(event.currentTarget).attr("id"));
   });
   
-  for (var key in data) {
-    var i = 0;
-    var _tab = tab.clone(true);
+  for (let key in data) {
+    let i = 0;
+    let _tab = tab.clone(true);
     _tab.attr('id',key);
     _tab.children("a").append(data[key].caption);
     $("#edittab").append(_tab);
@@ -93,7 +92,7 @@ function fileOpen(filename){
 }
 
 // iframe内のコンテンツを更新
-function refreshView(content){
+function refreshView (content) {
     // iframe内のコンテンツを更新
     $("#child-frame").attr("src", content);
   /*
@@ -111,7 +110,7 @@ function refreshView(content){
 }
 
 //プロジェクトファイルの読み込み
-function loadProject(url,type,cb) {
+function loadProject (url,type,cb) {
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
   $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
@@ -145,25 +144,21 @@ function loadProject(url,type,cb) {
   }
 }
 
-$(".samples").on("click", function(event) {
-  loadProject($(this).attr("data-url"),"html",() => {})
-});
-
 //File一覧の更新
-function refreshFileList(){
+function refreshFileList () {
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
   $("#filelist").empty();
 
-  var file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
-    file.on("click", (event) => {
-      fileOpen($(event.target).attr("data-uri"));
-      $("#filelist").children("li").removeClass("uk-active");
-      $(event.target.parentElement).addClass("uk-active");
-    });
+  const file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
+  file.on("click", (event) => {
+    fileOpen($(event.target).attr("data-uri"));
+    $("#filelist").children("li").removeClass("uk-active");
+    $(event.target.parentElement).addClass("uk-active");
+  });
   
   fileContainer.getFiles().forEach((val, i) => {
-    var _file = file.clone(true);
+    let _file = file.clone(true);
     _file.find('.fileSelect').attr('data-uri',val);
     _file.children('.file').attr('data-uri',val);
     _file.children('.file').append(val);
@@ -172,27 +167,30 @@ function refreshFileList(){
 }
 
 //プロジェクト一覧表示
-function projectjsonCallback(json, type){
+function projectjsonCallback (json, type) {
   $("#prjlist").empty();
 
-  var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
+  const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
   prj.on("click", (event) => {
     loadProject($(event.target).attr("data-url"), type, () => {})
   });
 
   json.rows.forEach((val, i) => {
     // ROWID, filename, ext, timestamp, uid, scope,projectid
-    var _prj = prj.clone(true);
+    let _prj = prj.clone(true);
     _prj.children('.project').attr('data-url',val[6]+'/'+val[1]+val[2]);
     _prj.children('.project').append(val[1]);
     $("#prjlist").append(_prj);
   });
 }
 
-//プロジェクト一覧取得
-localstorage.loadList((json, type) => {
-  projectjsonCallback(json, type)
-});
+function compileAll () {
+    $.UIkit.notify("compile..", {status:'success',timeout : 1000});
+    builderLogic.compileAll(fileContainer, () => {
+        $.UIkit.notify("success..", {status:'success',timeout : 1000});
+        refreshView("./test/index.html");
+    })
+}
 
 class DebugBuilder extends Builder {
   beforeCompile(src) {
@@ -214,14 +212,14 @@ for (var i = 0; pair[i]; i++) {
 }
 
 //View///////////////////////////////////////////////////
-$(document).ready(function(){
-    var editorContainer = document.getElementById("container");
+$(document).ready(() => {
+    const editorContainer = document.getElementById("container");
     editor = monaco.editor.create(editorContainer, {
       automaticLayout: true,
       model: null
     });
-    var url = "";
-    var type = "localStorage";
+    let url = "";
+    let type = "localStorage";
     if(arg["q"]){
       type = "html";
       url  = arg["q"];
@@ -232,18 +230,16 @@ $(document).ready(function(){
       type = "gas";
       url  = arg["ga"];
     }
+    //プロジェクト取得
     loadProject(url, type, () => {
       cachesLogic.refreshCache(fileContainer);
       compileAll();
     });
 
-    function compileAll () {
-        $.UIkit.notify("compile..", {status:'success',timeout : 1000});
-        builderLogic.compileAll(fileContainer, () => {
-            $.UIkit.notify("success..", {status:'success',timeout : 1000});
-            refreshView("./test/index.html");
-        })
-    }
+    //プロジェクト一覧取得
+    localstorage.loadList((json, type) => {
+        projectjsonCallback(json, type)
+    });
 
   $("#run").on("click", (event) => {
     cachesLogic.refreshCache(fileContainer);
@@ -254,9 +250,13 @@ $(document).ready(function(){
     loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {})
   });
 
+  $(".samples").on("click", (event) => {
+    loadProject($(event.currentTarget).attr("data-url"),"html",() => {})
+  });
+
   $("#gist").on("click", (event) => {
-    var token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
-    var token = localStorage.getItem(token_key);
+    const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
+    const token = localStorage.getItem(token_key);
     if(!token){
       UIkit.modal.prompt('<p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>', '', (newtoken) => {
         console.log('Confirmed.'+newtoken);
@@ -273,7 +273,7 @@ $(document).ready(function(){
   });
 
   $("#titleEdit").on("click", (event) => {
-      var title = $("#title").text();
+      const title = $("#title").text();
       UIkit.modal.prompt('<p>title</p>', title, (newTitle) => {
         console.log('newTitle '+newTitle);
         fileContainer.setProjectName(newTitle);
@@ -285,8 +285,8 @@ $(document).ready(function(){
   });
 
   $("#fileRename").on("click", (event) => {
-    $('.fileSelect:checkbox:checked').each( () => {
-      var filename = $(this).attr("data-uri");
+    $('.fileSelect:checkbox:checked').each( (index, element) => {
+      const filename = $(element).attr("data-uri");
       UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
         console.log('newName '+newName);
         fileContainer.renameFile(filename,newName);
@@ -299,8 +299,8 @@ $(document).ready(function(){
   });
 
   $("#fileDelete").on("click", (event) => {
-    $('.fileSelect:checkbox:checked').each(() => {
-      var filename = $(this).attr("data-uri");
+    $('.fileSelect:checkbox:checked').each((index, element) => {
+      const filename = $(element).attr("data-uri");
       UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
         console.log('filename '+filename);
         fileContainer.removeFile(filename);
@@ -322,7 +322,7 @@ $(document).ready(function(){
     <li><b>JavaScript</b> <span>.js</span> <span title="ECMASCRIPT6">.es6</span></li>
 </ul>
 <p>File Name:</p>`, '', (newFile) => {
-        var file = new FileData();
+        let file = new EditorFileData(monaco)
         file.setFilename(newFile);
         file.setContent("");
         fileContainer.putFile(file);
@@ -335,9 +335,9 @@ $(document).ready(function(){
 
   $('#container').bind('blur keydown keyup keypress change', () => {
         if(currentFile){
-          var currentState = editor.saveViewState();
-          var currentModel = editor.getModel();
-          var data = currentFile.getEditorData();
+          let currentState = editor.saveViewState();
+          let currentModel = editor.getModel();
+          let data = currentFile.getEditorData();
           data[currentModelId].state = currentState;
           currentFile.setEditorData(data);
           fileContainer.putFile(currentFile);

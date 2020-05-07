@@ -11,8 +11,10 @@ export class EditorFileData extends FileData {
   constructor (file,_monaco) {
     super(file)
     this.monaco = _monaco
-    this.setEditorDatas(file.filename)
-    this.editorData.source.model.setValue(this.file.content)
+    if (file && file.filename) {
+        this.setEditorDatas(file.filename)
+        this.editorData.source.model.setValue(this.file.content)
+    }
   }
 
   addEditorData (key, caption, type, model) {
@@ -27,6 +29,11 @@ export class EditorFileData extends FileData {
 
   getContent () {
     this.editorData.source.model.getValue()
+  }
+
+  setFilename (filename) {
+    super.setFilename(filename)
+    this.setEditorDatas (filename)
   }
 
   setEditorDatas (filename) {

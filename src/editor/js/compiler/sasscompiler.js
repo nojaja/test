@@ -3,14 +3,14 @@ export class SassCompiler {
         this.cachesLogic = _cachesLogic
     }
 
-    async compile(targetFile) {
+    async compile (targetFile) {
         let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."));
         
         Sass.options('defaults');
         // Sass.compile(data.source.model.getValue().trim(), async function(result) {
-        Sass.compile(data.trim(), async function(result) {
+        Sass.compile(data.trim(), async (result) => {
             if(result.status==0){
                 console.log(result);
                 data.compiled.model.setValue(result.text);
@@ -20,7 +20,7 @@ export class SassCompiler {
                 UIkit.notify(result.message, { status: 'warning', timeout: 1000 });
                 //エラー箇所の表示
                 data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [
-                { range: new monaco.Range(result.line,1,result.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
+                    { range: new monaco.Range(result.line,1,result.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
                 ]);
             }
         });

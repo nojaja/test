@@ -8,17 +8,17 @@ export class ES6Compiler {
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."));
         try {
-        var parseData = Babel.transform(data.source.model.getValue().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
-        data.compiled.model.setValue(parseData.code);
-        await this.cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
-        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
+            let parseData = Babel.transform(data.source.model.getValue().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
+            data.compiled.model.setValue(parseData.code);
+            await this.cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
+            data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
         } catch (e) {
-        console.log(e);
-        UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
-        //エラー箇所の表示
-        data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [
-            { range: new monaco.Range(e.loc.line,1,e.loc.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
-        ]);
+            console.log(e);
+            UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
+            //エラー箇所の表示
+            data.source.decorations = data.source.model.deltaDecorations(data.source.decorations, [
+                { range: new monaco.Range(e.loc.line,1,e.loc.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},
+            ]);
         }
     }
 

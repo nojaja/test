@@ -1,5 +1,5 @@
 
-var gistUrl  = "https://api.github.com/gists/"
+const gisturl = 'https://api.github.com/gists';
 
 export class GistStorage {
     constructor () {
@@ -7,22 +7,22 @@ export class GistStorage {
     saveDraft (fileContainer, token){
         $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
         
-        var sendType = "POST";
-        var gisturl = 'https://api.github.com/gists';
-        if(fileContainer.getId()){
-        sendType = "PATCH";
-        gisturl = gisturl + "/"+fileContainer.getId();
+        const sendType = "POST";
+        let _gisturl = gisturl;
+        if (fileContainer.getId()){
+            sendType = "PATCH";
+            _gisturl = gisturl + "/"+fileContainer.getId();
         }
 
         $.ajax({
-            url: gisturl,
+            url: _gisturl,
             type: sendType,
             dataType: 'json',
             beforeSend: function beforeSend(xhr) {
                 xhr.setRequestHeader("Authorization", "token " + token);
             },
             data: fileContainer.getGistJsonData()
-        }).success(function (e) {
+        }).success((e) => {
             console.log(e);
             $.UIkit.notify("complete!", { status: 'success', timeout: 1000 });
             
@@ -35,14 +35,14 @@ export class GistStorage {
                 console.log(json);
             });
             */
-        }).error(function (e) {
+        }).error((e) => {
             console.warn("gist save error", e);
             $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
         });
     }
 
     loadDraft (fileContainer,url,cb) {
-        $.getJSON(gistUrl+url).done((data) => {
+        $.getJSON(gisturl+"/"+url).done((data) => {
             fileContainer.setContainer(data);
             fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
             console.log("fileContainer:" + fileContainer.getContainerJson());

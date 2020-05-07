@@ -78,6 +78,7 @@ export class FileData {
 
   setFilename (filename) {
     this.file.filename = filename
+    this.setAutoType (filename)
   }
 
   setAutoType (filename) {
