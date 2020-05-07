@@ -8,7 +8,6 @@ import FileData from './FileData.js'
   monacoEditorと連携した場合の、ファイル管理クラス EditorFileData
 ------------------------------------------------*/
 export class EditorFileData extends FileData {
-  // constructor (file,_monaco) {
   constructor (file,_monaco) {
     super(file)
     this.monaco = _monaco
@@ -70,7 +69,6 @@ export class EditorFileData extends FileData {
     this.file.content = this.editorData.source.model.getValue()
   }
 }
-
 export default EditorFileData
 
 if (typeof window !== 'undefined') {

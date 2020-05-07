@@ -47,13 +47,13 @@ function changeTab(editor, desiredModelId) {
   var data = currentFile.getEditorData();
   data[currentModelId].state = currentState;
   currentFile.setEditorData(data);
-  // currentFile.setContent(data.source.model.getValue())
 
   editor.setModel(data[desiredModelId].model);
   editor.restoreViewState(data[desiredModelId].state);
   currentModelId = desiredModelId;
   editor.focus();
 }
+
 //１つ目のファイルを開く
 function openFirst() {
   fileOpen(fileContainer.getFiles()[0]);
@@ -64,12 +64,10 @@ function openFirst() {
 //Fileを開く
 function fileOpen(filename){
   currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
-  // currentFile = addEditorData(fileContainer.getFile(filename,EditorFileData,monaco))
   currentModelId = "source";
-  var source = currentFile.getContent();
-  // currentFile.getEditorData().source.model.setValue(source)
-  // var source = currentFile.getEditorData().source.model.getValue()
+  // var source = currentFile.getContent();
   var data = currentFile.getEditorData();
+
   $("#edittab").empty();
   var tab = $('<li><a></a></li>');
   tab.on("click", function (event) {
@@ -148,27 +146,23 @@ function loadProject(url,type,cb) {
 }
 
 $(".samples").on("click", function(event) {
-  loadProject($(this).attr("data-url"),"html",function () {
-  });
+  loadProject($(this).attr("data-url"),"html",() => {})
 });
 
 //File一覧の更新
 function refreshFileList(){
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
-
   $("#filelist").empty();
 
   var file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
-    file.on("click", function (event) {
+    file.on("click", (event) => {
       fileOpen($(event.target).attr("data-uri"));
       $("#filelist").children("li").removeClass("uk-active");
       $(event.target.parentElement).addClass("uk-active");
-      
     });
   
-  fileContainer.getFiles().forEach(function(val, i) {
-    console.log(i, val); 
+  fileContainer.getFiles().forEach((val, i) => {
     var _file = file.clone(true);
     _file.find('.fileSelect').attr('data-uri',val);
     _file.children('.file').attr('data-uri',val);
@@ -182,11 +176,11 @@ function projectjsonCallback(json, type){
   $("#prjlist").empty();
 
   var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
-    prj.on("click", function (event) {
-      loadProject( $(event.target).attr("data-url"), type, function () {});
-    });
+  prj.on("click", (event) => {
+    loadProject($(event.target).attr("data-url"), type, () => {})
+  });
 
-  json.rows.forEach(function(val, i) {
+  json.rows.forEach((val, i) => {
     // ROWID, filename, ext, timestamp, uid, scope,projectid
     var _prj = prj.clone(true);
     _prj.children('.project').attr('data-url',val[6]+'/'+val[1]+val[2]);
@@ -196,7 +190,6 @@ function projectjsonCallback(json, type){
 }
 
 //プロジェクト一覧取得
-//gasStorage.loadList((json, type) => {
 localstorage.loadList((json, type) => {
   projectjsonCallback(json, type)
 });
@@ -227,7 +220,6 @@ $(document).ready(function(){
       automaticLayout: true,
       model: null
     });
-    // fileContainer.setMonaco(monaco);
     var url = "";
     var type = "localStorage";
     if(arg["q"]){
@@ -258,10 +250,8 @@ $(document).ready(function(){
     compileAll();
   });
 
-  $("#test").on("click", function(event) {
-    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {
-        console.log(fileContainer)
-    });
+  $("#test").on("click", (event) => {
+    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {})
   });
 
   $("#gist").on("click", (event) => {
@@ -273,7 +263,7 @@ $(document).ready(function(){
         token = newtoken;
         localStorage.setItem(token_key, token);
         gistStorage.saveGist(fileContainer,token);
-      }, function () {
+      }, () => {
         console.log('Rejected.');
         return;
       });
@@ -299,7 +289,6 @@ $(document).ready(function(){
       var filename = $(this).attr("data-uri");
       UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
         console.log('newName '+newName);
-        
         fileContainer.renameFile(filename,newName);
         refreshFileList();
       }, () => {
@@ -335,9 +324,7 @@ $(document).ready(function(){
 <p>File Name:</p>`, '', (newFile) => {
         var file = new FileData();
         file.setFilename(newFile);
-        // file = addEditorData(file)
         file.setContent("");
-        // file.getEditorData().source.model.setValue(file.setContent(''))
         fileContainer.putFile(file);
         refreshFileList();
       }, () => {
@@ -346,7 +333,6 @@ $(document).ready(function(){
       });
   });
 
-
   $('#container').bind('blur keydown keyup keypress change', () => {
         if(currentFile){
           var currentState = editor.saveViewState();
@@ -354,7 +340,6 @@ $(document).ready(function(){
           var data = currentFile.getEditorData();
           data[currentModelId].state = currentState;
           currentFile.setEditorData(data);
-          // currentFile.setContent(data.source.model.getValue())
           fileContainer.putFile(currentFile);
         }
   });
@@ -373,7 +358,6 @@ $(document).ready(function(){
       }
     }
   });
-
 });
 
 function stringify(str) {

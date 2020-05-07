@@ -8,9 +8,7 @@ import FileData from './FileData.js'
   ファイル管理クラス FileContainer
 ------------------------------------------------ */
 export class FileContainer {
-  // constructor (monaco) {
   constructor () {
-    // this.monaco = monaco
     this.container = {
       v: 0.1,
       id: null,
@@ -168,7 +166,6 @@ export class FileContainer {
     this.container.lastUpdatedTime = lastUpdatedTime
   }
 }
-
 export default FileContainer
 if (typeof window !== 'undefined') {
   !window.FileContainer && (window.FileContainer = FileContainer)
