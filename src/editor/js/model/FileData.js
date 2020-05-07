@@ -7,7 +7,6 @@ Copyright 2017 - 2018
   ファイル管理クラス FileContainer
 ------------------------------------------------*/
 export class FileData {
-  // constructor (file,_monaco) {
   constructor (file) {
     if (file instanceof FileData) {
       this.file = file.getFileData
@@ -23,7 +22,7 @@ export class FileData {
         description: file && file.description ? file.description : ''
       }
       this.editorData = {}
-      if (file && file.filename) this.setFilename(file.filename)
+      if (file && file.filename) this.setAutoType (file.filename)
       // this.monaco = _monaco
       // if (this.monaco) this.editorData.source.model.setValue(this.file.content)
     }
@@ -85,6 +84,9 @@ export class FileData {
 
   setFilename (filename) {
     this.file.filename = filename
+  }
+
+  setAutoType (filename) {
     if (filename.match(/md$/)) {
       this.setType('text/plain')
       this.setLanguage('Markdown')

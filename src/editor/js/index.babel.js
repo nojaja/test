@@ -1,14 +1,8 @@
 "use strict";
 import * as monaco from 'monaco-editor'
-
-var editor = null;
-var currentFile = null;
-var currentModelId = "source";
-
 import FileData from './model/FileData.js'
+import EditorFileData from './model/EditorFileData.js'
 import FileContainer from './model/FileContainer.js'
-
-var fileContainer = new FileContainer();
 import LocalStorage from './fs/localstorage.js'
 import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
@@ -18,12 +12,19 @@ import AHtmlCompiler from './compiler/ahtmlcompiler.js'
 import ES6Compiler from './compiler/es6compiler.js'
 import MDCompiler from './compiler/mdcompiler.js'
 import SassCompiler from './compiler/sasscompiler.js'
+import BuilderLogic from './builderlogic.js'
+
+var editor = null;
+var currentFile = null;
+var currentModelId = "source";
+var fileContainer = new FileContainer();
 
 var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
 var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
 var cachesLogic = new CachesLogic();
+var builderLogic = new BuilderLogic(cachesLogic);
 var aHtmlCompiler = new AHtmlCompiler(cachesLogic);
 var es6Compiler = new ES6Compiler(cachesLogic);
 var mdCompiler = new MDCompiler(cachesLogic);
@@ -46,7 +47,7 @@ function changeTab(editor, desiredModelId) {
   var data = currentFile.getEditorData();
   data[currentModelId].state = currentState;
   currentFile.setEditorData(data);
-  currentFile.setContent(data.source.model.getValue())
+  // currentFile.setContent(data.source.model.getValue())
 
   editor.setModel(data[desiredModelId].model);
   editor.restoreViewState(data[desiredModelId].state);
@@ -62,11 +63,12 @@ function openFirst() {
 
 //Fileを開く
 function fileOpen(filename){
-  currentFile = addEditorData(fileContainer.getFile(filename))
+  currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
+  // currentFile = addEditorData(fileContainer.getFile(filename,EditorFileData,monaco))
   currentModelId = "source";
   var source = currentFile.getContent();
-  currentFile.getEditorData().source.model.setValue(source)
-  //var source = currentFile.getEditorData().source.model.getValue()
+  // currentFile.getEditorData().source.model.setValue(source)
+  // var source = currentFile.getEditorData().source.model.getValue()
   var data = currentFile.getEditorData();
   $("#edittab").empty();
   var tab = $('<li><a></a></li>');
@@ -117,8 +119,8 @@ function loadProject(url,type,cb) {
   //iframeの初期化
   refreshView("./blank.html");
   //localから取得
-  if(!url){
-    localstorage.loadDraft(fileContainer, (fileContainer) => {
+  if(!url || type == "local"){
+    localstorage.loadDraft(fileContainer, url, (fileContainer) => {
       refreshFileList()
       openFirst()
       return (cb)?cb():true
@@ -176,15 +178,16 @@ function refreshFileList(){
 }
 
 //プロジェクト一覧表示
-function projectjsonCallback(json){
+function projectjsonCallback(json, type){
   $("#prjlist").empty();
 
   var prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
     prj.on("click", function (event) {
-      loadProject( $(event.target).attr("data-url"),"gas",function () {});
+      loadProject( $(event.target).attr("data-url"), type, function () {});
     });
 
   json.rows.forEach(function(val, i) {
+    // ROWID, filename, ext, timestamp, uid, scope,projectid
     var _prj = prj.clone(true);
     _prj.children('.project').attr('data-url',val[6]+'/'+val[1]+val[2]);
     _prj.children('.project').append(val[1]);
@@ -193,46 +196,10 @@ function projectjsonCallback(json){
 }
 
 //プロジェクト一覧取得
-gasStorage.loadList((json) => {
-  projectjsonCallback(json)
+//gasStorage.loadList((json, type) => {
+localstorage.loadList((json, type) => {
+  projectjsonCallback(json, type)
 });
-
-function addEditorData (file) {
-    let filename = file.getFilename()
-    if (filename.match(/md$/)) {
-        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
-        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
-    } else if (filename.match(/markdown$/)) {
-        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
-        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
-    } else if (filename.match(/txt$/)) {
-        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/plain'))
-    } else if (filename.match(/json$/)) {
-        file.addEditorData('source', filename, 'json', monaco.editor.createModel('', 'application/json'))
-    } else if (filename.match(/ahtml$/)) {
-        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/html'))
-        file.addEditorData('dom', 'dom tree', 'json', monaco.editor.createModel('', 'application/json'))
-        file.addEditorData('component', 'js component.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('app', 'js app.js', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('html', 'result(html)', 'html', monaco.editor.createModel('', 'text/html'))
-    } else if (filename.match(/htm.?$/)) {
-        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/html'))
-    } else if (filename.match(/js$/)) {
-        file.addEditorData('source', filename, 'html', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('compiled', 'JS Compiled', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-    } else if (filename.match(/es6$/)) {
-        file.addEditorData('source', filename, 'javascript', monaco.editor.createModel('', 'text/javascript'))
-        file.addEditorData('compiled', 'JS Compiled', 'javascript', monaco.editor.createModel('', 'text/javascript'))
-    } else if (filename.match(/scss$/)) {
-        file.addEditorData('source', filename, 'scss', monaco.editor.createModel('', 'text/scss'))
-        file.addEditorData('compiled', 'CSS Compiled', 'css', monaco.editor.createModel('', 'text/css'))
-    } else if (filename.match(/css$/)) {
-        file.addEditorData('source', filename, 'css', monaco.editor.createModel('', 'text/css'))
-    }else{
-        file.addEditorData('source', filename, 'txt', monaco.editor.createModel('', 'text/css'))
-    }
-    return file
-}
 
 class DebugBuilder extends Builder {
   beforeCompile(src) {
@@ -253,10 +220,9 @@ for (var i = 0; pair[i]; i++) {
   arg[kv[0]] = kv[1];
 }
 
-var editorContainer = document.getElementById("container");
-
 //View///////////////////////////////////////////////////
 $(document).ready(function(){
+    var editorContainer = document.getElementById("container");
     editor = monaco.editor.create(editorContainer, {
       automaticLayout: true,
       model: null
@@ -279,44 +245,13 @@ $(document).ready(function(){
       compileAll();
     });
 
-
-  //全てのsourceのcompile
-  function compileAll () {
-    $.UIkit.notify("compile..", {status:'success',timeout : 1000});
-    async function _compileAll() {
-      function compileResolve(filename) {
-        return new Promise((resolve) => {
-          var language = fileContainer.getFile(filename).getLanguage().toLowerCase();
-          console.log(filename)
-          let _file = (filename)? addEditorData(fileContainer.getFile(filename)) : currentFile
-          if (language=="ahtml") {
-            //resolve(compile(filename));
-            resolve(aHtmlCompiler.compile(_file))
-          } else if (language=="markdown") {
-            resolve(mdCompiler.compile(_file))
-          } else if (language=="javascript") {
-            resolve(es6Compiler.compile(_file))
-          } else if (language=="sass"||language=="scss") {
-            resolve(sassCompiler.compile(_file))
-          } else {
-            cachesLogic.saveCache('./'+filename,_file.getContent(),_file.getType());
-            resolve(true);
-          }
-        });
-      }
-      const array = fileContainer.getFiles();
-      const promiseAll = await Promise.all(
-        array.map(async function(filename) {
-          return await compileResolve(filename);
+    function compileAll () {
+        $.UIkit.notify("compile..", {status:'success',timeout : 1000});
+        builderLogic.compileAll(fileContainer, () => {
+            $.UIkit.notify("success..", {status:'success',timeout : 1000});
+            refreshView("./test/index.html");
         })
-      );
-      return promiseAll;
     }
-    _compileAll().then(function() {
-      $.UIkit.notify("success..", {status:'success',timeout : 1000});
-      refreshView("./test/index.html");
-    });
-  }
 
   $("#run").on("click", (event) => {
     cachesLogic.refreshCache(fileContainer);
@@ -400,8 +335,9 @@ $(document).ready(function(){
 <p>File Name:</p>`, '', (newFile) => {
         var file = new FileData();
         file.setFilename(newFile);
-        file = addEditorData(file)
-        file.getEditorData().source.model.setValue(file.setContent(''))
+        // file = addEditorData(file)
+        file.setContent("");
+        // file.getEditorData().source.model.setValue(file.setContent(''))
         fileContainer.putFile(file);
         refreshFileList();
       }, () => {
@@ -418,7 +354,7 @@ $(document).ready(function(){
           var data = currentFile.getEditorData();
           data[currentModelId].state = currentState;
           currentFile.setEditorData(data);
-          currentFile.setContent(data.source.model.getValue())
+          // currentFile.setContent(data.source.model.getValue())
           fileContainer.putFile(currentFile);
         }
   });

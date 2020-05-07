@@ -4,13 +4,9 @@ export class ES6Compiler {
     }
 
     async compile(targetFile) {
-        // var data = (targetFile)?fileContainer.getFile(targetFile).getEditorData():currentFile.getEditorData();
-        // var data = (targetFile)? addEditorData(fileContainer.getFile(targetFile)).getEditorData() : currentFile.getEditorData()
-        // var filename = (targetFile)?fileContainer.getFile(targetFile).getFilename():currentFile.getFilename();
         let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."));
-        console.log('es6compile', targetFile, data)
         try {
         var parseData = Babel.transform(data.source.model.getValue().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
         data.compiled.model.setValue(parseData.code);

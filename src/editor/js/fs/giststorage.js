@@ -1,7 +1,4 @@
 
-import FileContainer from '../model/FileContainer.js'
-import FileData from '../model/FileData.js'
-
 var gistUrl  = "https://api.github.com/gists/"
 
 export class GistStorage {

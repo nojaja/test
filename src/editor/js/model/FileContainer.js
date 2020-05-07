@@ -34,14 +34,6 @@ export class FileContainer {
     return this.container.id
   }
 
-  // setMonaco (monaco) {
-  //   this.monaco = monaco
-  // }
-
-  // getMonaco () {
-  //   return this.monaco
-  // }
-
   setProjectName (projectName) {
     this.container.projectName = projectName
   }
@@ -61,10 +53,11 @@ export class FileContainer {
     return ret
   }
 
-  getFile (filename) {
+  getFile (filename, fileCls, ...constructorParam) {
+    let Cls = fileCls || FileData
     if (filename in this.container.files) {
       if (!(filename in this.fileObjects)) {
-        this.fileObjects[filename] = new FileData(this.container.files[filename])
+        this.fileObjects[filename] = new Cls(this.container.files[filename],...constructorParam)
       }
       return this.fileObjects[filename]
     }

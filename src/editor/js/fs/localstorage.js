@@ -5,6 +5,18 @@ import FileData from '../model/FileData.js'
 export class LocalStorage {
     constructor () {
     }
+    loadList (cb) {
+        //プロジェクト一覧取得
+        // ROWID, filename, ext, timestamp, uid, scope,projectid
+        let json = {
+            rows : [
+                //ROWID, filename, ext, timestamp, uid, scope,projectid
+                [0, 'index', 'txt', '', '', '', 'reactcomponent']
+            ]
+        }
+        return (cb)? cb(json, "local") : json
+    }
+
     saveDraft (fileContainer) {
         // ローカルストレージに最新の状態を保存
         var name = 'draftContainer'+location.pathname.replace(/\//g, '.');
@@ -13,9 +25,9 @@ export class LocalStorage {
         $.UIkit.notify("save..", {status:'success',timeout : 1000});
     }
 
-    loadDraft (fileContainer,cb) {
+    loadDraft (fileContainer, path, cb) {
         // ページが読み込まれたら、ローカルストレージから状態を読み込む
-        var name1 = 'draftContainer'+location.pathname.replace(/\//g, '.');
+        var name1 = path || 'draftContainer'+location.pathname.replace(/\//g, '.');
 
         var name2 = 'draft'+location.pathname.replace(/\//g, '.');
 
@@ -25,8 +37,9 @@ export class LocalStorage {
             var source = JSON.parse(localStorage.getItem(name2)) || null;
             var file = new FileData();
             file.setFilename("index.html");
-            file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
-            file.getEditorData().source.model.setValue(file.setContent(source))
+            file.setContent(source);
+            // file.addEditorData('source', 'index.html', 'html', monaco.editor.createModel('', 'text/html'))
+            // file.getEditorData().source.model.setValue(file.setContent(source))
             fileContainer.putFile(file);
         }
         fileContainer.setProjectName(fileContainer.getProjectName() || "new project")

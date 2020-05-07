@@ -1,6 +1,5 @@
-import FileContainer from './model/FileContainer.js'
-import FileData from './model/FileData.js'
-
+import * as monaco from 'monaco-editor'
+import EditorFileData from './model/EditorFileData.js'
 const STATIC_CACHE_KEY = '1';
 
 export class CachesLogic {
@@ -28,7 +27,7 @@ export class CachesLogic {
     //ファイルキャッシュの更新
     refreshCache (fileContainer) {
         fileContainer.getFiles().forEach((filename, i) => {
-            var _file = fileContainer.getFile(filename);
+            var _file = fileContainer.getFile(filename,EditorFileData,monaco) 
             this.saveCache('src/'+filename,_file.getContent(),_file.getType());
         });
     }

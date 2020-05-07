@@ -61,7 +61,7 @@ export class AHtmlCompiler {
 
 
         targetFile.setEditorData(data)
-        targetFile.setContent(data.source.model.getValue())
+        // targetFile.setContent(data.source.model.getValue())
 
         var bodyElements = parseData.getElementsByTagName("body");
         if (parseData.getElementsByTagName("head").length == 0) {
