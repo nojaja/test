@@ -25,8 +25,8 @@ export class AHtmlCompiler {
         });
 
         let builder = new HtmlBuilder({});
-        //var builder2 = new HtmlBuilder({});
-        //var debugBuilder = new DebugBuilder({});
+        //let builder2 = new HtmlBuilder({});
+        //let debugBuilder = new DebugBuilder({});
         let cssbuilder = new CSSBuilder({});
         let reactComponentBuilder = new ReactComponentBuilder({});
         let compiler1 = new Compiler(

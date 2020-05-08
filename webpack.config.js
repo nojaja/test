@@ -9,10 +9,11 @@ const WriteFilePlugin = require('write-file-webpack-plugin')
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'development' : 'production',
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   devServer: {
+    //disableHostCheck: true,
     contentBase: dist,
-    liveReload: false
+    public: process.env.URL || ''
   },
   context: src,
   entry: {
@@ -22,8 +23,8 @@ module.exports = {
   },
   output: {
     filename: './[name].bundle.js',
-    sourceMapFilename: './[name].map',
-    chunkFilename: './chunk/[id].js',
+    sourceMapFilename: './map/[id].[chunkhash].js.map',
+    chunkFilename: './chunk/[id].[chunkhash].js',
     path: dist,
     publicPath:""
   },
@@ -65,6 +66,10 @@ module.exports = {
             },
             {
             from: 'html/blank.html',
+            to: dist
+            },
+            {
+            from: 'serviceWorker/js/ws.js',
             to: dist
             }
         ],
