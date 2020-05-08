@@ -4,6 +4,26 @@ const gisturl = 'https://api.github.com/gists';
 export class GistStorage {
     constructor () {
     }
+
+    //プロジェクト一覧取得
+    loadList (cb) {
+        $.ajax({ 
+            url: gisturl,
+            type: 'GET',
+            beforeSend: function(xhr) { 
+                var tokens= prompt("GIT Personal access tokens",""); 
+                xhr.setRequestHeader("Authorization","token "+tokens); 
+            }
+        }).done((response) => {
+            let list = {rows : response}
+            console.log(list);
+            return (cb)? cb(list, "gist") : list
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            // エラーの場合処理
+            console.log(jqXHR,textStatus,errorThrown);
+        });
+    }
+
     saveDraft (fileContainer, token){
         $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
         

@@ -10,8 +10,8 @@ export class LocalStorage {
         // ROWID, filename, ext, timestamp, uid, scope,projectid
         let json = {
             rows : [
-                //ROWID, filename, ext, timestamp, uid, scope,projectid
-                [0, 'index', 'txt', '', '', '', 'reactcomponent']
+                //OUT [{description, id, public},,]
+                {description : 'index', id:'reactcomponent/index.text', public:true}
             ]
         }
         return (cb)? cb(json, "local") : json

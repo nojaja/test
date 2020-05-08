@@ -8,10 +8,7 @@ import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
 import HtmlStorage from './fs/htmlstorage.js'
 import CachesLogic from './cacheslogic.js'
-import AHtmlCompiler from './compiler/ahtmlcompiler.js'
-import ES6Compiler from './compiler/es6compiler.js'
-import MDCompiler from './compiler/mdcompiler.js'
-import SassCompiler from './compiler/sasscompiler.js'
+
 import BuilderLogic from './builderlogic.js'
 
 var editor = null;
@@ -25,10 +22,6 @@ var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
 var cachesLogic = new CachesLogic();
 var builderLogic = new BuilderLogic(cachesLogic);
-var aHtmlCompiler = new AHtmlCompiler(cachesLogic);
-var es6Compiler = new ES6Compiler(cachesLogic);
-var mdCompiler = new MDCompiler(cachesLogic);
-var sassCompiler = new SassCompiler(cachesLogic);
 
 /**
 サービスワーカーの登録
@@ -176,16 +169,17 @@ function projectjsonCallback (json, type) {
   });
 
   json.rows.forEach((val, i) => {
-    // ROWID, filename, ext, timestamp, uid, scope,projectid
+    // [{description, id, public},,]
     let _prj = prj.clone(true);
-    _prj.children('.project').attr('data-url',val[6]+'/'+val[1]+val[2]);
-    _prj.children('.project').append(val[1]);
+    _prj.children('.project').attr('data-url',val.id);
+    _prj.children('.project').append(val.description);
     $("#prjlist").append(_prj);
   });
 }
 
 function compileAll () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
+    cachesLogic.refreshCache(fileContainer);
     builderLogic.compileAll(fileContainer, () => {
         $.UIkit.notify("success..", {status:'success',timeout : 1000});
         refreshView("./test/index.html");
@@ -232,17 +226,15 @@ $(document).ready(() => {
     }
     //プロジェクト取得
     loadProject(url, type, () => {
-      cachesLogic.refreshCache(fileContainer);
       compileAll();
     });
 
     //プロジェクト一覧取得
-    localstorage.loadList((json, type) => {
+    gistStorage.loadList((json, type) => {
         projectjsonCallback(json, type)
     });
 
   $("#run").on("click", (event) => {
-    cachesLogic.refreshCache(fileContainer);
     compileAll();
   });
 
@@ -346,7 +338,6 @@ $(document).ready(() => {
 
   $(window).keydown( (e) => {
     if(e.keyCode === 120){
-        cachesLogic.refreshCache(fileContainer);
         compileAll();
         return false;
       }

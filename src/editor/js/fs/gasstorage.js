@@ -13,7 +13,16 @@ export class GasStorage {
     loadList (cb) {
         //プロジェクト一覧取得
         $.getJSON(gasUrl+ "&callback=?",  { t: '1' }, (json) => {
-            return (cb)? cb(json, "gas") : json
+            //IN  {rows:[[ROWID, filename, ext, timestamp, uid, scope,projectid],,]}
+            //OUT {rows:[{description, id, public},,]}
+            const list = {rows:json.rows.map( (currentValue, index, array) => {
+                return {
+                    description : currentValue[1],
+                    id : currentValue[6]+'/'+currentValue[1]+currentValue[2],
+                    public:true
+                }
+            })}
+            return (cb)? cb(list, "gas") : list
         })
     }
 
