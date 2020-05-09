@@ -2,26 +2,23 @@
 import * as monaco from 'monaco-editor'
 import FileData from './model/FileData.js'
 import EditorFileData from './model/EditorFileData.js'
-import FileContainer from './model/FileContainer.js'
+import FileContainer from './model/PublishFileContainer.js'
 import LocalStorage from './fs/localstorage.js'
 import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
 import HtmlStorage from './fs/htmlstorage.js'
-import CachesLogic from './cacheslogic.js'
-
 import BuilderLogic from './builderlogic.js'
 
 var editor = null;
 var currentFile = null;
 var currentModelId = "source";
-var fileContainer = new FileContainer();
+var fileContainer = new FileContainer('/test/');
 
 var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
 var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
-var cachesLogic = new CachesLogic();
-var builderLogic = new BuilderLogic(cachesLogic);
+var builderLogic = new BuilderLogic(fileContainer);
 
 /**
 サービスワーカーの登録
@@ -111,31 +108,33 @@ function loadProject (url,type,cb) {
   //localから取得
   if(!url || type == "local"){
     localstorage.loadDraft(fileContainer, url, (fileContainer) => {
-      refreshFileList()
+      // refreshFileList()
       openFirst()
       return (cb)?cb():true
     })
   }
   if(type == "gas"){
       gasStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          refreshFileList();
+          // refreshFileList();
           openFirst();
           return (cb)?cb():true;
       })
   }else if(type == "gist"){
       gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          refreshFileList();
+          // refreshFileList();
           openFirst();
           return (cb)?cb():true;
       })
   }else if(type == "html"){
       htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          refreshFileList();
+          // refreshFileList();
           openFirst();
           return (cb)?cb():true;
       })
   }
 }
+
+fileContainer.onChangeFiles(refreshFileList);
 
 //File一覧の更新
 function refreshFileList () {
@@ -179,8 +178,8 @@ function projectjsonCallback (json, type) {
 
 function compileAll () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
-    cachesLogic.refreshCache(fileContainer);
-    builderLogic.compileAll(fileContainer, () => {
+    // cachesLogic.refreshCache(fileContainer);
+    builderLogic.compileAll(fileContainer, '', '/test/', () => {
         $.UIkit.notify("success..", {status:'success',timeout : 1000});
         refreshView("./test/index.html");
     })
@@ -230,7 +229,7 @@ $(document).ready(() => {
     });
 
     //プロジェクト一覧取得
-    gistStorage.loadList((json, type) => {
+    localstorage.loadList((json, type) => {
         projectjsonCallback(json, type)
     });
 
@@ -269,7 +268,7 @@ $(document).ready(() => {
       UIkit.modal.prompt('<p>title</p>', title, (newTitle) => {
         console.log('newTitle '+newTitle);
         fileContainer.setProjectName(newTitle);
-        refreshFileList();
+        // refreshFileList();
       }, () => {
         console.log('Rejected.');
         return;
@@ -282,7 +281,7 @@ $(document).ready(() => {
       UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
         console.log('newName '+newName);
         fileContainer.renameFile(filename,newName);
-        refreshFileList();
+        // refreshFileList();
       }, () => {
         console.log('Rejected.');
         return;
@@ -296,7 +295,7 @@ $(document).ready(() => {
       UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
         console.log('filename '+filename);
         fileContainer.removeFile(filename);
-        refreshFileList();
+        // refreshFileList();
       }, () => {
         console.log('Rejected.');
         return;
@@ -318,7 +317,7 @@ $(document).ready(() => {
         file.setFilename(newFile);
         file.setContent("");
         fileContainer.putFile(file);
-        refreshFileList();
+        // refreshFileList();
       }, () => {
         console.log('Rejected.');
         return;
@@ -344,7 +343,7 @@ $(document).ready(() => {
     if(e.ctrlKey){
       if(e.keyCode === 83){
         localstorage.saveDraft(fileContainer);
-        cachesLogic.refreshCache(fileContainer);
+        // cachesLogic.refreshCache(fileContainer);
         return false;
       }
     }

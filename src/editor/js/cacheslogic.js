@@ -18,7 +18,8 @@ export class CachesLogic {
             caches.open(STATIC_CACHE_KEY).then(cache => {
                 const blob = new Blob([source], {type : _type});
                 const response = new Response(blob,{ "status" : 200 , "statusText" : "OK" });
-                cache.put(_url + "/test/"+url, response);
+                cache.put(_url + "/test2/"+url, response);
+                console.log('saveCache1'+_url + "/test2/"+url)
                 resolve();
             })
         })

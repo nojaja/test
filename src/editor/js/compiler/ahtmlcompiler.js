@@ -1,9 +1,11 @@
 
+import FileData from '../model/FileData.js'
+
 var htmlparser = Tautologistics.NodeHtmlParser;
 
 export class AHtmlCompiler {
-    constructor (_cachesLogic) {
-        this.cachesLogic = _cachesLogic
+    constructor (fileContainer) {
+        this.fileContainer = fileContainer
     }
 
     parseHtml (rawHtml) {
@@ -15,7 +17,7 @@ export class AHtmlCompiler {
             verbose: false
         })
     }
-    async compile (targetFile) {
+    async compile (targetFile, outpath) {
         let webComponentParser = new WebComponentParser({
             builder: ReactComponentBuilder
         });
@@ -42,7 +44,14 @@ export class AHtmlCompiler {
 
         let parseData = this.parseHtml(data.source.model.getValue().trim());
         data.dom.model.setValue(this.stringify(parseData));
-        await this.cachesLogic.saveCache(filename+'_dom.json',this.stringify(parseData),'application/json');
+
+        let domfile = new FileData()
+        domfile.setFilename(outpath+filename+'_dom.json')
+        domfile.setType('application/json')
+        domfile.setContent(this.stringify(parseData))
+        this.fileContainer.putFile(domfile)
+
+        //await this.cachesLogic.saveCache(filename+'_dom.json',this.stringify(parseData),'application/json');
         compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
 
         //editor4.setValue(cssbuilder.getNodes());
@@ -52,10 +61,22 @@ export class AHtmlCompiler {
         reactRootParser.build(); //react化処理の実行
         //変換されたコードはwindowに読み込まれ実行可能になります。
         data.component.model.setValue(webComponentParser.getResult());
-        await this.cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
+        
+        let componentfile = new FileData()
+        componentfile.setFilename(outpath+filename+'_component.js')
+        componentfile.setType('text/javascript; charset=UTF-8')
+        componentfile.setContent(webComponentParser.getResult())
+        this.fileContainer.putFile(componentfile)
+        //await this.cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
 
         data.app.model.setValue(reactRootParser.getResult());
-        await this.cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
+        
+        let appfile = new FileData()
+        appfile.setFilename(outpath+filename+'_app.js')
+        appfile.setType('text/javascript; charset=UTF-8')
+        appfile.setContent(webComponentParser.getResult())
+        this.fileContainer.putFile(appfile)
+        //await this.cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
 
         targetFile.setEditorData(data)
 
@@ -147,7 +168,14 @@ export class AHtmlCompiler {
         }, this);
         compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
         data.html.model.setValue(builder.getNodes());
-        await this.cachesLogic.saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
+        
+        let htmlfile = new FileData()
+        htmlfile.setFilename(outpath+filename+'.html')
+        htmlfile.setType('text/html; charset=UTF-8')
+        htmlfile.setContent(builder.getNodes())
+        this.fileContainer.putFile(htmlfile)
+
+        //await this.cachesLogic.saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
     }
 
     stringify(str) {
