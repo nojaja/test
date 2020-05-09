@@ -32,14 +32,17 @@ if (navigator.serviceWorker) {
 
 /* タブ切り替え処理 */
 function changeTab(editor, desiredModelId) {
+  let modelId = "source";
   let currentState = editor.saveViewState();
   let currentModel = editor.getModel();
   let data = currentFile.getEditorData();
-  data[currentModelId].state = currentState;
+  data[modelId].state = currentState;
   currentFile.setEditorData(data);
 
-  editor.setModel(data[desiredModelId].model);
-  editor.restoreViewState(data[desiredModelId].state);
+  currentFile = fileContainer.getFile(desiredModelId,EditorFileData,monaco)
+  data = currentFile.getEditorData();
+  editor.setModel(data[modelId].model);
+  editor.restoreViewState(data[modelId].state);
   currentModelId = desiredModelId;
   editor.focus();
 }
@@ -51,34 +54,48 @@ function openFirst() {
   $("#filelist li:first").addClass("uk-active");
 }
 
-//Fileを開く
-function fileOpen(filename){
-  currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
-  currentModelId = "source";
-  let data = currentFile.getEditorData();
+fileContainer.onOpenFile(refreshTab);
+fileContainer.onCloseFile(refreshTab);
 
+function refreshTab (filename) {
+  // currentModelId = "source";
+  currentModelId = filename;
   $("#edittab").empty();
   const tab = $('<li><a></a></li>');
   tab.on("click", (event) => {
     //タブの切替
-    changeTab(editor,$(event.currentTarget).attr("id"));
-  });
-  
-  for (let key in data) {
-    let i = 0;
-    let _tab = tab.clone(true);
-    _tab.attr('id',key);
-    _tab.children("a").append(data[key].caption);
-    $("#edittab").append(_tab);
-    if(key==currentModelId){
-      _tab.addClass('uk-active');
-      editor.setModel(data[currentModelId].model);
-      editor.restoreViewState(data[currentModelId].state);
-      editor.focus();
+    if (!$(event.target).hasClass('uk-icon-close')) {
+      changeTab(editor,$(event.currentTarget).attr("id"))
+    } else {
+      console.log('uk-icon-close',$(event.target).hasClass('uk-icon-close'),$(event.currentTarget).attr("id"))
+      fileContainer.closeFile($(event.currentTarget).attr("id"))
     }
-    i++;
-  };
-  $.UIkit.switcher('#edittab').show(0);
+  });
+  let index = 0
+  fileContainer.getOpenFiles().forEach((key, i) => {
+    let _tab = tab.clone(true);
+    _tab.attr('id', key);
+    _tab.children("a").append(key).append($('<a class="uk-icon-hover uk-icon-close" style="padding-left: 10px;"></a>'));
+    $("#edittab").append(_tab);
+    if (key==filename) {
+      //_tab.addClass('uk-active');
+      index = i
+    }
+  })
+  $.UIkit.switcher('#edittab').show(index)
+}
+
+//Fileを開く
+function fileOpen(filename){
+  currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
+  let data = currentFile.getEditorData();
+  //refreshTab(data)
+  
+  let edata = currentFile.getEditorData();
+  let modelId = "source";
+  editor.setModel(edata[modelId].model);
+  editor.restoreViewState(edata[modelId].state);
+  editor.focus();
 }
 
 // iframe内のコンテンツを更新

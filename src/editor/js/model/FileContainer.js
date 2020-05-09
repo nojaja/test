@@ -30,6 +30,14 @@ export class FileContainer {
     this.ev.on('change', callback)
   }
 
+  onOpenFile (callback) {
+    this.ev.on('open', callback)
+  }
+
+  onCloseFile (callback) {
+    this.ev.on('close', callback)
+  }
+
   setId (id) {
     this.container.id = id
   }
@@ -49,7 +57,24 @@ export class FileContainer {
   getFiles ( parentPath = null) {
     // 配列のキーを取り出す
     let ret = []
-    for (var key in this.container.files) {
+    for (let key in this.container.files) {
+      if (!this.container.files[key].truncated) {
+        if (!parentPath) {
+          ret.push(key)
+        } else {
+          if(key.indexOf(parentPath)==0 && key.indexOf('/', parentPath.length)==-1 ) {
+            ret.push(key)
+          }
+        }
+      }
+    }
+    return ret
+  }
+
+  getOpenFiles ( parentPath = null) {
+    // 配列のキーを取り出す
+    let ret = []
+    for (let key in this.fileObjects) {
       if (!this.container.files[key].truncated) {
         if (!parentPath) {
           ret.push(key)
@@ -69,6 +94,7 @@ export class FileContainer {
       if (!(filename in this.fileObjects)) {
         this.fileObjects[filename] = new Cls(this.container.files[filename],...constructorParam)
       }
+      this.ev.emit('open', filename, this.fileObjects[filename])
       return this.fileObjects[filename]
     }
   }
@@ -77,6 +103,27 @@ export class FileContainer {
     if (filename in this.container.files) {
       return this.container.files[filename]
     }
+  }
+
+  closeFile (filename) {
+    if (filename in this.container.files) {
+      if (filename in this.fileObjects) {
+        const ret = this.fileObjects[filename]
+        delete this.fileObjects[filename]
+        this.ev.emit('close', filename)
+        return ret
+      }
+    }
+    return null
+  }
+
+  saveFile (filename) {
+    if (filename in this.container.files) {
+      if (!(filename in this.fileObjects)) {
+        return this.putFile(this.fileObjects[filename])
+      }
+    }
+    return false
   }
 
   putFile (file) {
