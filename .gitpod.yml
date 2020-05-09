@@ -1,6 +1,6 @@
 tasks:
   - init: npm install
-    command: export TZ="Asia/Tokyo"
+  - command: export TZ="Asia/Tokyo"
     command: export URL=$(gp url 8080)
     command: eval $(gp env -e) && npm run build
     command: npm run start
