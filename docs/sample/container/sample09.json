@@ -1,0 +1,21 @@
+{
+    "v": 0.1,
+    "id": "",
+    "files": {
+        "index.ahtml": {
+            "filename": "index.ahtml",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "ahtml",
+            "size": 0,
+            "truncated": false,
+            "content": "<html lang=\"en\">\n\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, shrink-to-fit=no\">\n  <meta name=\"description\" content=\"\">\n  <meta name=\"author\" content=\"\">\n  <link rel=\"icon\" href=\"https://v4-alpha.getbootstrap.com/favicon.ico\">\n\n  <title>Narrow Jumbotron Template for Bootstrap</title>\n\n  <!-- Bootstrap core CSS -->\n  <link href=\"https://v4-alpha.getbootstrap.com/dist/css/bootstrap.min.css\" rel=\"stylesheet\">\n\n  <!-- Custom styles for this template -->\n  <link href=\"https://v4-alpha.getbootstrap.com/examples/narrow-jumbotron/narrow-jumbotron.css\" rel=\"stylesheet\">\n</head>\n\n<body>\n  <div>\n    <div class=\"container\">\n      <div class=\"header clearfix\">\n        <nav>\n          <ul class=\"nav nav-pills float-right\">\n            <li class=\"nav-item\">\n              <a class=\"nav-link active\" href=\"#\">Home <span class=\"sr-only\">(current)</span></a>\n            </li>\n            <li class=\"nav-item\">\n              <a class=\"nav-link\" href=\"#\">About</a>\n            </li>\n            <li class=\"nav-item\">\n              <a class=\"nav-link\" href=\"#\">Contact</a>\n            </li>\n          </ul>\n        </nav>\n        <h3 class=\"text-muted\">Project name</h3>\n      </div>\n\n      <div class=\"jumbotron\">\n        <h1 class=\"display-3\">Jumbotron heading</h1>\n        <p class=\"lead\">Cras justo odio, dapibus ac facilisis in, egestas eget quam. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>\n        <p><a class=\"btn btn-lg btn-success\" href=\"#\" role=\"button\">Sign up today</a></p>\n      </div>\n\n      <div class=\"row marketing\">\n        <div class=\"col-lg-6\">\n          <h4>Subheading</h4>\n          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>\n\n          <h4>Subheading</h4>\n          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>\n\n          <h4>Subheading</h4>\n          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>\n        </div>\n\n        <div class=\"col-lg-6\">\n          <h4>Subheading</h4>\n          <p>Donec id elit non mi porta gravida at eget metus. Maecenas faucibus mollis interdum.</p>\n\n          <h4>Subheading</h4>\n          <p>Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Cras mattis consectetur purus sit amet fermentum.</p>\n\n          <h4>Subheading</h4>\n          <p>Maecenas sed diam eget risus varius blandit sit amet non magna.</p>\n        </div>\n      </div>\n\n      <footer class=\"footer\">\n        <p>&copy; Company 2017</p>\n      </footer>\n\n    </div>\n    <!-- /container -->\n\n    <!-- Bootstrap core JavaScript\n    ================================================== -->\n    <!-- Placed at the end of the document so the pages load faster -->\n    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->\n    <script src=\"https://v4-alpha.getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js\"></script>\n  </div>\n</body>\n\n</html>",
+            "description": ""
+        }
+    },
+    "public": true,
+    "createdTime": 1589111576120,
+    "lastUpdatedTime": 1589116879890,
+    "description": "",
+    "projectName": "new project"
+}
