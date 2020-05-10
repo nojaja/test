@@ -38,12 +38,12 @@ export class AHtmlCompiler {
         let compiler2 = new Compiler([builder], {});
 
         //-ここからDemo用処理----------------------------------
-        let data = targetFile.getEditorData()
+        //let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."))
-
-        let parseData = this.parseHtml(data.source.model.getValue().trim());
-        data.dom.model.setValue(this.stringify(parseData));
+        console.log(targetFile)
+        let parseData = this.parseHtml(targetFile.getContent().trim())
+        // data.dom.model.setValue(this.stringify(parseData));
 
         let domfile = new FileData()
         domfile.setFilename(outpath+filename+'_dom.json')
@@ -60,7 +60,7 @@ export class AHtmlCompiler {
         //変換されたコードはwindowに読み込まれ実行可能になります。
         reactRootParser.build(); //react化処理の実行
         //変換されたコードはwindowに読み込まれ実行可能になります。
-        data.component.model.setValue(webComponentParser.getResult());
+        // data.component.model.setValue(webComponentParser.getResult());
         
         let componentfile = new FileData()
         componentfile.setFilename(outpath+filename+'_component.js')
@@ -69,7 +69,7 @@ export class AHtmlCompiler {
         this.fileContainer.putFile(componentfile)
         //await this.cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
 
-        data.app.model.setValue(reactRootParser.getResult());
+        // data.app.model.setValue(reactRootParser.getResult());
         
         let appfile = new FileData()
         appfile.setFilename(outpath+filename+'_app.js')
@@ -78,7 +78,7 @@ export class AHtmlCompiler {
         this.fileContainer.putFile(appfile)
         //await this.cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
 
-        targetFile.setEditorData(data)
+        //targetFile.setEditorData(data)
 
         let bodyElements = parseData.getElementsByTagName("body");
         if (parseData.getElementsByTagName("head").length == 0) {
@@ -167,7 +167,7 @@ export class AHtmlCompiler {
             }
         }, this);
         compiler2.compile(parseData.children); //jsonオブジェクトを各種コードに変換します
-        data.html.model.setValue(builder.getNodes());
+        // data.html.model.setValue(builder.getNodes());
         
         let htmlfile = new FileData()
         htmlfile.setFilename(outpath+filename+'.html')

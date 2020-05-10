@@ -91,18 +91,27 @@ export class FileContainer {
   getFile (filename, fileCls, ...constructorParam) {
     let Cls = fileCls || FileData
     if (filename in this.container.files) {
-      if (!(filename in this.fileObjects)) {
-        this.fileObjects[filename] = new Cls(this.container.files[filename],...constructorParam)
-      }
-      this.ev.emit('open', filename, this.fileObjects[filename])
-      return this.fileObjects[filename]
+      return new Cls(this.container.files[filename],...constructorParam)
     }
+    return false
   }
 
   getFileRaw (filename) {
     if (filename in this.container.files) {
       return this.container.files[filename]
     }
+    return false
+  }
+
+  openFile (filename, fileCls, ...constructorParam) {
+    if (filename in this.container.files) {
+      if (!(filename in this.fileObjects)) {
+        this.fileObjects[filename] = this.getFile(filename, fileCls, ...constructorParam)
+      }
+      this.ev.emit('open', filename, this.fileObjects[filename])
+      return this.fileObjects[filename]
+    }
+    return false
   }
 
   closeFile (filename) {

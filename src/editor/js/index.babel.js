@@ -1,6 +1,5 @@
 "use strict";
 import * as monaco from 'monaco-editor'
-import FileData from './model/FileData.js'
 import EditorFileData from './model/EditorFileData.js'
 import FileContainer from './model/PublishFileContainer.js'
 import LocalStorage from './fs/localstorage.js'
@@ -11,7 +10,6 @@ import BuilderLogic from './builderlogic.js'
 
 var editor = null;
 var currentFile = null;
-var currentModelId = "source";
 var fileContainer = new FileContainer('/test/');
 
 var localstorage = new LocalStorage();
@@ -32,18 +30,18 @@ if (navigator.serviceWorker) {
 
 /* タブ切り替え処理 */
 function changeTab(editor, desiredModelId) {
-  let modelId = "source";
-  let currentState = editor.saveViewState();
-  let currentModel = editor.getModel();
   let data = currentFile.getEditorData();
-  data[modelId].state = currentState;
+  data.state = editor.saveViewState();
+  //let currentState = editor.saveViewState();
+  //let currentModel = editor.getModel();
+  //data.state = currentState;
   currentFile.setEditorData(data);
+  //fileContainer.putFile(currentFile);
 
-  currentFile = fileContainer.getFile(desiredModelId,EditorFileData,monaco)
+  currentFile = fileContainer.openFile(desiredModelId,EditorFileData,monaco)
   data = currentFile.getEditorData();
-  editor.setModel(data[modelId].model);
-  editor.restoreViewState(data[modelId].state);
-  currentModelId = desiredModelId;
+  editor.setModel(data.model);
+  editor.restoreViewState(data.state);
   editor.focus();
 }
 
@@ -58,8 +56,6 @@ fileContainer.onOpenFile(refreshTab);
 fileContainer.onCloseFile(refreshTab);
 
 function refreshTab (filename) {
-  // currentModelId = "source";
-  currentModelId = filename;
   $("#edittab").empty();
   const tab = $('<li><a></a></li>');
   tab.on("click", (event) => {
@@ -67,7 +63,6 @@ function refreshTab (filename) {
     if (!$(event.target).hasClass('uk-icon-close')) {
       changeTab(editor,$(event.currentTarget).attr("id"))
     } else {
-      console.log('uk-icon-close',$(event.target).hasClass('uk-icon-close'),$(event.currentTarget).attr("id"))
       fileContainer.closeFile($(event.currentTarget).attr("id"))
     }
   });
@@ -87,14 +82,11 @@ function refreshTab (filename) {
 
 //Fileを開く
 function fileOpen(filename){
-  currentFile = fileContainer.getFile(filename,EditorFileData,monaco)
+  currentFile = fileContainer.openFile(filename,EditorFileData,monaco)
   let data = currentFile.getEditorData();
   //refreshTab(data)
-  
-  let edata = currentFile.getEditorData();
-  let modelId = "source";
-  editor.setModel(edata[modelId].model);
-  editor.restoreViewState(edata[modelId].state);
+  editor.setModel(data.model);
+  editor.restoreViewState(data.state);
   editor.focus();
 }
 
@@ -343,10 +335,11 @@ $(document).ready(() => {
 
   $('#container').bind('blur keydown keyup keypress change', () => {
         if(currentFile){
-          let currentState = editor.saveViewState();
-          let currentModel = editor.getModel();
           let data = currentFile.getEditorData();
-          data[currentModelId].state = currentState;
+          data.state = editor.saveViewState();
+          //let currentState = editor.saveViewState();
+          //let currentModel = editor.getModel();
+          //data.state = currentState;
           currentFile.setEditorData(data);
           fileContainer.putFile(currentFile);
         }

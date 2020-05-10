@@ -19,7 +19,7 @@ export class BuilderLogic {
         let _compileAll = async () => {
             let compileResolve = (filename) => {
                 return new Promise((resolve) => {
-                    let _file = fileContainer.getFile(filename,EditorFileData,monaco) 
+                    let _file = fileContainer.getFile(filename) 
                     let language = _file.getLanguage().toLowerCase()
                     if (language=="ahtml") {
                         resolve(this.aHtmlCompiler.compile(_file, outpath))
