@@ -17,8 +17,8 @@ module.exports = {
   },
   context: src,
   entry: {
-    'editor': './editor/js/editor/index.babel.js',
-    'dashboard': './editor/js/dashboard/index.babel.js',
+    'editor': './js/editor/index.babel.js',
+    'dashboard': './js/dashboard/index.babel.js',
     'serviceWorker': './serviceWorker/js/ws.js',
   },
   output: {
