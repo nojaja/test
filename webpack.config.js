@@ -17,8 +17,8 @@ module.exports = {
   },
   context: src,
   entry: {
-    'editor': './editor/js/index.babel.js',
-    'dashboard': './dashboard/js/index.babel.js',
+    'editor': './editor/js/editor/index.babel.js',
+    'dashboard': './editor/js/dashboard/index.babel.js',
     'serviceWorker': './serviceWorker/js/ws.js',
   },
   output: {
@@ -61,16 +61,20 @@ module.exports = {
     new CopyFilePlugin(
         [
             {
-            from: 'css/*.css',
-            to: dist
+                from: 'css/*.css',
+                to: dist
             },
             {
-            from: 'html/blank.html',
-            to: dist
+                from: 'html/blank.html',
+                to: dist
             },
             {
-            from: 'serviceWorker/js/ws.js',
-            to: dist
+                from: 'serviceWorker/js/ws.js',
+                to: dist
+            },
+            {
+                from: 'sample/*/*.*',
+                to: dist
             }
         ],
         { copyUnmodified: true }

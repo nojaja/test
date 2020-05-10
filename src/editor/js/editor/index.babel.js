@@ -1,12 +1,12 @@
 "use strict";
 import * as monaco from 'monaco-editor'
-import EditorFileData from './model/EditorFileData.js'
-import FileContainer from './model/PublishFileContainer.js'
-import LocalStorage from './fs/localstorage.js'
-import GistStorage from './fs/giststorage.js'
-import GasStorage from './fs/gasstorage.js'
-import HtmlStorage from './fs/htmlstorage.js'
-import WebStorage from './fs/webstorage.js'
+import EditorFileData from '../model/EditorFileData.js'
+import FileContainer from '../model/PublishFileContainer.js'
+import LocalStorage from '../fs/localstorage.js'
+import GistStorage from '../fs/giststorage.js'
+import GasStorage from '../fs/gasstorage.js'
+import HtmlStorage from '../fs/htmlstorage.js'
+import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
 var editor = null;

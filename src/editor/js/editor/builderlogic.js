@@ -1,10 +1,10 @@
 import * as monaco from 'monaco-editor'
-import FileData from './model/FileData.js'
-import EditorFileData from './model/EditorFileData.js'
-import AHtmlCompiler from './compiler/ahtmlcompiler.js'
-import ES6Compiler from './compiler/es6compiler.js'
-import MDCompiler from './compiler/mdcompiler.js'
-import SassCompiler from './compiler/sasscompiler.js'
+import FileData from '../model/FileData.js'
+import EditorFileData from '../model/EditorFileData.js'
+import AHtmlCompiler from '../compiler/ahtmlcompiler.js'
+import ES6Compiler from '../compiler/es6compiler.js'
+import MDCompiler from '../compiler/mdcompiler.js'
+import SassCompiler from '../compiler/sasscompiler.js'
 
 export class BuilderLogic {
     constructor (fileContainer) {
