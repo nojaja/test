@@ -28,21 +28,11 @@ if (navigator.serviceWorker) {
   });
 }
 
-/* タブ切り替え処理 */
-function changeTab(editor, desiredModelId) {
-  let data = currentFile.getEditorData();
-  data.state = editor.saveViewState();
-  //let currentState = editor.saveViewState();
-  //let currentModel = editor.getModel();
-  //data.state = currentState;
-  currentFile.setEditorData(data);
-  //fileContainer.putFile(currentFile);
 
-  currentFile = fileContainer.openFile(desiredModelId,EditorFileData,monaco)
-  data = currentFile.getEditorData();
-  editor.setModel(data.model);
-  editor.restoreViewState(data.state);
-  editor.focus();
+/* タブ切り替え処理 */
+function changeTab(desiredModelId) {
+  saveState()
+  fileOpen(desiredModelId)
 }
 
 //１つ目のファイルを開く
@@ -61,7 +51,7 @@ function refreshTab (filename) {
   tab.on("click", (event) => {
     //タブの切替
     if (!$(event.target).hasClass('uk-icon-close')) {
-      changeTab(editor,$(event.currentTarget).attr("id"))
+      changeTab($(event.currentTarget).attr("id"))
     } else {
       fileContainer.closeFile($(event.currentTarget).attr("id"))
     }
@@ -70,7 +60,7 @@ function refreshTab (filename) {
   fileContainer.getOpenFiles().forEach((key, i) => {
     let _tab = tab.clone(true);
     _tab.attr('id', key);
-    _tab.children("a").append(key).append($('<a class="uk-icon-hover uk-icon-close" style="padding-left: 10px;"></a>'));
+    _tab.children("a").append(key).append($('<a class="uk-icon-hover uk-icon-close" style="padding-left: 10px; display: inline-block; #display: inline;"></a>'));
     $("#edittab").append(_tab);
     if (key==filename) {
       //_tab.addClass('uk-active');
@@ -88,6 +78,19 @@ function fileOpen(filename){
   editor.setModel(data.model);
   editor.restoreViewState(data.state);
   editor.focus();
+}
+
+//Fileを保存
+function saveState(){
+    if(currentFile){
+        let data = currentFile.getEditorData();
+        data.state = editor.saveViewState();
+        //let currentState = editor.saveViewState();
+        //let currentModel = editor.getModel();
+        //data.state = currentState;
+        currentFile.setEditorData(data);
+        fileContainer.putFile(currentFile);
+    }
 }
 
 // iframe内のコンテンツを更新
@@ -253,6 +256,10 @@ $(document).ready(() => {
   $(".samples").on("click", (event) => {
     loadProject($(event.currentTarget).attr("data-url"),"html",() => {})
   });
+  
+  $("#refresh").on("click", (event) => {
+    refreshView($("#url").value);
+  });
 
   $("#gist").on("click", (event) => {
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
@@ -334,15 +341,7 @@ $(document).ready(() => {
   });
 
   $('#container').bind('blur keydown keyup keypress change', () => {
-        if(currentFile){
-          let data = currentFile.getEditorData();
-          data.state = editor.saveViewState();
-          //let currentState = editor.saveViewState();
-          //let currentModel = editor.getModel();
-          //data.state = currentState;
-          currentFile.setEditorData(data);
-          fileContainer.putFile(currentFile);
-        }
+        saveState()
   });
 
   $(window).keydown( (e) => {

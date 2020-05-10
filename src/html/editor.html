@@ -30,10 +30,9 @@
       <ul class="uk-navbar-nav uk-hidden-small">
 
         <li class="uk-active uk-button-primary"><a id="test0" class="samples" > Load localStorage</a></li>
-        <li class="uk-active uk-button-primary"><a id="run"><i class="uk-icon-repeat"></i> RUN</a></li>
+        <li class="uk-active uk-button-primary"><a id="run"><i class="uk-icon-play-circle"></i> RUN</a></li>
         <li class="uk-active uk-button-primary"><a id="gist"><i class="uk-icon-github"></i> Share Gist</a></li>
-        <li class="uk-active uk-button-primary"><a id="test"><i class="uk-icon-github"></i> test</a></li>
-        <li class="uk-active uk-button-primary"><a target="_blank" href="./test/index.html"><i class="uk-icon-eye"></i> View</a></li>
+        <li class="uk-active uk-button-primary"><a id="test"><i class="uk-icon-file-text"></i> test</a></li>
 
  
 
@@ -59,16 +58,21 @@
 
   </div>
   <div class="uk-width-medium-3-6">
-    <h3 class="uk-panel-title">Files </h3>
     <div class="uk-panel">
-      <ul id="edittab" class="uk-tab" data-uk-tab>
-        <li id="source" class="uk-active"><a>source html</a></li>
-        <li id="dom"><a>dom tree </a></li>
-        <li id="component"><a>js component.js</a></li>
-        <li id="app"><a>js app.js </a></li>
-        <li id="html"><a>result(html)</a></li>
+      <div style="
+            overflow-y: hidden;
+        " >
+      <ul id="edittab" class="uk-tab" style="
+            #overflow: hidden !important;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            display: flex;
+            #touch-action: auto;
+            -webkit-overflow-scrolling: touch;
+        " data-uk-tab >
       </ul>
-
+      </div>
       <!-- This is the container of the content items -->
       <ul id="tab-content" class="uk-switcher uk-margin">
         <li class="uk-active">
@@ -80,10 +84,11 @@
   <div class="uk-width-medium-2-6">
     <div class="uk-panel uk-form">
       <h3 class="uk-panel-title">Preview</h3>
-        <select id="previewFile" class="uk-margin-small-top">
-                                        <option>index.html</option>
-                                        <option>Option 02</option>
-        </select>
+        <button class="uk-button uk-button-default"><i class="uk-icon-arrow-left"></i></button>
+        <button class="uk-button uk-button-default"><i class="uk-icon-arrow-right"></i></button>
+        <button class="uk-button uk-button-default" id="refresh"><i class="uk-icon-refresh"></i></button>
+        <input class="uk-input" value="/test/index.html" id="url">
+        <a class="uk-button uk-button-default" target="_blank" href="./test/index.html"><i class="uk-icon-mail-forward"></i> View</a>
       <iframe id="child-frame" class="editor" src="./blank.html"></iframe>
     </div>
   </div>
