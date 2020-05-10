@@ -11,7 +11,7 @@ module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'development' : 'production',
   devtool: 'source-map',
   devServer: {
-    //disableHostCheck: true,
+    disableHostCheck: true,
     contentBase: dist,
     public: process.env.URL || ''
   },
