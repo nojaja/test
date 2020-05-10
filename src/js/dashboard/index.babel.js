@@ -1,13 +1,17 @@
+"use strict";
+
+import WebStorage from '../fs/webstorage.js'
 
 
+
+var webStorage = new WebStorage();
 
 //プロジェクト一覧表示
-var gasUrl="https://script.google.com/macros/s/AKfycbzyNQRAwdTJ2yqdNzyD5-9nvb84kbkS4vztfcyuT8kwvqQhE-Lr/exec?p=/uid/reactcomponent/";
-function projectjsonCallback(json){
+function projectjsonCallback (json, type) {
   console.log(json);
-  $("#filelist").empty();
+  $("#prjlist").empty();
 
-  var file = $(`
+  const prj = $(`
 <div class="uk-width-medium-1-3">
   <a target="_blank" class="uk-panel uk-panel-hover uk-panel-box file" data-url="">
     <h3 class="uk-panel-title"><i class="uk-icon-file"></i></h3>
@@ -15,18 +19,19 @@ function projectjsonCallback(json){
 </div>
 `);
   // [ROWID, filename, ext, timestamp, uid, scope,projectid]
-  json.rows.forEach(function(val, i) {
-    console.log(i, val); 
-    var _file = file.clone(true);
-    _file.children('.file').attr('href','editor.html?ga='+val[6]+'/'+val[1]+val[2]);
-    _file.find('.uk-panel-title').append(val[1]);
-    $("#filelist").append(_file);
+  // [{description, id, public},,]
+  json.rows.forEach((val, i) => {
+    let _prj = prj.clone(true);
+    _prj.children('.file').attr('href','editor.html?q='+val.id+'&t='+type);
+    _prj.find('.uk-panel-title').append(val.description);
+    $("#prjlist").append(_prj);
   });
 }
 
 //プロジェクト一覧取得
-$.getJSON(gasUrl+ "&callback=?",  { t: '1' }, function(json){
-  projectjsonCallback(json);
+webStorage.loadList((json, type) => {
+  projectjsonCallback(json, type)
+
 });
 
 

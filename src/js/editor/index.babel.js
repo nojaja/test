@@ -240,16 +240,8 @@ $(document).ready(() => {
     });
     let url = "";
     let type = "localStorage";
-    if(arg["q"]){
-      type = "html";
-      url  = arg["q"];
-    }else if(arg["g"]){
-      type = "gist";
-      url  = arg["g"];
-    }else if(arg["ga"]){
-      type = "gas";
-      url  = arg["ga"];
-    }
+    url  = arg["q"] || arg["g"] || arg["ga"]
+    type = arg["t"] || "localStorage"
 
     //URLの引数からプロジェクト取得、コンパイルの実行
     loadProject(url, type, () => {
