@@ -1,0 +1,51 @@
+{
+    "v": 0.1,
+    "id": "",
+    "files": {
+        "index.ahtml": {
+            "filename": "index.ahtml",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "ahtml",
+            "size": 0,
+            "truncated": false,
+            "content": "<html>\n<head>\n    <script src=\"https://npmcdn.com/number-to-locale-string@1.0.1/polyfill.number.toLocaleString.js\"></script>\n    <link rel='stylesheet' href='./ZKNJgG.css'>\n    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100'>\n    <script src=\"./ZKNJgG.js\"></script>\n</head>\n<body>\n    <div className=\"calculator\">\n        <div className=\"digit-keys\">\n            <Calculatorkey className=\"key-0\" onPress={inputDigit(0)}>0</Calculatorkey>\n            <Calculatorkey className=\"key-1\" onPress={inputDigit(1)}>1</Calculatorkey>\n            <Calculatorkey className=\"key-2\" onPress={inputDigit(2)}>2</Calculatorkey>\n            <Calculatorkey className=\"key-3\" onPress={inputDigit(3)}>3</Calculatorkey>\n            <Calculatorkey className=\"key-4\" onPress={inputDigit(4)}>4</Calculatorkey>\n            <Calculatorkey className=\"key-5\" onPress={inputDigit(5)}>5</Calculatorkey>\n            <Calculatorkey className=\"key-6\" onPress={inputDigit(6)}>6</Calculatorkey>\n        </div>\n    </div>\n<element name=\"Calculatorkey\">\n  <template>\n      <div onClick={this.props.onPress}>\n        <button className='calculator-key {this.props.className}'>{this.props.children}</button>\n      </div>\n  </template>\n</element>\n  \n</body>\n</html>",
+            "description": ""
+        },
+        "index.html": {
+            "filename": "index.html",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "html",
+            "size": 0,
+            "truncated": true,
+            "content": "",
+            "description": ""
+        },
+        "ZKNJgG.css": {
+            "filename": "ZKNJgG.css",
+            "fileType": "txt",
+            "type": "text/css",
+            "language": "css",
+            "size": 0,
+            "truncated": false,
+            "content": "html {\r\n  box-sizing: border-box;\r\n}\r\n*, *:before, *:after {\r\n  box-sizing: inherit;\r\n}\r\n\r\nbody {\r\n  margin: 0;\r\n  font: 100 14px 'Roboto';\r\n}\r\n\r\nbutton {\r\n  display: block;\r\n  background: none;\r\n  border: none;\r\n  padding: 0;\r\n  font-family: inherit;\r\n  user-select: none;\r\n  cursor: pointer;\r\n  outline: none;\r\n  \r\n  -webkit-tap-highlight-color: rgba(0,0,0,0);\r\n}\r\n\r\nbutton:active {\r\n  box-shadow: inset 0px 0px 80px 0px rgba(0,0,0,0.25);\r\n}\r\n\r\n#wrapper {\r\n  height: 100vh;\r\n  \r\n  display: flex;\r\n  align-items: center;\r\n  justify-content: center;\r\n}\r\n\r\n#app {\r\n  width: 320px;\r\n  height: 520px;\r\n  position: relative;\r\n}\r\n\r\n.calculator {\r\n  width: 100%;\r\n  height: 100%;\r\n  background: black;\r\n  \r\n  display: flex;\r\n  flex-direction: column;\r\n}\r\n\r\n#wrapper .calculator {\r\n  box-shadow: 0px 0px 20px 0px #aaa;\r\n}\r\n\r\n.calculator-display {\r\n  color: white;\r\n  background: #1c191c;\r\n  line-height: 130px;\r\n  font-size: 6em;\r\n  \r\n  flex: 1;\r\n}\r\n\r\n.auto-scaling-text {\r\n  display: inline-block;\r\n}\r\n\r\n.calculator-display .auto-scaling-text {\r\n  padding: 0 30px;\r\n  position: absolute;\r\n  right: 0;\r\n  transform-origin: right;\r\n}\r\n\r\n.calculator-keypad {\r\n  height: 400px;\r\n  \r\n  display: flex;\r\n}\r\n\r\n.calculator .input-keys {\r\n  width: 240px;\r\n}\r\n\r\n.calculator .function-keys {\r\n  display: flex;\r\n}\r\n\r\n.calculator .digit-keys {\r\n  background: #e0e0e7;\r\n  \r\n  display: flex;\r\n  flex-direction: row;\r\n  flex-wrap: wrap-reverse;\r\n}\r\n\r\n.calculator-key {\r\n  width: 80px;\r\n  height: 80px;\r\n  border-top: 1px solid #777;\r\n  border-right: 1px solid #666;  \r\n  text-align: center;\r\n  line-height: 80px;\r\n}\r\n.calculator .function-keys .calculator-key {\r\n  font-size: 2em;\r\n}\r\n.calculator .function-keys .key-multiply {\r\n  line-height: 50px;\r\n}\r\n.calculator .digit-keys .calculator-key {\r\n  font-size: 2.25em;\r\n}\r\n.calculator .digit-keys .key-0 {\r\n  width: 160px;\r\n  text-align: left;\r\n  padding-left: 32px;\r\n}\r\n.calculator .digit-keys .key-dot {\r\n  padding-top: 1em;\r\n  font-size: 0.75em;\r\n}\r\n.calculator .operator-keys .calculator-key {\r\n  color: white;\r\n  border-right: 0;\r\n  font-size: 3em;\r\n}\r\n\r\n.calculator .function-keys {\r\n  background: linear-gradient(to bottom, rgba(202,202,204,1) 0%, rgba(196,194,204,1) 100%);\r\n}\r\n.calculator .operator-keys {\r\n  background:  linear-gradient(to bottom, rgba(252,156,23,1) 0%, rgba(247,126,27,1) 100%);\r\n}",
+            "description": ""
+        },
+        "ZKNJgG.js": {
+            "filename": "ZKNJgG.js",
+            "fileType": "txt",
+            "type": "text/javascript",
+            "language": "JavaScript",
+            "size": 0,
+            "truncated": false,
+            "content": "var inputDigit = function inputDigit(digit) {};\r\n\r\nvar inputDot = function inputDot() {\r\n};\r\n",
+            "description": ""
+        }
+    },
+    "public": true,
+    "createdTime": 1589111576120,
+    "lastUpdatedTime": 1589113932790,
+    "description": "",
+    "projectName": "new project"
+}
