@@ -7,12 +7,12 @@ export class MDCompiler {
     }
  
     async compile (targetFile, outpath) {
-        let data = targetFile.getEditorData()
+        //todo let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."));
 
-        let parseData = marked(data.source.model.getValue().trim());
-        data.html.model.setValue(parseData);
+        let parseData = marked(targetFile.getContent().trim());
+        //data.html.model.setValue(parseData);
         
         let htmlfile = new FileData()
         htmlfile.setFilename(outpath+filename+'.html')

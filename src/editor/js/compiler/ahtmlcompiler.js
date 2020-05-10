@@ -41,7 +41,6 @@ export class AHtmlCompiler {
         //let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
         filename = filename.substr(0,filename.lastIndexOf("."))
-        console.log(targetFile)
         let parseData = this.parseHtml(targetFile.getContent().trim())
         // data.dom.model.setValue(this.stringify(parseData));
 

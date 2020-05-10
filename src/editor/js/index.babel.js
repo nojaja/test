@@ -6,6 +6,7 @@ import LocalStorage from './fs/localstorage.js'
 import GistStorage from './fs/giststorage.js'
 import GasStorage from './fs/gasstorage.js'
 import HtmlStorage from './fs/htmlstorage.js'
+import WebStorage from './fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
 var editor = null;
@@ -16,6 +17,7 @@ var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
 var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
+var webStorage = new WebStorage();
 var builderLogic = new BuilderLogic(fileContainer);
 
 /**
@@ -45,6 +47,7 @@ function openFirst() {
 fileContainer.onOpenFile(refreshTab);
 fileContainer.onCloseFile(refreshTab);
 
+//タブの更新
 function refreshTab (filename) {
   $("#edittab").empty();
   const tab = $('<li><a></a></li>');
@@ -71,6 +74,7 @@ function refreshTab (filename) {
 }
 
 //Fileを開く
+//Editorに開いたファイルをセット
 function fileOpen(filename){
   currentFile = fileContainer.openFile(filename,EditorFileData,monaco)
   let data = currentFile.getEditorData();
@@ -80,7 +84,8 @@ function fileOpen(filename){
   editor.focus();
 }
 
-//Fileを保存
+//Editorの内容をcurrentFileに保存
+//currentFileをFileに保存
 function saveState(){
     if(currentFile){
         let data = currentFile.getEditorData();
@@ -96,7 +101,8 @@ function saveState(){
 // iframe内のコンテンツを更新
 function refreshView (content) {
     // iframe内のコンテンツを更新
-    $("#child-frame").attr("src", content);
+    $("#child-frame").attr("src", content)
+    $("#url").val(content)
   /*
     //$("#child-frame").attr("srcdoc", "");
     //$("#child-frame").attr("src", "./blank.html");
@@ -143,9 +149,16 @@ function loadProject (url,type,cb) {
           openFirst();
           return (cb)?cb():true;
       })
+  }else if(type == "web"){
+      webStorage.loadDraft(fileContainer, url, (fileContainer) => {
+          // refreshFileList();
+          openFirst();
+          return (cb)?cb():true;
+      })
   }
 }
 
+//ファイルセットが変更された場合
 fileContainer.onChangeFiles(refreshFileList);
 
 //File一覧の更新
@@ -188,6 +201,8 @@ function projectjsonCallback (json, type) {
   });
 }
 
+// コンパイル処理の実行
+// /test/に出力する
 function compileAll () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
     // cachesLogic.refreshCache(fileContainer);
@@ -235,13 +250,14 @@ $(document).ready(() => {
       type = "gas";
       url  = arg["ga"];
     }
-    //プロジェクト取得
+
+    //URLの引数からプロジェクト取得、コンパイルの実行
     loadProject(url, type, () => {
       compileAll();
     });
 
     //プロジェクト一覧取得
-    localstorage.loadList((json, type) => {
+    webStorage.loadList((json, type) => {
         projectjsonCallback(json, type)
     });
 
@@ -258,8 +274,15 @@ $(document).ready(() => {
   });
   
   $("#refresh").on("click", (event) => {
-    refreshView($("#url").value);
-  });
+    refreshView($("#url").val())
+  })
+
+  $("#url").keypress( ( e ) => {
+	if ( e.which == 13 ) {
+		refreshView($("#url").val())
+		return false //submit 停止
+	}
+  } )
 
   $("#gist").on("click", (event) => {
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');

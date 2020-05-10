@@ -159,6 +159,8 @@ export class FileContainer {
     if (filename in this.container.files) {
       let file = new FileData(this.container.files[filename])
       file.remove()
+      delete this.container.files[filename]
+      delete this.fileObjects[filename]
       this.putFile(file)
       this.container.lastUpdatedTime = new Date().getTime()
       return true
