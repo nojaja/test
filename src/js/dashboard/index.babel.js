@@ -1,8 +1,8 @@
 "use strict";
 
+import UIkit from 'uikit'
+//import notify from 'uikit/dist/js/components/notify'
 import WebStorage from '../fs/webstorage.js'
-
-
 
 var webStorage = new WebStorage();
 

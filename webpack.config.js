@@ -28,6 +28,11 @@ module.exports = {
     path: dist,
     publicPath:""
   },
+  resolve: {
+    alias: {
+      '@': path.resolve(src, '/js/')
+    }
+  },
   module: {
     rules: [{
       test: /\.css$/,
@@ -38,6 +43,11 @@ module.exports = {
     }]
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      $: 'jquery',
+      jQuery: 'jquery',
+      'window.jQuery': 'jquery'
+    }),
     new MonacoWebpackPlugin({
     // https://github.com/Microsoft/monaco-editor-webpack-plugin#options
     // Include a subset of languages support

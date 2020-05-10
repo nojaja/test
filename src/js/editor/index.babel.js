@@ -1,5 +1,8 @@
 "use strict";
 import * as monaco from 'monaco-editor'
+
+import UIkit from 'uikit'
+import notify from 'uikit/dist/js/components/notify'
 import EditorFileData from '../model/EditorFileData.js'
 import FileContainer from '../model/PublishFileContainer.js'
 import LocalStorage from '../fs/localstorage.js'
