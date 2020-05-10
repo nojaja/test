@@ -1,10 +1,13 @@
 image:
   file: .gitpod.Dockerfile
 tasks:
-  - init: npm install
-    command: echo init
-  - command: export TZ="Asia/Tokyo"
-    command: export URL=`gp url 8080`
-    command: echo command
-    command: eval $(gp env -e) && npm run build
-    command: npm run start
+  - name: init
+    init: >
+      npm install;
+  - name: npmstart
+    command: >
+      export TZ="Asia/Tokyo";
+      export URL=`gp url 8080`;
+      eval $(gp env -e) ;
+      npm run start;
+ 
