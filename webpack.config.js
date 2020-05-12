@@ -38,9 +38,10 @@ module.exports = {
       test: /\.css$/,
       use: ['style-loader', 'css-loader']
     }, {
-      test: /\.ttf$/,
+      test: /\.(woff|woff2|eot|ttf|svg)$/,
       use: ['file-loader']
-    }]
+    }
+  ]
   },
   plugins: [
     new webpack.ProvidePlugin({

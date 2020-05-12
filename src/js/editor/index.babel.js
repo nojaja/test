@@ -12,6 +12,11 @@ import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
+import 'uikit/dist/css/uikit.css'
+import 'uikit/dist/css/components/notify.css'
+import '../../css/style.css'
+
+
 var editor = null;
 var currentFile = null;
 var fileContainer = new FileContainer('/test/');

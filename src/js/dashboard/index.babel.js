@@ -4,6 +4,10 @@ import UIkit from 'uikit'
 //import notify from 'uikit/dist/js/components/notify'
 import WebStorage from '../fs/webstorage.js'
 
+import 'uikit/dist/css/uikit.css'
+import 'uikit/dist/css/components/notify.css'
+import '../../css/style.css'
+
 var webStorage = new WebStorage();
 
 //プロジェクト一覧表示
