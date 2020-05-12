@@ -1,7 +1,9 @@
 
 import FileData from '../model/FileData.js'
+import htmlparser from 'htmlparser'
+import htmlcompiler from 'htmlcompiler'
 
-var htmlparser = Tautologistics.NodeHtmlParser;
+//var htmlparser = Tautologistics.NodeHtmlParser;
 
 export class AHtmlCompiler {
     constructor (fileContainer) {

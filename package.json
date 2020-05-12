@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test webpack && jest",
-    "build": "NODE_ENV=production webpack",
-    "dev": "webpack --mode development --watch",
-    "start": "webpack-dev-server"
+    "build": "cross-env NODE_OPTIONS=--max_old_space_size=2048 NODE_ENV=production webpack",
+    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=2048 webpack --mode development --watch",
+    "start": "cross-env NODE_OPTIONS=--max_old_space_size=2048 webpack-dev-server"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,10 @@
   },
   "homepage": "https://nojaja.github.io/SiteEditor/",
   "dependencies": {
+    "@babel/standalone": "^7.9.6",
     "cssom": "git+https://github.com/nojaja/CSSOM.git",
+    "htmlcompiler": "git+https://github.com/nojaja/node-htmlcompiler.git#v1.0.2",
+    "htmlparser": "git+https://github.com/nojaja/node-htmlparser.git#v2.1",
     "jquery": "^3.5.1",
     "marked": "^0.3.9",
     "monaco-editor": "^0.20.0",
@@ -31,6 +34,7 @@
     "@babel/preset-env": "^7.9.6",
     "babel-jest": "^26.0.1",
     "copy-webpack-plugin": "^5.1.1",
+    "cross-env": "^7.0.2",
     "css-loader": "^3.5.3",
     "file-loader": "^6.0.0",
     "html-loader": "^1.1.0",
