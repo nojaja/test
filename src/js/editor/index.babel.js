@@ -12,10 +12,12 @@ import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
+import treeview from 'jquery-treeview'
+console.log($,jQuery,$.treeview)
 import 'uikit/dist/css/uikit.css'
 import 'uikit/dist/css/components/notify.css'
 import '../../css/style.css'
-
+//import 'jquery-treeview/jquery.treeview.css'
 
 var editor = null;
 var currentFile = null;
@@ -169,25 +171,67 @@ function loadProject (url,type,cb) {
 //ファイルセットが変更された場合
 fileContainer.onChangeFiles(refreshFileList);
 
+function _refreshFileList (path = null) {
+  let listid = (path)? 'li[data-uri="'+path+'"] ul' : '#filelist'
+  console.log(listid,path)
+  $(listid).empty();
+
+  const dir = $(`
+                <li class="closed">
+                  <span class="folder"><i class="uk-icon-folder uk-icon-mediu"></i></span>
+                  <ul>
+                    <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
+                  </ul>
+                </li>`);
+  dir.on("click", (event) => {
+    let t = $(event.target).attr("data-uri")
+    //_refreshFileList(t);
+    $('#filelist').find("li").removeClass("uk-active");
+    $(event.target.parentElement).addClass("uk-active");
+  });
+
+  const file = $(`
+                  <li>
+                    <span><a class="file">
+                      <input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i>
+                    </a>
+                  </li>`);
+  file.on("click", (event) => {
+    let t = $(event.target).attr("data-uri")
+    console.log("click",t)
+    fileOpen(t);
+    $('#filelist').find("li").removeClass("uk-active");
+    $(event.target.parentElement).addClass("uk-active");
+  });
+  
+  fileContainer.getDirectories(path).forEach((val, i) => {
+    let _dir = dir.clone(true);
+    _dir.find('.fileSelect').attr('data-uri',val.path);
+    _dir.find('span').attr('data-uri',val.path);
+    _dir.find('.folder').append(val.name);
+    _dir.attr('data-uri',val.path);
+    $(listid).append(_dir);
+    _refreshFileList(val.path)
+  });
+
+  fileContainer.getFiles(path).forEach((val, i) => {
+    let _file = file.clone(true);
+    _file.find('.fileSelect').attr('data-uri',val.path);
+    _file.find('.file').attr('data-uri',val.path);
+    _file.find('.file').append(val.name);
+    $(listid).append(_file);
+  });
+}
+
 //File一覧の更新
 function refreshFileList () {
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
-  $("#filelist").empty();
 
-  const file = $('<li ><a  class="file" data-url=""><input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i> </a></li>');
-  file.on("click", (event) => {
-    fileOpen($(event.target).attr("data-uri"));
-    $("#filelist").children("li").removeClass("uk-active");
-    $(event.target.parentElement).addClass("uk-active");
-  });
-  
-  fileContainer.getFiles().forEach((val, i) => {
-    let _file = file.clone(true);
-    _file.find('.fileSelect').attr('data-uri',val);
-    _file.children('.file').attr('data-uri',val);
-    _file.children('.file').append(val);
-    $("#filelist").append(_file);
+  _refreshFileList();
+  $('#filelist').treeview({
+		animated: "fast",
+    collapsed: false
   });
 }
 
@@ -367,6 +411,14 @@ $(document).ready(() => {
         saveState()
   });
 
+  $('#TreeView').treeview({
+		animated: "fast",
+    collapsed: true
+  });
+  $('#TreeView2').treeview({
+		animated: "fast",
+    collapsed: true
+  });
   $(window).keydown( (e) => {
     if(e.keyCode === 120){
         compileAll();

@@ -24,3 +24,38 @@
 .edit-title:hover {
     opacity: 0.8;
 }
+
+.treeview {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.treeview ul {
+    margin: 0;
+    padding-left: 10px;
+    list-style: none;
+}
+
+.treeview li.uk-active > a, .treeview li.uk-active > span {
+    background: #00a8e6;
+    color: #fff;
+}
+
+.treeview ul a:hover, .treeview ul span:hover {
+    color: #059;
+}
+
+.treeview li > a:hover, .treeview li > a:focus, .treeview li > span:hover, .treeview li > span:focus {
+    background: rgba(0, 0, 0, 0.05);
+    color: #444;
+    outline: none;
+}
+
+.treeview li > span, .treeview li > span > a {
+    color: #444;
+    padding: 2px 5px;
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+}

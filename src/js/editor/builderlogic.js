@@ -42,10 +42,10 @@ export class BuilderLogic {
             }
             const array = fileContainer.getFiles();
             const promiseAll = await Promise.all(
-                array.filter(filename => {
-                    return filename.indexOf(outpath)!=0 && filename.indexOf(srcpath)==0
-                }).map(async (filename) => {
-                    return await compileResolve(filename)
+                array.filter(filedata => {
+                    return filedata.name.indexOf(outpath)!=0 && filedata.name.indexOf(srcpath)==0
+                }).map(async (filedata) => {
+                    return await compileResolve(filedata.name)
                 })
             );
             return promiseAll;
