@@ -13,7 +13,6 @@ import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
 import treeview from 'jquery-treeview'
-console.log($,jQuery,$.treeview)
 import 'uikit/dist/css/uikit.css'
 import 'uikit/dist/css/components/notify.css'
 import '../../css/style.css'
@@ -21,7 +20,7 @@ import '../../css/style.css'
 
 var editor = null;
 var currentFile = null;
-var fileContainer = new FileContainer('/test/');
+var fileContainer = new FileContainer('/public/');
 
 var localstorage = new LocalStorage();
 var gistStorage = new GistStorage();
@@ -128,7 +127,7 @@ function refreshView (content) {
 }
 
 //プロジェクトファイルの読み込み
-function loadProject (url,type,cb) {
+function loadProject (url, type, cb) {
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
   $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
@@ -258,9 +257,9 @@ function projectjsonCallback (json, type) {
 function compileAll () {
     $.UIkit.notify("compile..", {status:'success',timeout : 1000});
     // cachesLogic.refreshCache(fileContainer);
-    builderLogic.compileAll(fileContainer, '', '/test/', () => {
+    builderLogic.compileAll(fileContainer, '', '/public/', () => {
         $.UIkit.notify("success..", {status:'success',timeout : 1000});
-        refreshView("./test/index.html");
+        refreshView("./public/index.html");
     })
 }
 
@@ -322,11 +321,20 @@ $(document).ready(() => {
   })
 
   $("#url").keypress( ( e ) => {
-	if ( e.which == 13 ) {
-		refreshView($("#url").val())
-		return false //submit 停止
-	}
+    if ( e.which == 13 ) {
+      refreshView($("#url").val())
+      return false //submit 停止
+    }
   } )
+  $("#history_back").on("click", (event) => {
+    $("#child-frame")[0].contentWindow.history.back()
+  } )
+  $("#history_forward").on("click", (event) => {
+    $("#child-frame")[0].contentWindow.history.forward()
+  } )
+  $("#child-frame").on('load', function() {
+    $("#url").val($("#child-frame")[0].contentWindow.location.pathname)
+  })
 
   $("#gist").on("click", (event) => {
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');

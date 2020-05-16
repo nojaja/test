@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nojaja/SiteEditor.git"
+    "url": "git+https://github.com/nojaja/SiteEditor.git"
   },
   "author": "nojaja",
   "license": "MIT",
@@ -21,9 +21,9 @@
   "homepage": "https://nojaja.github.io/SiteEditor/",
   "dependencies": {
     "@babel/standalone": "^7.9.6",
+    "@nojaja/htmlcompiler": "^1.0.2",
+    "@nojaja/htmlparser": "^2.1.1",
     "cssom": "git+https://github.com/nojaja/CSSOM.git",
-    "htmlcompiler": "git+https://github.com/nojaja/node-htmlcompiler.git#v1.0.2",
-    "htmlparser": "git+https://github.com/nojaja/node-htmlparser.git#v2.1",
     "jquery": "^3.5.1",
     "jquery-treeview": "^1.4.2",
     "marked": "^0.3.9",

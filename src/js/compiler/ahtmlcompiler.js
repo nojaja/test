@@ -1,7 +1,7 @@
 
 import FileData from '../model/FileData.js'
-import htmlparser from 'htmlparser'
-import htmlcompiler from 'htmlcompiler'
+import htmlparser from '@nojaja/htmlparser'
+import htmlcompiler from '@nojaja/htmlcompiler'
 
 //var htmlparser = Tautologistics.NodeHtmlParser;
 
