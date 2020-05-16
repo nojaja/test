@@ -13,6 +13,8 @@ import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
 import treeview from 'jquery-treeview'
+import contextmenu from 'jquery-contextmenu'
+import 'jquery-contextmenu/dist/jquery.contextMenu.css'
 import 'uikit/dist/css/uikit.css'
 import 'uikit/dist/css/components/notify.css'
 import '../../css/style.css'
@@ -98,12 +100,14 @@ function fileOpen(filename){
 function saveState(){
     if(currentFile){
         let data = currentFile.getEditorData();
-        data.state = editor.saveViewState();
         //let currentState = editor.saveViewState();
         //let currentModel = editor.getModel();
         //data.state = currentState;
-        currentFile.setEditorData(data);
-        fileContainer.putFile(currentFile);
+
+        if(currentFile.setEditorData(data)){
+          data.state = editor.saveViewState();
+          fileContainer.putFile(currentFile);
+        }
     }
 }
 
@@ -167,12 +171,44 @@ function loadProject (url, type, cb) {
   }
 }
 
+function fileRename () {
+  $('#filelist .uk-active').each( (index, element) => {
+    console.log(element)
+    const filename = $(element).attr("data-uri");
+    UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
+      console.log('newName '+newName);
+      fileContainer.renameFile(filename,newName);
+      // refreshFileList();
+    }, () => {
+      console.log('Rejected.');
+      return;
+    });
+  });
+}
+
+function fileDelete () {
+  $('#filelist .uk-active').each((index, element) => {
+    console.log(element)
+    const filename = $(element).attr("data-uri");
+    UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
+      console.log('filename '+filename);
+      fileContainer.removeFile(filename);
+      // refreshFileList();
+    }, () => {
+      console.log('Rejected.');
+      return;
+    });
+  });
+};
+
 //ファイルセットが変更された場合
-fileContainer.onChangeFiles(refreshFileList);
+fileContainer.onChangeFiles( () => {
+  console.log('onChangeFiles')
+  refreshFileList()
+})
 
 function _refreshFileList (path = null) {
   let listid = (path)? 'li[data-uri="'+path+'"] ul' : '#filelist'
-  console.log(listid,path)
   $(listid).empty();
 
   const dir = $(`
@@ -183,24 +219,29 @@ function _refreshFileList (path = null) {
                   </ul>
                 </li>`);
   dir.on("click", (event) => {
-    let t = $(event.target).attr("data-uri")
-    //_refreshFileList(t);
-    $('#filelist').find("li").removeClass("uk-active");
-    $(event.target.parentElement).addClass("uk-active");
+    if(event.target.parentElement == event.currentTarget){
+      let t = $(event.target).attr("data-uri")
+      //_refreshFileList(t);
+      if(!event.ctrlKey){
+        $('#filelist').find("li").removeClass("uk-active");
+      }
+      $(event.target.parentElement).addClass("uk-active");
+    }
   });
 
   const file = $(`
                   <li>
                     <span><a class="file">
-                      <input type="checkbox" class="fileSelect" > <i class="uk-icon-file uk-icon-mediu"></i>
-                    </a>
+                      <i class="uk-icon-file uk-icon-mediu"></i>
+                    </a></span>
                   </li>`);
   file.on("click", (event) => {
     let t = $(event.target).attr("data-uri")
-    console.log("click",t)
     fileOpen(t);
-    $('#filelist').find("li").removeClass("uk-active");
-    $(event.target.parentElement).addClass("uk-active");
+    if(!event.ctrlKey){
+      $('#filelist').find("li").removeClass("uk-active");
+    }
+    $(event.target.parentElement.parentElement).addClass("uk-active");
   });
   
   fileContainer.getDirectories(path).forEach((val, i) => {
@@ -218,6 +259,7 @@ function _refreshFileList (path = null) {
     _file.find('.fileSelect').attr('data-uri',val.path);
     _file.find('.file').attr('data-uri',val.path);
     _file.find('.file').append(val.name);
+    _file.attr('data-uri',val.path);
     $(listid).append(_file);
   });
 }
@@ -232,6 +274,16 @@ function refreshFileList () {
 		animated: "fast",
     collapsed: false
   });
+
+  $.contextMenu({
+    selector: '#filelist',
+    // define the elements of the menu
+    items: {
+      "delete": { name: "Delete", callback: (key, options) => {fileDelete()} },
+      "rename": { name: "Rename", callback: (key, options) => {fileRename()} }
+    }
+    // there's more, have a look at the demos and docs...
+  })
 }
 
 //プロジェクト一覧表示
@@ -366,34 +418,6 @@ $(document).ready(() => {
       });
   });
 
-  $("#fileRename").on("click", (event) => {
-    $('.fileSelect:checkbox:checked').each( (index, element) => {
-      const filename = $(element).attr("data-uri");
-      UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
-        console.log('newName '+newName);
-        fileContainer.renameFile(filename,newName);
-        // refreshFileList();
-      }, () => {
-        console.log('Rejected.');
-        return;
-      });
-    });
-  });
-
-  $("#fileDelete").on("click", (event) => {
-    $('.fileSelect:checkbox:checked').each((index, element) => {
-      const filename = $(element).attr("data-uri");
-      UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
-        console.log('filename '+filename);
-        fileContainer.removeFile(filename);
-        // refreshFileList();
-      }, () => {
-        console.log('Rejected.');
-        return;
-      });
-    });
-  });
-
   $("#newfile").on("click", (event) => {
       UIkit.modal.prompt(`
 <h3>New File</h3>
@@ -415,25 +439,19 @@ $(document).ready(() => {
       });
   });
 
-  $('#container').bind('blur keydown keyup keypress change', () => {
+  $('#container').bind('blur keyup keypress change', (e) => {
         saveState()
   });
 
-  $('#TreeView').treeview({
-		animated: "fast",
-    collapsed: true
-  });
-  $('#TreeView2').treeview({
-		animated: "fast",
-    collapsed: true
-  });
   $(window).keydown( (e) => {
     if(e.keyCode === 120){
+        console.log("keydown120")
         compileAll();
         return false;
       }
     if(e.ctrlKey){
       if(e.keyCode === 83){
+        console.log("keydown83")
         localstorage.saveDraft(fileContainer);
         // cachesLogic.refreshCache(fileContainer);
         return false;
