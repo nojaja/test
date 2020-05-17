@@ -3,9 +3,6 @@
 <head>
   <meta charset='UTF-8'>
   <title>Html2ReactComponent</title>
-  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/css/uikit.min.css">
-  <link rel="stylesheet prefetch" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/css/components/notify.min.css">
-  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -43,16 +40,10 @@
 <div class="uk-grid ">
   <div class="uk-form uk-width-medium-1-6">
     <div class="uk-panel">
-      <h3 class="uk-panel-title">Files 
-      <a id="fileCopy" class="uk-icon-hover uk-icon-copy "></a>
-      <a id="fileRename" class="uk-icon-hover uk-icon-edit"></a>
-      <a id="fileDelete" class="uk-icon-hover uk-icon-trash "></a>
-      <a id="newfile" class="uk-button uk-button-success uk-button-smal uk-float-right"><i class="uk-icon-plus"></i> ADD File</a></h3>
-      </ul>
+      <a id="newfile" class="uk-button uk-button-success uk-button-smal uk-float-right"><i class="uk-icon-plus"></i> ADD File</a>
     </div>
 
-
-    <ul id="filelist" class="uk-nav uk-nav-side " data-uk-nav="">
+    <ul id="filelist">
       <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
     </ul>
 
@@ -84,24 +75,16 @@
   <div class="uk-width-medium-2-6">
     <div class="uk-panel uk-form">
       <h3 class="uk-panel-title">Preview</h3>
-        <button class="uk-button uk-button-default"><i class="uk-icon-arrow-left"></i></button>
-        <button class="uk-button uk-button-default"><i class="uk-icon-arrow-right"></i></button>
-        <input class="uk-input" value="/test/index.html" id="url">
+        <button class="uk-button uk-button-default" id="history_back"><i class="uk-icon-arrow-left"></i></button>
+        <button class="uk-button uk-button-default" id="history_forward"><i class="uk-icon-arrow-right"></i></button>
+        <input class="uk-input" value="/public/index.html" id="url">
         <button class="uk-button uk-button-default" id="refresh"><i class="uk-icon-refresh"></i></button>
-        <a class="uk-button uk-button-default" target="_blank" href="./test/index.html"><i class="uk-icon-mail-forward"></i> View</a>
+        <a class="uk-button uk-button-default" target="_blank" href="./public/index.html"><i class="uk-icon-mail-forward"></i> View</a>
       <iframe id="child-frame" class="editor" src="./blank.html"></iframe>
     </div>
   </div>
 </div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<script src="https://code.jquery.com/jquery-migrate-3.0.0.js"></script>
-<script src="https://codepen.io/nojaja/pen/GjzRga.js"></script>
-<script src="https://rawgit.com/nojaja/node-htmlcompiler/v1.0.2/lib/htmlcompiler.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/js/uikit.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.27.3/js/components/notify.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.23.1/babel.js"></script>
-<!-- sass.js を読み込む -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.10.7/sass.sync.min.js"></script>
 
 <script>
