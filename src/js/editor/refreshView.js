@@ -2,10 +2,13 @@
 import FileData from '../model/FileData.js'
 import htmlparser from '@nojaja/htmlparser'
 import htmlcompiler from '@nojaja/htmlcompiler'
+import {EventEmitter} from 'events'
 
 export class RefreshView {
     constructor (fileContainer) {
         this.fileContainer = fileContainer
+        this.url = ''
+        this.ev = new EventEmitter ()
     }
 
     parseHtml (rawHtml) {
@@ -16,6 +19,10 @@ export class RefreshView {
             caseSensitiveAttr: true,
             verbose: false
         })
+    }
+
+    onload (callback) {
+        this.ev.on('load', callback)
     }
 
     test () {
@@ -311,7 +318,9 @@ export class RefreshView {
     </html>
         `) 
         this.fileContainer.putFile(index_html)
-        this.refreshView('/public/index.html',false)
+        
+        let frame = document.getElementById("child-frame");
+        this.refreshView(frame, '/public/index.html', false)
     }
 
     //////
@@ -359,28 +368,34 @@ export class RefreshView {
         return builder.getNodes()
     }   
     // iframe内のコンテンツを更新
-    refreshView (url,flg=true) {
-        
-        let frame = document.getElementById("child-frame");
+    //htmlElement: ifremeのelement document.getElementById("Iframe");
+    refreshView (htmlElement,url,flg=true) {
+        this.url = url
         if (flg && navigator.serviceWorker) {
+            htmlElement.addEventListener('load', () => {
+                this.ev.emit('load', this.url)
+             })
             // iframe内のコンテンツを更新
-            frame.setAttribute("src", url)
+            htmlElement.setAttribute("src", this.url)
             //document.getElementById("#url")
-            $("#url").val(url)
+            //$("#url").val(this.url)
         } else {
-            
             // iframe内のコンテンツを更新
-            frame.setAttribute("srcdoc", "");
+            htmlElement.setAttribute("srcdoc", "");
         
-            let contents = this.createSingleHtml(url)
-            
-            frame.src = "./blank.html";
-            frame.onload = function(){
-                frame.onload=function(){};
-                //frame.contentDocument.appendChild(fragment)
-                frame.contentDocument.open();
-                frame.contentDocument.write(contents);
-                frame.contentDocument.close();
+            let contents = this.createSingleHtml(this.url)
+            htmlElement.src = "./blank.html";
+
+            htmlElement.addEventListener('load', () => {
+                this.ev.emit('load', this.url)
+            })
+
+            htmlElement.onload = () => {
+                htmlElement.onload=function(){};
+                htmlElement.contentDocument.open();
+                htmlElement.contentDocument.write(contents);
+                htmlElement.contentDocument.close();
+                htmlElement.contentWindow.location.replace(this.url)
             }
         }
     }

@@ -116,43 +116,14 @@ function saveState(){
 
 let refreshViewLogic = new RefreshView(fileContainer);
 
+refreshViewLogic.onload( (url) => {
+  $("#url").val(url)
+})
 
 // iframe内のコンテンツを更新
-function refreshView (url,flg=false) {
+function refreshView (url) {
   let frame = document.getElementById("child-frame");
-  if (flg && navigator.serviceWorker) {
-    // iframe内のコンテンツを更新
-    frame.setAttribute("src", url)
-    //document.getElementById("#url")
-    $("#url").val(url)
-  } else {
-    //////
-    // 1つのファイルにローカルファイルを埋め込む
-    //////
-    let contents = refreshViewLogic.createSingleHtml(url)
-    // iframe内のコンテンツを更新
-    frame.setAttribute("srcdoc", "")
-    frame.src = "./blank.html"
-    frame.onload = function(){
-        frame.onload=function(){}
-        //frame.contentDocument.appendChild(fragment)
-        frame.contentDocument.open()
-        frame.contentDocument.write(contents)
-        frame.contentDocument.close()
-    }
-  }
-  /*
-    //$("#child-frame").attr("srcdoc", "");
-    //$("#child-frame").attr("src", "./blank.html");
-    var frame = document.getElementById("child-frame");
-    frame.src = "./blank.html";
-    frame.onload = function(){
-       frame.onload=function(){};
-       frame.contentDocument.open();
-       frame.contentDocument.write(content);
-       frame.contentDocument.close();
-    }
- */
+  refreshViewLogic.refreshView(frame,url)
 }
 
 //プロジェクトファイルの読み込み
@@ -408,9 +379,8 @@ $(document).ready(() => {
   $("#history_forward").on("click", (event) => {
     $("#child-frame")[0].contentWindow.history.forward()
   } )
-  $("#child-frame").on('load', function() {
-    $("#url").val($("#child-frame")[0].contentWindow.location.pathname)
-  })
+
+
 
   $("#gist").on("click", (event) => {
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
