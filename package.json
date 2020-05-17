@@ -22,7 +22,7 @@
   "dependencies": {
     "@babel/standalone": "^7.9.6",
     "@nojaja/htmlcompiler": "^1.0.2",
-    "@nojaja/htmlparser": "^2.1.1",
+    "@nojaja/htmlparser": "git+https://github.com/nojaja/node-htmlparser.git",
     "cssom": "git+https://github.com/nojaja/CSSOM.git",
     "jquery": "^3.5.1",
     "jquery-contextmenu": "^2.9.2",

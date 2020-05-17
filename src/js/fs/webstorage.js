@@ -29,7 +29,7 @@ export class WebStorage {
         $.getJSON(this.siteurl+url).done((data) => {
             fileContainer.setContainer(data);
             fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
-            console.log("fileContainer:" + fileContainer.getContainerJson());
+            //console.log("fileContainer:" + fileContainer.getContainerJson());
             return (cb)?cb(fileContainer):fileContainer.getContainerJson();
         })
     }

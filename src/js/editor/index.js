@@ -12,6 +12,8 @@ import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
 
+import RefreshView from './refreshView.js'
+
 import treeview from 'jquery-treeview'
 import contextmenu from 'jquery-contextmenu'
 import 'jquery-contextmenu/dist/jquery.contextMenu.css'
@@ -88,6 +90,7 @@ function refreshTab (filename) {
 //Editorに開いたファイルをセット
 function fileOpen(filename){
   currentFile = fileContainer.openFile(filename,EditorFileData,monaco)
+  if(!currentFile) return 
   let data = currentFile.getEditorData();
   //refreshTab(data)
   editor.setModel(data.model);
@@ -111,11 +114,33 @@ function saveState(){
     }
 }
 
+let refreshViewLogic = new RefreshView(fileContainer);
+
+
 // iframe内のコンテンツを更新
-function refreshView (content) {
+function refreshView (url,flg=false) {
+  let frame = document.getElementById("child-frame");
+  if (flg && navigator.serviceWorker) {
     // iframe内のコンテンツを更新
-    $("#child-frame").attr("src", content)
-    $("#url").val(content)
+    frame.setAttribute("src", url)
+    //document.getElementById("#url")
+    $("#url").val(url)
+  } else {
+    //////
+    // 1つのファイルにローカルファイルを埋め込む
+    //////
+    let contents = refreshViewLogic.createSingleHtml(url)
+    // iframe内のコンテンツを更新
+    frame.setAttribute("srcdoc", "")
+    frame.src = "./blank.html"
+    frame.onload = function(){
+        frame.onload=function(){}
+        //frame.contentDocument.appendChild(fragment)
+        frame.contentDocument.open()
+        frame.contentDocument.write(contents)
+        frame.contentDocument.close()
+    }
+  }
   /*
     //$("#child-frame").attr("srcdoc", "");
     //$("#child-frame").attr("src", "./blank.html");
@@ -203,7 +228,6 @@ function fileDelete () {
 
 //ファイルセットが変更された場合
 fileContainer.onChangeFiles( () => {
-  console.log('onChangeFiles')
   refreshFileList()
 })
 
