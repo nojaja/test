@@ -139,8 +139,7 @@ function loadProject (url, type, cb) {
       openFirst()
       return (cb)?cb():true
     })
-  }
-  if(type == "gas"){
+  }else if(type == "gas"){
       gasStorage.loadDraft(fileContainer, url, (fileContainer) => {
           // refreshFileList();
           openFirst();
@@ -203,7 +202,7 @@ fileContainer.onChangeFiles( () => {
 })
 
 function _refreshFileList (path = null) {
-  let listid = (path)? 'li[data-uri="'+path+'"] ul' : '#filelist'
+  let listid = (path)? 'li[data-uri="'+path+'"]>ul' : '#filelist'
   $(listid).empty();
 
   const dir = $(`
@@ -238,7 +237,7 @@ function _refreshFileList (path = null) {
     }
     $(event.target.parentElement.parentElement).addClass("uk-active");
   });
-  
+  console.log('path', path,fileContainer)
   fileContainer.getDirectories(path).forEach((val, i) => {
     let _dir = dir.clone(true);
     _dir.find('.fileSelect').attr('data-uri',val.path);
@@ -447,7 +446,7 @@ $(document).ready(() => {
       if(e.keyCode === 83){
         console.log("keydown83")
         localstorage.saveDraft(fileContainer);
-        // cachesLogic.refreshCache(fileContainer);
+        fileContainer.refreshCache(EditorFileData,monaco);
         return false;
       }
     }

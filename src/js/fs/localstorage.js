@@ -21,7 +21,7 @@ export class LocalStorage {
         // ローカルストレージに最新の状態を保存
         const name = 'draftContainer'+location.pathname.replace(/\//g, '.');
         localStorage.setItem(name, fileContainer.getContainerJson());
-        console.log("draftContainer:" + fileContainer.getContainerJson());
+        // console.log("draftContainer:" + fileContainer.getContainerJson());
         $.UIkit.notify("save..", {status:'success',timeout : 1000});
     }
 
