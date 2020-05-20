@@ -201,12 +201,13 @@ fileContainer.onChangeFiles( () => {
   refreshFileList()
 })
 
+let collapsableList = {}
 function _refreshFileList (path = null) {
   let listid = (path)? 'li[data-uri="'+path+'"]>ul' : '#filelist'
   $(listid).empty();
 
   const dir = $(`
-                <li class="closed">
+                <li>
                   <span class="folder"><i class="uk-icon-folder uk-icon-mediu"></i></span>
                   <ul>
                     <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
@@ -215,6 +216,7 @@ function _refreshFileList (path = null) {
   dir.on("click", (event) => {
     if(event.target.parentElement == event.currentTarget){
       let t = $(event.target).attr("data-uri")
+      collapsableList[t] = $(event.currentTarget).hasClass('collapsable')
       //_refreshFileList(t);
       if(!event.ctrlKey){
         $('#filelist').find("li").removeClass("uk-active");
@@ -237,13 +239,20 @@ function _refreshFileList (path = null) {
     }
     $(event.target.parentElement.parentElement).addClass("uk-active");
   });
-  console.log('path', path,fileContainer)
+  
   fileContainer.getDirectories(path).forEach((val, i) => {
     let _dir = dir.clone(true);
     _dir.find('.fileSelect').attr('data-uri',val.path);
     _dir.find('span').attr('data-uri',val.path);
     _dir.find('.folder').append(val.name);
     _dir.attr('data-uri',val.path);
+
+    if(collapsableList[val.path]){
+      _dir.addClass('open')
+    } else {
+      _dir.addClass('closed')
+    }
+
     $(listid).append(_dir);
     _refreshFileList(val.path)
   });
@@ -343,6 +352,7 @@ $(document).ready(() => {
     //URLの引数からプロジェクト取得、コンパイルの実行
     loadProject(url, type, () => {
       compileAll();
+      fileContainer.refreshCache(EditorFileData,monaco);
     });
 
     //プロジェクト一覧取得
@@ -355,11 +365,15 @@ $(document).ready(() => {
   });
 
   $("#test").on("click", (event) => {
-    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {})
+    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {
+      fileContainer.refreshCache(EditorFileData,monaco);
+    })
   });
 
   $(".samples").on("click", (event) => {
-    loadProject($(event.currentTarget).attr("data-url"),"html",() => {})
+    loadProject($(event.currentTarget).attr("data-url"),"html",() => {
+      fileContainer.refreshCache(EditorFileData,monaco);
+    })
   });
   
   $("#refresh").on("click", (event) => {
