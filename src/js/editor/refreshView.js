@@ -327,6 +327,7 @@ export class RefreshView {
     // 1つのファイルにローカルファイルを埋め込む
     //////
     createSingleHtml (url) {
+        if(url.indexOf('.')==0)url=url.slice(1) // 1文字目のドットは削る
         let file = this.fileContainer.getFile(url)
         if(!file)return "404";
 
@@ -398,10 +399,10 @@ export class RefreshView {
 
             htmlElement.onload = () => {
                 htmlElement.onload=function(){};
+                //htmlElement.contentWindow.location.replace(this.url)
                 htmlElement.contentDocument.open();
                 htmlElement.contentDocument.write(contents);
                 htmlElement.contentDocument.close();
-                htmlElement.contentWindow.location.replace(this.url)
             }
         }
     }
