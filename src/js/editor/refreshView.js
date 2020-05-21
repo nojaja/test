@@ -384,6 +384,12 @@ export class RefreshView {
             htmlElement.setAttribute("srcdoc", "");
         
             let contents = this.createSingleHtml(this.url)
+            //////
+            let file = new FileData()
+            file.setFilename('view.html')
+            file.setContent(contents)
+            this.fileContainer.putFile(file)
+            /////
             htmlElement.src = "./blank.html";
 
             htmlElement.addEventListener('load', () => {
