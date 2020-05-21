@@ -6,6 +6,7 @@ const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyFilePlugin = require('copy-webpack-plugin')
 const WriteFilePlugin = require('write-file-webpack-plugin')
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'development' : 'production',
@@ -44,6 +45,7 @@ module.exports = {
   ]
   },
   plugins: [
+    new HardSourceWebpackPlugin(),
     new webpack.ProvidePlugin({
       $: 'jquery',
       jQuery: 'jquery',

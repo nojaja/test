@@ -24,6 +24,7 @@
     "@nojaja/htmlcompiler": "^1.0.3",
     "@nojaja/htmlparser": "git+https://github.com/nojaja/node-htmlparser.git",
     "cssom": "git+https://github.com/nojaja/CSSOM.git",
+    "hard-source-webpack-plugin": "^0.13.1",
     "jquery": "^3.5.1",
     "jquery-contextmenu": "^2.9.2",
     "jquery-treeview": "^1.4.2",
