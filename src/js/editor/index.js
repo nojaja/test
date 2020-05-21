@@ -11,16 +11,14 @@ import GasStorage from '../fs/gasstorage.js'
 import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
-
 import RefreshView from './refreshView.js'
+import FileList from './filelistlogic.js'
 
-import treeview from 'jquery-treeview'
 import contextmenu from 'jquery-contextmenu'
 import 'jquery-contextmenu/dist/jquery.contextMenu.css'
 import 'uikit/dist/css/uikit.css'
 import 'uikit/dist/css/components/notify.css'
 import '../../css/style.css'
-//import 'jquery-treeview/jquery.treeview.css'
 
 var editor = null;
 var currentFile = null;
@@ -32,17 +30,21 @@ var gasStorage = new GasStorage();
 var htmlStorage = new HtmlStorage();
 var webStorage = new WebStorage();
 var builderLogic = new BuilderLogic(fileContainer);
+let refreshViewLogic = new RefreshView(fileContainer);
+let filelist = new FileList(fileContainer);
 
-/**
-サービスワーカーの登録
-キャッシュファイルの制御を可能にする
-*/
-if (navigator.serviceWorker) {
-    navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
-    registraion.update();
-  });
+
+let mode = 1
+  
+/* 左側のタブ切り替え処理 */
+function changeleftTab(desiredModelId) {
+  let list = document.getElementsByClassName('tabs')
+  for (let element of list) {
+    element.classList.remove('active')
+  }
+  mode = desiredModelId
+  list[desiredModelId].classList.add('active')
 }
-
 
 /* タブ切り替え処理 */
 function changeTab(desiredModelId) {
@@ -58,7 +60,9 @@ function openFirst() {
 }
 
 fileContainer.onOpenFile(refreshTab);
-fileContainer.onCloseFile(refreshTab);
+fileContainer.onCloseFile( (filename) => {
+  refreshTab(filename)
+});
 
 //タブの更新
 function refreshTab (filename) {
@@ -72,7 +76,7 @@ function refreshTab (filename) {
       fileContainer.closeFile($(event.currentTarget).attr("id"))
     }
   });
-  let index = 0
+  let index = -1
   fileContainer.getOpenFiles().forEach((key, i) => {
     let _tab = tab.clone(true);
     _tab.attr('id', key);
@@ -83,19 +87,30 @@ function refreshTab (filename) {
       index = i
     }
   })
-  $.UIkit.switcher('#edittab').show(index)
+  if(index==-1){
+    const editorContainer = document.getElementById("container")
+    editorContainer.style.display='none'
+  }else{
+    $.UIkit.switcher('#edittab').show(index)
+  }
 }
 
 //Fileを開く
 //Editorに開いたファイルをセット
 function fileOpen(filename){
   currentFile = fileContainer.openFile(filename,EditorFileData,monaco)
-  if(!currentFile) return 
-  let data = currentFile.getEditorData();
-  //refreshTab(data)
-  editor.setModel(data.model);
-  editor.restoreViewState(data.state);
-  editor.focus();
+  const editorContainer = document.getElementById("container")
+  if(!currentFile) {
+    editorContainer.style.display='none'
+    return
+  }else{
+    editorContainer.style.display=''
+    let data = currentFile.getEditorData();
+    //refreshTab(data)
+    editor.setModel(data.model);
+    editor.restoreViewState(data.state);
+    editor.focus();
+  } 
 }
 
 //Editorの内容をcurrentFileに保存
@@ -114,8 +129,6 @@ function saveState(){
     }
 }
 
-let refreshViewLogic = new RefreshView(fileContainer);
-
 refreshViewLogic.onload( (url) => {
   $("#url").val(url)
   $("#popout").attr('href',url)
@@ -129,6 +142,7 @@ function refreshView (url) {
 
 //プロジェクトファイルの読み込み
 function loadProject (url, type, cb) {
+  changeleftTab(2)
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
   $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
@@ -167,6 +181,11 @@ function loadProject (url, type, cb) {
   }
 }
 
+
+filelist.onOpenFile( (path) => {
+  fileOpen(path);
+})
+
 function fileRename () {
   $('#filelist .uk-active').each( (index, element) => {
     console.log(element)
@@ -198,87 +217,12 @@ function fileDelete () {
 };
 
 //ファイルセットが変更された場合
-fileContainer.onChangeFiles( () => {
-  refreshFileList()
-})
-
-let collapsableList = {}
-function _refreshFileList (path = null) {
-  let listid = (path)? 'li[data-uri="'+path+'"]>ul' : '#filelist'
-  $(listid).empty();
-
-  const dir = $(`
-                <li>
-                  <span class="folder"><i class="uk-icon-folder uk-icon-mediu"></i></span>
-                  <ul>
-                    <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
-                  </ul>
-                </li>`);
-  dir.on("click", (event) => {
-    if(event.target.parentElement == event.currentTarget){
-      let t = $(event.target).attr("data-uri")
-      collapsableList[t] = $(event.currentTarget).hasClass('collapsable')
-      //_refreshFileList(t);
-      if(!event.ctrlKey){
-        $('#filelist').find("li").removeClass("uk-active");
-      }
-      $(event.target.parentElement).addClass("uk-active");
-    }
-  });
-
-  const file = $(`
-                  <li>
-                    <span><a class="file">
-                      <i class="uk-icon-file uk-icon-mediu"></i>
-                    </a></span>
-                  </li>`);
-  file.on("click", (event) => {
-    let t = $(event.target).attr("data-uri")
-    fileOpen(t);
-    if(!event.ctrlKey){
-      $('#filelist').find("li").removeClass("uk-active");
-    }
-    $(event.target.parentElement.parentElement).addClass("uk-active");
-  });
-  
-  fileContainer.getDirectories(path).forEach((val, i) => {
-    let _dir = dir.clone(true);
-    _dir.find('.fileSelect').attr('data-uri',val.path);
-    _dir.find('span').attr('data-uri',val.path);
-    _dir.find('.folder').append(val.name);
-    _dir.attr('data-uri',val.path);
-
-    if(collapsableList[val.path]){
-      _dir.addClass('open')
-    } else {
-      _dir.addClass('closed')
-    }
-
-    $(listid).append(_dir);
-    _refreshFileList(val.path)
-  });
-
-  fileContainer.getFiles(path).forEach((val, i) => {
-    let _file = file.clone(true);
-    _file.find('.fileSelect').attr('data-uri',val.path);
-    _file.find('.file').attr('data-uri',val.path);
-    _file.find('.file').append(val.name);
-    _file.attr('data-uri',val.path);
-    $(listid).append(_file);
-  });
-}
-
 //File一覧の更新
-function refreshFileList () {
+fileContainer.onChangeFiles( () => {
+  refreshTab()
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
-
-  _refreshFileList();
-  $('#filelist').treeview({
-		animated: "fast",
-    collapsed: false
-  });
-
+  filelist.refreshFileList()
   $.contextMenu({
     selector: '#filelist',
     // define the elements of the menu
@@ -288,7 +232,7 @@ function refreshFileList () {
     }
     // there's more, have a look at the demos and docs...
   })
-}
+})
 
 //プロジェクト一覧表示
 function projectjsonCallback (json, type) {
@@ -296,7 +240,9 @@ function projectjsonCallback (json, type) {
 
   const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
   prj.on("click", (event) => {
-    loadProject($(event.target).attr("data-url"), type, () => {})
+    loadProject($(event.target).attr("data-url"), type, () => {
+      fileContainer.refreshCache(EditorFileData,monaco);
+    })
   });
 
   json.rows.forEach((val, i) => {
@@ -317,18 +263,6 @@ function compileAll () {
         $.UIkit.notify("success..", {status:'success',timeout : 1000});
         refreshView("./public/index.html");
     })
-}
-
-class DebugBuilder extends Builder {
-  beforeCompile(src) {
-    console.log("DebugBuilder", stringify(src));
-  }
-  beforeCreateNodes(src) {
-    console.log("DebugBuilder-createNodes", stringify(src));
-  }
-  beforeCreateTagElement(src) {
-    console.log("DebugBuilder-beforeCreateTagElement", stringify(src));
-  }
 }
 
 var arg = new Object();
@@ -394,6 +328,18 @@ $(document).ready(() => {
     $("#child-frame")[0].contentWindow.history.forward()
   } )
     
+
+  $(".test1").on("click", (event) => {
+    if(mode > 0) mode--
+    changeleftTab(mode)
+  });
+  $(".test2").on("click", (event) => {
+    if(mode <= 2) mode++
+    changeleftTab(mode)
+  });
+
+
+
   if (!navigator.serviceWorker) {
     $("#popout").css('display','none')
   }
@@ -470,22 +416,3 @@ $(document).ready(() => {
   });
 });
 
-function stringify(str) {
-  var cache = [];
-  return JSON.stringify(
-    str,
-    function (key, value) {
-      if (typeof value === "object" && value !== null) {
-        if (cache.indexOf(value) !== -1) {
-          // Circular reference found, discard key
-          return;
-        }
-        // Store value in our collection
-        cache.push(value);
-      }
-      if (key == "parentNode") return;
-      return value;
-    },
-    "\t"
-  );
-}

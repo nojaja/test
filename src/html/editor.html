@@ -1,59 +1,77 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset='UTF-8'>
   <title>Html2ReactComponent</title>
 </head>
+
 <body>
-
-<!-- This is the off-canvas sidebar -->
-<div id="offcanvas-1" class="uk-offcanvas" aria-hidden="false">
-  <div class="uk-offcanvas-bar " mode="push">
-
-    <ul id="prjlist" class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
-      <li class="uk-nav-header">プロジェクト</li>
-    </ul>
-  </div>
-</div>
-
-
-<nav class="tm-navbar uk-navbar uk-navbar-attached">
-  <div class="uk-container uk-container-center">
-    <a data-uk-offcanvas="{target:'#offcanvas-1'}" class="uk-navbar-toggle"></a>
-    <ul class="uk-navbar-nav uk-hidden-small">
-      <li><h2 class="uk-margin-remove"><div><span id="title"></span> <i id="titleEdit" class="uk-icon-pencil uk-icon-hover edit-title"></i></div></h2></li>
-    </ul>
-    <div class="uk-navbar-flip">
+  <nav class="tm-navbar uk-navbar uk-navbar-attached">
+    <div class="uk-container uk-container-center">
       <ul class="uk-navbar-nav uk-hidden-small">
-
-        <li class="uk-active uk-button-primary"><a id="test0" class="samples" > Load localStorage</a></li>
-        <li class="uk-active uk-button-primary"><a id="run"><i class="uk-icon-play-circle"></i> RUN</a></li>
-        <li class="uk-active uk-button-primary"><a id="gist"><i class="uk-icon-github"></i> Share Gist</a></li>
-        <li class="uk-active uk-button-primary"><a id="test"><i class="uk-icon-file-text"></i> test</a></li>
-
- 
-
+        <li>
+          <h2 class="uk-margin-remove">
+            <div><span id="title"></span> <i id="titleEdit" class="uk-icon-pencil uk-icon-hover edit-title"></i></div>
+          </h2>
+        </li>
       </ul>
-    </div>
-  </div>
-</nav>
-<div class="uk-grid ">
-  <div class="uk-form uk-width-medium-1-6">
-    <div class="uk-panel">
-      <a id="newfile" class="uk-button uk-button-success uk-button-smal uk-float-right"><i class="uk-icon-plus"></i> ADD File</a>
-    </div>
+      <div class="uk-navbar-flip">
+        <ul class="uk-navbar-nav uk-hidden-small">
 
-    <ul id="filelist">
-      <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
-    </ul>
+          <li class="uk-active uk-button-primary"><a id="test0" class="samples"> Load localStorage</a></li>
+          <li class="uk-active uk-button-primary"><a id="run"><i class="uk-icon-play-circle"></i> RUN</a></li>
+          <li class="uk-active uk-button-primary"><a id="gist"><i class="uk-icon-github"></i> Share Gist</a></li>
+          <li class="uk-active uk-button-primary"><a id="test"><i class="uk-icon-file-text"></i> test</a></li>
 
-  </div>
-  <div class="uk-width-medium-3-6">
-    <div class="uk-panel">
-      <div style="
+
+
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="uk-grid ">
+    <div class="left-panel uk-form uk-width-medium-1-6">
+
+      <div class="tabs">
+        <div class="uk-panel">
+          Select
+          <a class="uk-button uk-button-success uk-button-smal test2 uk-float-right"><i
+              class="uk-icon-chevron-right"></i></a>
+          test
+        </div>
+      </div>
+
+      <div class="tabs active">
+        <div class="uk-panel">
+          <a class="uk-button uk-button-success uk-button-smal test1"><i class="uk-icon-chevron-left"></i></a>
+          Samples
+          <a class="uk-button uk-button-success uk-button-smal test2 uk-float-right"><i
+              class="uk-icon-chevron-right"></i></a>
+          <ul id="prjlist" class="uk-nav uk-nav-offcanvas uk-nav-parent-icon" data-uk-nav="">
+            <li class="uk-nav-header">プロジェクト</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <div class="uk-panel">
+          <a class="uk-button uk-button-success uk-button-smal test1"><i class="uk-icon-chevron-left"></i></a>
+          <a id="newfile" class="uk-button uk-button-success uk-button-smal uk-float-right"><i class="uk-icon-plus"></i>
+            ADD File</a>
+        </div>
+        <ul id="filelist">
+          <li><i class="uk-icon-spinner uk-icon-spin"></i></li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="uk-width-medium-3-6">
+      <div class="uk-panel">
+        <div style="
             overflow-y: hidden;
-        " >
-      <ul id="edittab" class="uk-tab" style="
+        ">
+          <ul id="edittab" class="uk-tab" style="
             #overflow: hidden !important;
             overflow-x: auto;
             overflow-y: hidden;
@@ -61,40 +79,45 @@
             display: flex;
             #touch-action: auto;
             -webkit-overflow-scrolling: touch;
-        " data-uk-tab >
-      </ul>
+        " data-uk-tab>
+          </ul>
+        </div>
+        <!-- This is the container of the content items -->
+        <ul id="tab-content" class="uk-switcher uk-margin">
+          <li class="uk-active">
+            <div id="container" class="editor"></div>
+          </li>
+        </ul>
       </div>
-      <!-- This is the container of the content items -->
-      <ul id="tab-content" class="uk-switcher uk-margin">
-        <li class="uk-active">
-          <div id="container" class="editor"></div>
-        </li>
-      </ul>
     </div>
-  </div>
-  <div class="uk-width-medium-2-6">
-    <div class="uk-panel uk-form">
-      <h3 class="uk-panel-title">Preview</h3>
+    <div class="uk-width-medium-2-6">
+      <div class="uk-panel uk-form">
+        <h3 class="uk-panel-title">Preview</h3>
         <button class="uk-button uk-button-default" id="history_back"><i class="uk-icon-arrow-left"></i></button>
         <button class="uk-button uk-button-default" id="history_forward"><i class="uk-icon-arrow-right"></i></button>
         <input class="uk-input" value="/public/index.html" id="url">
         <button class="uk-button uk-button-default" id="refresh"><i class="uk-icon-refresh"></i></button>
-        <a id="popout" class="uk-button uk-button-default" target="_blank" href="./public/index.html" ><i class="uk-icon-mail-forward"></i> View</a>
-      <iframe id="child-frame" class="editor" src="./blank.html"></iframe>
+        <a id="popout" class="uk-button uk-button-default" target="_blank" href="./public/index.html"><i
+            class="uk-icon-mail-forward"></i> View</a>
+        <iframe id="child-frame" class="editor" src="./blank.html"></iframe>
+      </div>
     </div>
   </div>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.10.7/sass.sync.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sass.js/0.10.7/sass.sync.min.js"></script>
 
-<script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date(); a = s.createElement(o),
+        m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+    })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
 
-  ga('create', 'UA-101081454-1', 'auto');
-  ga('send', 'pageview');
+    ga('create', 'UA-101081454-1', 'auto');
+    ga('send', 'pageview');
 
-</script>
-</body></html>
+  </script>
+</body>
+
+</html>

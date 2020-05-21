@@ -1,3 +1,15 @@
+.left-panel {
+    background: #333;
+    color: #fff
+}
+
+.tabs{
+    display:none;
+}
+.tabs.active{
+    display:block;
+}
+
 .editor {
   width: 100%;
   height: 800px;
@@ -43,17 +55,17 @@
 }
 
 .treeview ul a:hover, .treeview ul span:hover {
-    color: #059;
+    __color: #059;
 }
 
 .treeview li > a:hover, .treeview li > a:focus, .treeview li > span:hover, .treeview li > span:focus {
-    background: rgba(0, 0, 0, 0.05);
-    color: #444;
+    background: rgba(0, 0, 0, 0.5);
+    color: #EEE;
     outline: none;
 }
 
 .treeview li > span, .treeview li > span > a {
-    color: #444;
+    color: #EEE;
     padding: 2px 5px;
     display: block;
     text-decoration: none;
