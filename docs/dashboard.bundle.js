@@ -16169,7 +16169,7 @@ class FileContainer {
   }
 
   getId () {
-    return this.container.id
+    return this.container.id || null
   }
 
   setProjectName (projectName) {
@@ -16177,7 +16177,7 @@ class FileContainer {
   }
 
   getProjectName () {
-    return this.container.projectName
+    return this.container.projectName || null
   }
 
   
@@ -16193,7 +16193,7 @@ class FileContainer {
             ret[mp[1]] = mp[1]
           }
         } else {
-          if(key.indexOf(parentPath)==0 && key.indexOf('/', parentPath.length)==-1 ) {
+          if(key.indexOf(parentPath)==0 && key.indexOf('/', parentPath.length) > 0 ) {
             const _key = key.substring(parentPath.length)
             let mp = _key.match(/(.+?\/)/)
             if(mp){
@@ -16206,18 +16206,22 @@ class FileContainer {
     return Object.keys(ret).map(key => { return {"path": key, "name": ret[key]} });
   }
 
-  getFiles ( parentPath = null) {
+  getFiles ( parentPath = null, all = false) {
     // 配列のキーを取り出す
     let ret = {}
     for (let key in this.container.files) {
       if (!this.container.files[key].truncated) {
-        if (!parentPath && key.indexOf('/')==-1) {
+        if (!parentPath && (all || key.indexOf('/')==-1)) { 
+          // parentPathを指定してない場合 最上位階層のファイルを返す
+          // all = trueの場合は全ファイルを返す
           let mp = key.match(/\/?([^\/]+\.[^.]+)$/)
           if(mp){
             ret[key] = mp[1]
           }
-        } else {
-          if(key.indexOf(parentPath)==0 && key.indexOf('/', parentPath.length)==-1 ) {
+        } else { 
+          // parentPathを指定した場合　そのpathの直配下のファイルを返す
+          // all = trueの場合は全配下のファイルを返す
+          if(key.indexOf(parentPath)==0 && (all || key.indexOf('/', parentPath.length)==-1 )) {
             let mp = key.match(/\/?([^\/]+\.[^.]+)$/)
             if(mp){
               ret[key] = mp[1]
@@ -16246,19 +16250,26 @@ class FileContainer {
     return ret
   }
 
+  existFile (filename) {
+    if (filename in this.container.files) {
+      return true
+    }
+    return false
+  }
+
   getFile (filename, fileCls, ...constructorParam) {
     let Cls = fileCls || _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"]
     if (filename in this.container.files) {
       return new Cls(this.container.files[filename],...constructorParam)
     }
-    return false
+    return null
   }
 
   getFileRaw (filename) {
     if (filename in this.container.files) {
       return this.container.files[filename]
     }
-    return false
+    return null
   }
 
   openFile (filename, fileCls, ...constructorParam) {
@@ -16269,7 +16280,7 @@ class FileContainer {
       this.ev.emit('open', filename, this.fileObjects[filename])
       return this.fileObjects[filename]
     }
-    return false
+    return null
   }
 
   closeFile (filename) {
@@ -16301,14 +16312,30 @@ class FileContainer {
     return true
   }
 
+  copyFile (src, dest, mode = 0 ) {
+    if (src in this.container.files) {
+      if (mode==1 || !dest in this.container.files) {
+        let file = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.container.files[src])
+        file.setFilename(dest)
+        this.putFile(file)
+        this.container.lastUpdatedTime = new Date().getTime()
+        return true
+      }
+    }
+    return false
+  }
+
   renameFile (filename, newName) {
     if (filename in this.container.files) {
-      let file = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.container.files[filename])
-      file.setFilename(newName)
-      delete this.container.files[filename]
-      this.putFile(file)
-      this.container.lastUpdatedTime = new Date().getTime()
-      return true
+      if (!newName in this.container.files) {
+        let file = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.container.files[filename])
+        file.setFilename(newName)
+        delete this.container.files[filename]
+        delete this.fileObjects[filename]
+        this.putFile(file)
+        this.container.lastUpdatedTime = new Date().getTime()
+        return true
+      }
     }
     return false
   }
@@ -16317,16 +16344,16 @@ class FileContainer {
     if (filename in this.container.files) {
       let file = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.container.files[filename])
       file.remove()
+      this.putFile(file)
       delete this.container.files[filename]
       delete this.fileObjects[filename]
-      this.putFile(file)
       this.container.lastUpdatedTime = new Date().getTime()
       return true
     }
     return false
   }
 
-  init () {
+  clear() {
     this.container = {
       v: 0.1,
       id: '',
@@ -16341,12 +16368,16 @@ class FileContainer {
     this.fileObjects = {}
   }
 
+  init () {
+    this.clear()
+  }
+
   setPublic (bool) {
     this.container.public = bool
   }
 
   getPublic () {
-    return this.container.public
+    return this.container.public || null
   }
 
   setDescription (description) {
@@ -16354,7 +16385,7 @@ class FileContainer {
   }
 
   getDescription () {
-    return this.container.description
+    return this.container.description || null
   }
 
   setContainer (container) {
@@ -16364,7 +16395,7 @@ class FileContainer {
   }
 
   getContainer () {
-    return this.container
+    return this.container || null
   }
 
   setContainerJson (container) {
@@ -16570,4 +16601,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.da22ae4041135af60188.js.map
+//# sourceMappingURL=map/dashboard.c381ec877f86c9bfdf9b.js.map
