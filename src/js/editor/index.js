@@ -118,6 +118,7 @@ let refreshViewLogic = new RefreshView(fileContainer);
 
 refreshViewLogic.onload( (url) => {
   $("#url").val(url)
+  $("#popout").attr('href',url)
 })
 
 // iframe内のコンテンツを更新
@@ -392,8 +393,10 @@ $(document).ready(() => {
   $("#history_forward").on("click", (event) => {
     $("#child-frame")[0].contentWindow.history.forward()
   } )
-
-
+    
+  if (!navigator.serviceWorker) {
+    $("#popout").css('display','none')
+  }
 
   $("#gist").on("click", (event) => {
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');

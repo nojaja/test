@@ -34,7 +34,7 @@ export class HtmlStorage {
             fileContainer.putFile(file);
             
             fileContainer.setProjectName($(data).find("title").text()||"new project");
-            console.log("fileContainer:" + fileContainer.getContainerJson());
+            // console.log("fileContainer:" + fileContainer.getContainerJson());
             return (cb)?cb(fileContainer):fileContainer.getContainerJson();
         });
     }

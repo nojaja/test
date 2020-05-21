@@ -42,7 +42,7 @@ export class GasStorage {
                 file.setContent(json.content)
                 fileContainer.putFile(file)
             
-                console.log("fileContainer:" + fileContainer.getContainerJson())
+                // console.log("fileContainer:" + fileContainer.getContainerJson())
                 return (cb)?cb(fileContainer):fileContainer.getContainerJson()
             }
         })

@@ -39,7 +39,7 @@ export class LocalStorage {
             fileContainer.putFile(file);
         }
         fileContainer.setProjectName(fileContainer.getProjectName() || "new project")
-        console.log("fileContainer:" + fileContainer.getContainerJson());
+        // console.log("fileContainer:" + fileContainer.getContainerJson());
         return (cb)?cb(fileContainer):fileContainer.getContainerJson();
     }
 
