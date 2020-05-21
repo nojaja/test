@@ -8,7 +8,16 @@ export class RefreshView {
     constructor (fileContainer) {
         this.fileContainer = fileContainer
         this.url = ''
-        this.ev = new EventEmitter ()
+        this.ev = new EventEmitter ()        
+        /**
+        サービスワーカーの登録
+        キャッシュファイルの制御を可能にする
+        */
+        if (navigator.serviceWorker) {
+            navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
+                registraion.update()
+            })
+        }
     }
 
     parseHtml (rawHtml) {
