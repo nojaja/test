@@ -3,6 +3,7 @@ const gisturl = 'https://api.github.com/gists';
 
 export class GistStorage {
     constructor () {
+        this.tokens = localStorage.getItem('gittoken') || null
     }
 
     //プロジェクト一覧取得
@@ -10,41 +11,45 @@ export class GistStorage {
         $.ajax({ 
             url: gisturl,
             type: 'GET',
-            beforeSend: function(xhr) { 
-                var tokens= prompt("GIT Personal access tokens",""); 
-                xhr.setRequestHeader("Authorization","token "+tokens); 
+            beforeSend: (xhr) => { 
+                // <p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>
+                if(this.tokens==null) this.token = prompt("<p>Gist</p><br><p><a href='https://github.com/settings/tokens'>Personal access tokens</a>:</p>","")
+                xhr.setRequestHeader("Authorization","token " + this.tokens)
             }
         }).done((response) => {
             let list = {rows : response}
-            console.log(list);
+            localStorage.setItem('gittoken', this.tokens)
             return (cb)? cb(list, "gist") : list
         }).fail((jqXHR, textStatus, errorThrown) => {
             // エラーの場合処理
-            console.log(jqXHR,textStatus,errorThrown);
+            this.tokens = null
         });
     }
 
-    saveDraft (fileContainer, token){
+    saveDraft (fileContainer){
+        if(this.tokens==null) this.token = prompt("<p>Gist</p><br><p><a href='https://github.com/settings/tokens'>Personal access tokens</a>:</p>","")
+
         $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
         
-        const sendType = "POST";
+        let sendType = "POST";
         let _gisturl = gisturl;
-        if (fileContainer.getId()){
+        if (fileContainer.getGistId()){
             sendType = "PATCH";
-            _gisturl = gisturl + "/"+fileContainer.getId();
+            _gisturl = gisturl + "/"+fileContainer.getGistId();
         }
-
         $.ajax({
             url: _gisturl,
             type: sendType,
             dataType: 'json',
-            beforeSend: function beforeSend(xhr) {
-                xhr.setRequestHeader("Authorization", "token " + token);
+            beforeSend: (xhr) => { 
+                xhr.setRequestHeader("Authorization", "token " + this.tokens);
             },
             data: fileContainer.getGistJsonData()
-        }).success((e) => {
-            console.log(e);
-            $.UIkit.notify("complete!", { status: 'success', timeout: 1000 });
+        }).done((response) => {
+            $.UIkit.notify("complete!", { status: 'success', timeout: 1000 })
+            localStorage.setItem('gittoken', this.tokens)
+            
+            fileContainer.setGistId(response.id)
             
             //TODO ここにGASへの登録処理を追加する
             //URL https://script.google.com/macros/s/AKfycbzjYobwi6G61HPTeiUue67PlOHvnsj2E_SFgzi-CVoV/dev?p=/uid/reactcomponent/ ファイル名.gist&contents=gistID
@@ -55,16 +60,30 @@ export class GistStorage {
                 console.log(json);
             });
             */
-        }).error((e) => {
-            console.warn("gist save error", e);
+        }).fail((jqXHR, textStatus, errorThrown) => {
+            console.warn("gist save error", errorThrown);
             $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
         });
     }
 
     loadDraft (fileContainer,url,cb) {
-        $.getJSON(gisturl+"/"+url).done((data) => {
+        $.getJSON(gisturl+"/"+url).done((response) => {
+            let conv = (response) => ({
+                "v": 0.1,
+                "id": response.id,
+                "gistid": response.id,
+                "files": Object.fromEntries(Object.entries(response.files).map(([key, value]) => {
+                            return [key.replace(/%2F/g, '\/'), {"filename": value.filename.replace(/%2F/g, '\/'), "content": value.content, "type": value.type, "language": value.language, "size": value.size, "truncated": value.truncated}]
+                        })),
+                "public": response.public,
+                "createdTime": new Date(response.created_at).getTime(),
+                "lastUpdatedTime": new Date(response.updated_at).getTime(),
+                "description": response.description,
+                "projectName": response.projectName
+            })
+            let data = conv(response)
             fileContainer.setContainer(data);
-            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
+            fileContainer.setProjectName(data.projectName || data.description.split(/\r\n|\r|\n/)[0] || "new project");
             // console.log("fileContainer:" + fileContainer.getContainerJson());
             return (cb)?cb(fileContainer):fileContainer.getContainerJson();
         })

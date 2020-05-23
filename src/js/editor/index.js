@@ -7,7 +7,6 @@ import EditorFileData from '../model/EditorFileData.js'
 import FileContainer from '../model/PublishFileContainer.js'
 import LocalStorage from '../fs/localstorage.js'
 import GistStorage from '../fs/giststorage.js'
-import GasStorage from '../fs/gasstorage.js'
 import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import BuilderLogic from './builderlogic.js'
@@ -20,22 +19,21 @@ import 'uikit/dist/css/uikit.css'
 import 'uikit/dist/css/components/notify.css'
 import '../../css/style.css'
 
-var editor = null;
-var currentFile = null;
-var fileContainer = new FileContainer('/public/');
+let editor = null;
+let currentFile = null;
+let fileContainer = new FileContainer('/public/');
 
-var localstorage = new LocalStorage();
-var gistStorage = new GistStorage();
-var gasStorage = new GasStorage();
-var htmlStorage = new HtmlStorage();
-var webStorage = new WebStorage();
-var builderLogic = new BuilderLogic(fileContainer);
+let localstorage = new LocalStorage();
+let gistStorage = new GistStorage();
+let htmlStorage = new HtmlStorage();
+let webStorage = new WebStorage();
+let builderLogic = new BuilderLogic(fileContainer);
 let refreshViewLogic = new RefreshView(fileContainer);
 let filelist = new FileList(fileContainer);
 
+let selectStorage = webStorage
 
 let mode = 1
-  
 /* 左側のタブ切り替え処理 */
 function changeleftTab(desiredModelId) {
   let list = document.getElementsByClassName('tabs')
@@ -45,6 +43,25 @@ function changeleftTab(desiredModelId) {
   mode = desiredModelId
   list[desiredModelId].classList.add('active')
 }
+
+$(".storageType").on("click", (event) => {
+  let type = $(event.target).attr("data-type")
+  if(type == 'localstorage') selectStorage = localstorage
+  if(type == 'gistStorage') selectStorage = gistStorage
+  if(type == 'htmlStorage') selectStorage = htmlStorage
+  if(type == 'webStorage') selectStorage = webStorage
+
+  $("#prjlist").empty();
+  $("#prjlist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
+  mode++
+  changeleftTab(mode)
+
+  //プロジェクト一覧取得
+  selectStorage.loadList((json, type) => {
+      projectjsonCallback(json, type)
+  });
+
+})
 
 /* タブ切り替え処理 */
 function changeTab(desiredModelId) {
@@ -59,7 +76,9 @@ function openFirst() {
   $("#filelist li:first").addClass("uk-active");
 }
 
-fileContainer.onOpenFile(refreshTab);
+fileContainer.onOpenFile( (filename) => {
+  refreshTab(filename)
+});
 fileContainer.onCloseFile( (filename) => {
   refreshTab(filename)
 });
@@ -154,12 +173,6 @@ function loadProject (url, type, cb) {
       openFirst()
       return (cb)?cb():true
     })
-  }else if(type == "gas"){
-      gasStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          // refreshFileList();
-          openFirst();
-          return (cb)?cb():true;
-      })
   }else if(type == "gist"){
       gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
           // refreshFileList();
@@ -188,7 +201,6 @@ filelist.onOpenFile( (path) => {
 
 function fileRename () {
   $('#filelist .uk-active').each( (index, element) => {
-    console.log(element)
     const filename = $(element).attr("data-uri");
     UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
       console.log('newName '+newName);
@@ -203,7 +215,6 @@ function fileRename () {
 
 function fileDelete () {
   $('#filelist .uk-active').each((index, element) => {
-    console.log(element)
     const filename = $(element).attr("data-uri");
     UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
       console.log('filename '+filename);
@@ -216,12 +227,15 @@ function fileDelete () {
   });
 };
 
-//ファイルセットが変更された場合
-//File一覧の更新
-fileContainer.onChangeFiles( () => {
-  refreshTab()
+fileContainer.onChangeMetas( () => {
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
+});
+
+//ファイルセットが変更された場合
+//File一覧の更新
+fileContainer.onChangeFiles( (filename) => {
+  refreshTab(filename)
   filelist.refreshFileList()
   $.contextMenu({
     selector: '#filelist',
@@ -238,7 +252,7 @@ fileContainer.onChangeFiles( () => {
 function projectjsonCallback (json, type) {
   $("#prjlist").empty();
 
-  const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-file"></i></a></li>');
+  const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
   prj.on("click", (event) => {
     loadProject($(event.target).attr("data-url"), type, () => {
       fileContainer.refreshCache(EditorFileData,monaco);
@@ -249,7 +263,7 @@ function projectjsonCallback (json, type) {
     // [{description, id, public},,]
     let _prj = prj.clone(true);
     _prj.children('.project').attr('data-url',val.id);
-    _prj.children('.project').append(val.description);
+    _prj.children('.project').append(' '+val.description);
     $("#prjlist").append(_prj);
   });
 }
@@ -291,7 +305,7 @@ $(document).ready(() => {
     });
 
     //プロジェクト一覧取得
-    webStorage.loadList((json, type) => {
+    selectStorage.loadList((json, type) => {
         projectjsonCallback(json, type)
     });
 
@@ -328,7 +342,6 @@ $(document).ready(() => {
     $("#child-frame")[0].contentWindow.history.forward()
   } )
     
-
   $(".test1").on("click", (event) => {
     if(mode > 0) mode--
     changeleftTab(mode)
@@ -338,13 +351,13 @@ $(document).ready(() => {
     changeleftTab(mode)
   });
 
-
-
   if (!navigator.serviceWorker) {
     $("#popout").css('display','none')
   }
 
   $("#gist").on("click", (event) => {
+    gistStorage.saveDraft(fileContainer)
+    /*
     const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
     const token = localStorage.getItem(token_key);
     if(!token){
@@ -360,6 +373,7 @@ $(document).ready(() => {
     }else{
        gistStorage.saveGist(fileContainer,token);
     }
+    */
   });
 
   $("#titleEdit").on("click", (event) => {
@@ -395,19 +409,17 @@ $(document).ready(() => {
       });
   });
 
-  $('#container').bind('blur keyup keypress change', (e) => {
-        saveState()
+  $('#container').bind('blur keypress change', (e) => {
+    saveState()
   });
 
   $(window).keydown( (e) => {
     if(e.keyCode === 120){
-        console.log("keydown120")
         compileAll();
         return false;
       }
     if(e.ctrlKey){
       if(e.keyCode === 83){
-        console.log("keydown83")
         localstorage.saveDraft(fileContainer);
         fileContainer.refreshCache(EditorFileData,monaco);
         return false;

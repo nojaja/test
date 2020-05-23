@@ -13,6 +13,7 @@ export class FileContainer {
     this.container = {
       v: 0.1,
       id: null,
+      gistid: null,
       files: {},
       public: true,
       createdTime: new Date().getTime(),
@@ -26,6 +27,9 @@ export class FileContainer {
     this.ev = new EventEmitter ()
   }
 
+  onChangeMetas (callback) {
+    this.ev.on('changemeta', callback)
+  }
   onChangeFiles (callback) {
     this.ev.on('change', callback)
   }
@@ -40,14 +44,25 @@ export class FileContainer {
 
   setId (id) {
     this.container.id = id
+    this.ev.emit('changemeta')
   }
 
   getId () {
     return this.container.id || null
   }
 
+  setGistId (gistid) {
+    this.container.id = gistid
+    this.ev.emit('changemeta')
+  }
+
+  getGistId () {
+    return this.container.gistid || null
+  }
+
   setProjectName (projectName) {
     this.container.projectName = projectName
+    this.ev.emit('changemeta')
   }
 
   getProjectName () {
@@ -231,6 +246,7 @@ export class FileContainer {
     this.container = {
       v: 0.1,
       id: '',
+      gistid: '',
       files: {},
       public: true,
       createdTime: new Date().getTime(),
@@ -248,6 +264,7 @@ export class FileContainer {
 
   setPublic (bool) {
     this.container.public = bool
+    this.ev.emit('changemeta')
   }
 
   getPublic () {
@@ -256,6 +273,7 @@ export class FileContainer {
 
   setDescription (description) {
     this.container.description = description
+    this.ev.emit('changemeta')
   }
 
   getDescription () {
@@ -266,6 +284,7 @@ export class FileContainer {
     this.container = container
     this.fileObjects = {}
     this.ev.emit('change', null)
+    this.ev.emit('changemeta')
   }
 
   getContainer () {
@@ -282,10 +301,25 @@ export class FileContainer {
   }
 
   getGistData () {
+    let siteeditor = new FileData()
+    siteeditor.setFilename('.siteeditor');
+    siteeditor.setContent("HelloWorld");
+    siteeditor.getFileData()
+    this.putFile(siteeditor)
+
+    let readme = new FileData()
+    readme.setFilename('README.md');
+    readme.setContent("HelloWorld");
+    this.putFile(readme)
+    
+    let files = Object.entries(this.container.files).filter( (x, self) => (!x[1].content == "")).map(([key, value]) => {
+      return [key.replace(/\//g, '%2F'), {"filename": value.filename.replace(/\//g, '%2F'), "content": value.content}]
+    })
+
     let gistdata = {
       description: this.container.projectName + '\n' + this.container.description,
       public: this.container.public,
-      files: this.container.files
+      files: Object.fromEntries(files)
     }
     return gistdata
   }
@@ -304,10 +338,12 @@ export class FileContainer {
 
   setCreatedTime (createdTime) {
     this.container.createdTime = createdTime
+    this.ev.emit('changemeta')
   }
 
   setLastUpdatedTime (lastUpdatedTime) {
     this.container.lastUpdatedTime = lastUpdatedTime
+    this.ev.emit('changemeta')
   }
 }
 export default FileContainer

@@ -6,21 +6,41 @@ export class LocalStorage {
     constructor () {
     }
     loadList (cb) {
+        
+        Object.keys(localStorage).filter( (x, i, self) => /^Container_/.test(x)).map(key => { 
+            let data = JSON.parse(localStorage[key])
+            return {"description": data.projectName, "id": key, "public": data.public }
+        }).forEach((val) => {
+            console.log(val)
+        })
+        //return Object.keys(ret).map(key => { return {"path": key, "name": ret[key]} });
+        //const noteKeyList = array.filter(function (x, i, self) {
+        //    return self.indexOf(x) === i
+        //  })
+
         //プロジェクト一覧取得
         // ROWID, filename, ext, timestamp, uid, scope,projectid
+        //let json = {
+        //    rows : [
+        //        //OUT [{description, id, public},,]
+        //        {description : 'index', id:'reactcomponent/index.text', public:true}
+        //    ]
+        //}
+        
         let json = {
-            rows : [
-                //OUT [{description, id, public},,]
-                {description : 'index', id:'reactcomponent/index.text', public:true}
-            ]
+            rows : Object.keys(localStorage).filter( (x, i, self) => /^Container_/.test(x)).map(key => { 
+                let data = JSON.parse(localStorage[key])
+                return {"description": data.projectName, "id": key, "public": data.public }
+            })
         }
         return (cb)? cb(json, "local") : json
     }
 
     saveDraft (fileContainer) {
         // ローカルストレージに最新の状態を保存
-        const name = 'draftContainer'+location.pathname.replace(/\//g, '.');
-        localStorage.setItem(name, fileContainer.getContainerJson());
+        //const name = 'draftContainer'+location.pathname.replace(/\//g, '.');
+        const prjName = 'Container_' + fileContainer.getId()
+        localStorage.setItem(prjName, fileContainer.getContainerJson());
         // console.log("draftContainer:" + fileContainer.getContainerJson());
         $.UIkit.notify("save..", {status:'success',timeout : 1000});
     }
@@ -28,14 +48,17 @@ export class LocalStorage {
     loadDraft (fileContainer, path, cb) {
         // ページが読み込まれたら、ローカルストレージから状態を読み込む
         const name1 = path || 'draftContainer'+location.pathname.replace(/\//g, '.');
-        const name2 = 'draft'+location.pathname.replace(/\//g, '.');
         if (localStorage.getItem(name1)) {
             fileContainer.setContainerJson(localStorage.getItem(name1));
-        } else {
-            const source = JSON.parse(localStorage.getItem(name2)) || null;
+        } else { 
+            const prjId = Date.now() + Math.floor(1e4 + 9e4 * Math.random())
+            
+            const source = null;
             const file = new FileData();
             file.setFilename("index.html");
             file.setContent(source);
+            
+            fileContainer.setId(prjId)
             fileContainer.putFile(file);
         }
         fileContainer.setProjectName(fileContainer.getProjectName() || "new project")
