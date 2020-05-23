@@ -33,6 +33,50 @@ let filelist = new FileList(fileContainer);
 
 let selectStorage = webStorage
 
+/**
+ * イベント操作系
+ */
+fileContainer.onOpenFile((filename) => {
+  refreshTab(filename)
+});
+
+fileContainer.onCloseFile((filename) => {
+  refreshTab(filename)
+});
+
+refreshViewLogic.onload((url) => {
+  $("#url").val(url)
+  $("#popout").attr('href', url)
+})
+
+filelist.onOpenFile((path) => {
+  fileOpen(path);
+})
+
+fileContainer.onChangeMetas(() => {
+  $("#title").empty();
+  $("#title").text(fileContainer.getProjectName());
+});
+
+//ファイルセットが変更された場合
+//File一覧の更新
+fileContainer.onChangeFiles((filename) => {
+  refreshTab(filename)
+  filelist.refreshFileList()
+  $.contextMenu({
+    selector: '#filelist',
+    // define the elements of the menu
+    items: {
+      "delete": { name: "Delete", callback: (key, options) => { fileDelete() } },
+      "rename": { name: "Rename", callback: (key, options) => { fileRename() } }
+    }
+  })
+})
+
+/**
+ * 左のpanelのstorage処理
+ */
+
 let mode = 1
 /* 左側のタブ切り替え処理 */
 function changeleftTab(desiredModelId) {
@@ -44,6 +88,7 @@ function changeleftTab(desiredModelId) {
   list[desiredModelId].classList.add('active')
 }
 
+/* storage選択処理 */
 $(".storageType").on("click", (event) => {
   let type = $(event.target).attr("data-type")
   if (type == 'localstorage') selectStorage = localstorage
@@ -60,13 +105,62 @@ $(".storageType").on("click", (event) => {
   selectStorage.loadList((json, type) => {
     projectjsonCallback(json, type)
   });
-
 })
 
-/* タブ切り替え処理 */
-function changeTab(desiredModelId) {
-  saveState()
-  fileOpen(desiredModelId)
+//プロジェクト一覧表示
+function projectjsonCallback(json, type) {
+  $("#prjlist").empty();
+
+  const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
+  prj.on("click", (event) => {
+    loadProject($(event.target).attr("data-url"), type, () => {
+      fileContainer.refreshCache(EditorFileData, monaco);
+    })
+  });
+
+  json.rows.forEach((val, i) => {
+    // [{description, id, public},,]
+    let _prj = prj.clone(true);
+    _prj.children('.project').attr('data-url', val.id);
+    _prj.children('.project').append(' ' + val.description);
+    $("#prjlist").append(_prj);
+  });
+}
+
+//プロジェクトファイルの読み込み
+function loadProject(url, type, cb) {
+  // file一覧に切り替え
+  changeleftTab(2)
+  $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
+  $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
+  // iframeの初期化
+  refreshView("./blank.html");
+  // URL指定がない場合はlocalから取得
+  if (!url || type == "local") {
+    localstorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList()
+      openFirst()
+      return (cb) ? cb() : true
+    })
+  } else if (type == "gist") {
+    gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "html") {
+    htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "web") {
+    webStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  }
 }
 
 //１つ目のファイルを開く
@@ -76,12 +170,29 @@ function openFirst() {
   $("#filelist li:first").addClass("uk-active");
 }
 
-fileContainer.onOpenFile((filename) => {
-  refreshTab(filename)
-});
-fileContainer.onCloseFile((filename) => {
-  refreshTab(filename)
-});
+//Fileを開く
+//Editorに開いたファイルをセット
+function fileOpen(filename) {
+  currentFile = fileContainer.openFile(filename, EditorFileData, monaco)
+  const editorContainer = document.getElementById("container")
+  if (!currentFile) {
+    editorContainer.style.display = 'none'
+    return
+  } else {
+    editorContainer.style.display = ''
+    let data = currentFile.getEditorData();
+    //refreshTab(data)
+    editor.setModel(data.model);
+    editor.restoreViewState(data.state);
+    editor.focus();
+  }
+}
+
+/* タブ切り替え処理 */
+function changeTab(desiredModelId) {
+  saveState()
+  fileOpen(desiredModelId)
+}
 
 //タブの更新
 function refreshTab(filename) {
@@ -114,24 +225,6 @@ function refreshTab(filename) {
   }
 }
 
-//Fileを開く
-//Editorに開いたファイルをセット
-function fileOpen(filename) {
-  currentFile = fileContainer.openFile(filename, EditorFileData, monaco)
-  const editorContainer = document.getElementById("container")
-  if (!currentFile) {
-    editorContainer.style.display = 'none'
-    return
-  } else {
-    editorContainer.style.display = ''
-    let data = currentFile.getEditorData();
-    //refreshTab(data)
-    editor.setModel(data.model);
-    editor.restoreViewState(data.state);
-    editor.focus();
-  }
-}
-
 //Editorの内容をcurrentFileに保存
 //currentFileをFileに保存
 function saveState() {
@@ -140,7 +233,7 @@ function saveState() {
     //let currentState = editor.saveViewState();
     //let currentModel = editor.getModel();
     //data.state = currentState;
-
+    
     if (currentFile.setEditorData(data)) {
       data.state = editor.saveViewState();
       fileContainer.putFile(currentFile);
@@ -148,10 +241,16 @@ function saveState() {
   }
 }
 
-refreshViewLogic.onload((url) => {
-  $("#url").val(url)
-  $("#popout").attr('href', url)
-})
+// コンパイル処理の実行
+// /public/に出力する
+function compileAll() {
+  $.UIkit.notify("compile..", { status: 'success', timeout: 1000 });
+  // cachesLogic.refreshCache(fileContainer);
+  builderLogic.compileAll(fileContainer, '', '/public/', () => {
+    $.UIkit.notify("success..", { status: 'success', timeout: 1000 });
+    refreshView("./public/index.html");
+  })
+}
 
 // iframe内のコンテンツを更新
 function refreshView(url) {
@@ -159,46 +258,7 @@ function refreshView(url) {
   refreshViewLogic.refreshView(frame, url)
 }
 
-//プロジェクトファイルの読み込み
-function loadProject(url, type, cb) {
-  changeleftTab(2)
-  $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
-  $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
-  //iframeの初期化
-  refreshView("./blank.html");
-  //localから取得
-  if (!url || type == "local") {
-    localstorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList()
-      openFirst()
-      return (cb) ? cb() : true
-    })
-  } else if (type == "gist") {
-    gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
-      openFirst();
-      return (cb) ? cb() : true;
-    })
-  } else if (type == "html") {
-    htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
-      openFirst();
-      return (cb) ? cb() : true;
-    })
-  } else if (type == "web") {
-    webStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
-      openFirst();
-      return (cb) ? cb() : true;
-    })
-  }
-}
-
-
-filelist.onOpenFile((path) => {
-  fileOpen(path);
-})
-
+// ファイル名変更
 function fileRename() {
   $('#filelist .uk-active').each((index, element) => {
     const filename = $(element).attr("data-uri");
@@ -213,6 +273,7 @@ function fileRename() {
   });
 }
 
+// ファイル削除
 function fileDelete() {
   $('#filelist .uk-active').each((index, element) => {
     const filename = $(element).attr("data-uri");
@@ -226,58 +287,6 @@ function fileDelete() {
     });
   });
 };
-
-fileContainer.onChangeMetas(() => {
-  $("#title").empty();
-  $("#title").text(fileContainer.getProjectName());
-});
-
-//ファイルセットが変更された場合
-//File一覧の更新
-fileContainer.onChangeFiles((filename) => {
-  refreshTab(filename)
-  filelist.refreshFileList()
-  $.contextMenu({
-    selector: '#filelist',
-    // define the elements of the menu
-    items: {
-      "delete": { name: "Delete", callback: (key, options) => { fileDelete() } },
-      "rename": { name: "Rename", callback: (key, options) => { fileRename() } }
-    }
-    // there's more, have a look at the demos and docs...
-  })
-})
-
-//プロジェクト一覧表示
-function projectjsonCallback(json, type) {
-  $("#prjlist").empty();
-
-  const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
-  prj.on("click", (event) => {
-    loadProject($(event.target).attr("data-url"), type, () => {
-      fileContainer.refreshCache(EditorFileData, monaco);
-    })
-  });
-
-  json.rows.forEach((val, i) => {
-    // [{description, id, public},,]
-    let _prj = prj.clone(true);
-    _prj.children('.project').attr('data-url', val.id);
-    _prj.children('.project').append(' ' + val.description);
-    $("#prjlist").append(_prj);
-  });
-}
-
-// コンパイル処理の実行
-// /test/に出力する
-function compileAll() {
-  $.UIkit.notify("compile..", { status: 'success', timeout: 1000 });
-  // cachesLogic.refreshCache(fileContainer);
-  builderLogic.compileAll(fileContainer, '', '/public/', () => {
-    $.UIkit.notify("success..", { status: 'success', timeout: 1000 });
-    refreshView("./public/index.html");
-  })
-}
 
 var arg = new Object();
 var pair = location.search.substring(1).split("&");
@@ -357,23 +366,6 @@ $(document).ready(() => {
 
   $("#gist").on("click", (event) => {
     gistStorage.saveDraft(fileContainer)
-    /*
-    const token_key = 'gist_pat'+location.pathname.replace(/\//g, '.');
-    const token = localStorage.getItem(token_key);
-    if(!token){
-      UIkit.modal.prompt('<p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>', '', (newtoken) => {
-        console.log('Confirmed.'+newtoken);
-        token = newtoken;
-        localStorage.setItem(token_key, token);
-        gistStorage.saveGist(fileContainer,token);
-      }, () => {
-        console.log('Rejected.');
-        return;
-      });
-    }else{
-       gistStorage.saveGist(fileContainer,token);
-    }
-    */
   });
 
   $("#titleEdit").on("click", (event) => {
@@ -409,7 +401,7 @@ $(document).ready(() => {
     });
   });
 
-  $('#container').bind('blur keypress change', (e) => {
+  $('#container').bind('blur keyup change', (e) => {
     saveState()
   });
 
