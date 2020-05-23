@@ -16005,7 +16005,7 @@ __webpack_require__.r(__webpack_exports__);
 var webStorage = new _fs_webstorage_js__WEBPACK_IMPORTED_MODULE_1__["default"]();
 
 //プロジェクト一覧表示
-function projectjsonCallback (json, type) {
+function projectjsonCallback(json, type) {
   console.log(json);
   $("#prjlist").empty();
 
@@ -16020,7 +16020,7 @@ function projectjsonCallback (json, type) {
   // [{description, id, public},,]
   json.rows.forEach((val, i) => {
     let _prj = prj.clone(true);
-    _prj.children('.file').attr('href','editor.html?q='+val.id+'&t='+type);
+    _prj.children('.file').attr('href', 'editor.html?q=' + val.id + '&t=' + type);
     _prj.find('.uk-panel-title').append(val.description);
     $("#prjlist").append(_prj);
   });
@@ -16038,7 +16038,7 @@ function stringify(str) {
   var cache = [];
   return JSON.stringify(
     str,
-    function(key, value) {
+    function (key, value) {
       if (typeof value === "object" && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Circular reference found, discard key
@@ -16075,12 +16075,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 class WebStorage {
-    constructor () {
-        this.siteurl = './sample/container/' 
+    constructor() {
+        this.siteurl = './sample/container/'
     }
 
-    loadList (cb) {
-        $.getJSON(this.siteurl+'index.json').done((data) => {
+    loadList(cb) {
+        $.getJSON(this.siteurl + 'index.json').done((data) => {
             /*schema
                 data = {
                     rows : [
@@ -16089,19 +16089,19 @@ class WebStorage {
                     ]
                 }
             */
-            return (cb)? cb(data, "web") : data
+            return (cb) ? cb(data, "web") : data
         })
     }
 
-    saveDraft (fileContainer){
+    saveDraft(fileContainer) {
     }
 
-    loadDraft (fileContainer,url,cb) {
-        $.getJSON(this.siteurl+url).done((data) => {
+    loadDraft(fileContainer, url, cb) {
+        $.getJSON(this.siteurl + url).done((data) => {
             fileContainer.setContainer(data);
-            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
+            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0] || "new project");
             //console.log("fileContainer:" + fileContainer.getContainerJson());
-            return (cb)?cb(fileContainer):fileContainer.getContainerJson();
+            return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
         })
     }
 
@@ -16637,4 +16637,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.c540d68fc968b1b0fb8c.js.map
+//# sourceMappingURL=map/dashboard.e2ed2298442ec7de157a.js.map

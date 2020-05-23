@@ -96,7 +96,7 @@
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      return response || fetch(event.request).then(function(_response) {
+      return response || fetch(event.request).then(function (_response) {
         // console.log("fetch:"+event.request.url);
         return _response;
       });
@@ -126,4 +126,4 @@ self.addEventListener('fetch', event => {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/serviceWorker.ac81cdcb9c305cd8fdca.js.map
+//# sourceMappingURL=map/serviceWorker.c20e2bb9e0f594fbe049.js.map
