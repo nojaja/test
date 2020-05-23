@@ -322,12 +322,6 @@ $(document).ready(() => {
     compileAll();
   });
 
-  $("#test").on("click", (event) => {
-    loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {
-      fileContainer.refreshCache(EditorFileData, monaco);
-    })
-  });
-
   $(".samples").on("click", (event) => {
     loadProject($(event.currentTarget).attr("data-url"), "html", () => {
       fileContainer.refreshCache(EditorFileData, monaco);

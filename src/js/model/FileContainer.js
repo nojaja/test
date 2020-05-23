@@ -317,7 +317,7 @@ export class FileContainer {
     })
 
     let gistdata = {
-      description: this.container.projectName + '\n' + this.container.description,
+      description: this.container.projectName ,
       public: this.container.public,
       files: Object.fromEntries(files)
     }

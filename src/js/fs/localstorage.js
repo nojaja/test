@@ -6,18 +6,6 @@ export class LocalStorage {
     constructor() {
     }
     loadList(cb) {
-
-        Object.keys(localStorage).filter((x, i, self) => /^Container_/.test(x)).map(key => {
-            let data = JSON.parse(localStorage[key])
-            return { "description": data.projectName, "id": key, "public": data.public }
-        }).forEach((val) => {
-            console.log(val)
-        })
-        //return Object.keys(ret).map(key => { return {"path": key, "name": ret[key]} });
-        //const noteKeyList = array.filter(function (x, i, self) {
-        //    return self.indexOf(x) === i
-        //  })
-
         //プロジェクト一覧取得
         // ROWID, filename, ext, timestamp, uid, scope,projectid
         //let json = {

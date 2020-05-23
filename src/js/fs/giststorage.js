@@ -5,21 +5,42 @@ export class GistStorage {
     constructor() {
         this.tokens = localStorage.getItem('gittoken') || null
     }
+    
+    async getToken () {
+        let _getToken = async () => {
+            return new Promise(resolve => {
+                if (this.tokens == null) {
+                    $.UIkit.modal.prompt('<p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>', '', (newtoken) => {
+                        console.log('Confirmed.'+newtoken);
+                        this.token = newtoken;
+                        resolve(true)
+                    }, () => {
+                        console.log('newtoken Rejected.')
+                        resolve(false)
+                    })
+                } else {
+                    resolve(false)
+                }
+            })
+        }
+        return await _getToken()
+    }
 
     //プロジェクト一覧取得
-    loadList(cb) {
+    loadList (callback) {
         $.ajax({
             url: gisturl,
             type: 'GET',
             beforeSend: (xhr) => {
                 // <p>Gist</p><br><p><a href="https://github.com/settings/tokens">Personal access tokens</a>:</p>
-                if (this.tokens == null) this.token = prompt("<p>Gist</p><br><p><a href='https://github.com/settings/tokens'>Personal access tokens</a>:</p>", "")
+                // if (this.tokens == null) this.token = prompt("<p>Gist</p><br><p><a href='https://github.com/settings/tokens'>Personal access tokens</a>:</p>", "")
+                this.getToken()
                 xhr.setRequestHeader("Authorization", "token " + this.tokens)
             }
         }).done((response) => {
             let list = { rows: response }
             localStorage.setItem('gittoken', this.tokens)
-            return (cb) ? cb(list, "gist") : list
+            return (callback) ? callback(list, "gist") : list
         }).fail((jqXHR, textStatus, errorThrown) => {
             // エラーの場合処理
             this.tokens = null
@@ -27,8 +48,6 @@ export class GistStorage {
     }
 
     saveDraft(fileContainer) {
-        if (this.tokens == null) this.token = prompt("<p>Gist</p><br><p><a href='https://github.com/settings/tokens'>Personal access tokens</a>:</p>", "")
-
         $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
 
         let sendType = "POST";
@@ -42,6 +61,7 @@ export class GistStorage {
             type: sendType,
             dataType: 'json',
             beforeSend: (xhr) => {
+                this.getToken()
                 xhr.setRequestHeader("Authorization", "token " + this.tokens);
             },
             data: fileContainer.getGistJsonData()
@@ -66,7 +86,7 @@ export class GistStorage {
         });
     }
 
-    loadDraft(fileContainer, url, cb) {
+    loadDraft(fileContainer, url, callback) {
         $.getJSON(gisturl + "/" + url).done((response) => {
             let conv = (response) => ({
                 "v": 0.1,
@@ -85,7 +105,7 @@ export class GistStorage {
             fileContainer.setContainer(data);
             fileContainer.setProjectName(data.projectName || data.description.split(/\r\n|\r|\n/)[0] || "new project");
             // console.log("fileContainer:" + fileContainer.getContainerJson());
-            return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
+            return (callback) ? callback(fileContainer) : fileContainer.getContainerJson();
         })
     }
 
