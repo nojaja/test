@@ -4,38 +4,38 @@ import FileData from '../model/FileData.js'
 
 
 export class HtmlStorage {
-    constructor () {
+    constructor() {
     }
 
-    loadList (cb) {
+    loadList(cb) {
         //プロジェクト一覧取得
         // ROWID, filename, ext, timestamp, uid, scope,projectid
         let json = {
-            rows : [
+            rows: [
                 //OUT [{description, id, public},,]
-                {description : 'index', id:'./sample/html/index.html', public:true}
+                { description: 'index', id: './sample/html/index.html', public: true }
             ]
         }
-        return (cb)? cb(json, "html") : json
+        return (cb) ? cb(json, "html") : json
     }
 
-    saveDraft (fileContainer){
+    saveDraft(fileContainer) {
     }
 
-    loadDraft (fileContainer,url,cb) {
+    loadDraft(fileContainer, url, cb) {
         $.ajax({
             url: url
         }).done((data) => {
             fileContainer.init();
-            
+
             let file = new FileData();
             file.setFilename("index.html");
             file.setContent(data);
             fileContainer.putFile(file);
-            
-            fileContainer.setProjectName($(data).find("title").text()||"new project");
+
+            fileContainer.setProjectName($(data).find("title").text() || "new project");
             // console.log("fileContainer:" + fileContainer.getContainerJson());
-            return (cb)?cb(fileContainer):fileContainer.getContainerJson();
+            return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
         });
     }
 

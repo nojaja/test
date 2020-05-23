@@ -2,20 +2,20 @@ import FileData from '../model/FileData.js'
 import Babel from '@babel/standalone'
 
 export class ES6Compiler {
-    constructor (fileContainer) {
+    constructor(fileContainer) {
         this.fileContainer = fileContainer
     }
 
     async compile(targetFile, outpath) {
         //todo let data = targetFile.getEditorData()
         let filename = targetFile.getFilename()
-        filename = filename.substr(0,filename.lastIndexOf("."));
+        filename = filename.substr(0, filename.lastIndexOf("."));
         try {
-            let parseData = Babel.transform(targetFile.getContent().trim(),{"babelrc":false,"filename":filename,presets: ['es2015']});
+            let parseData = Babel.transform(targetFile.getContent().trim(), { "babelrc": false, "filename": filename, presets: ['es2015'] });
             //data.compiled.model.setValue(parseData.code);
-            
+
             let jsfile = new FileData()
-            jsfile.setFilename(outpath+filename+'.js')
+            jsfile.setFilename(outpath + filename + '.js')
             jsfile.setType('text/javascript; charset=UTF-8')
             jsfile.setContent(parseData.code)
             this.fileContainer.putFile(jsfile)

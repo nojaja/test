@@ -46,10 +46,10 @@ function changeleftTab(desiredModelId) {
 
 $(".storageType").on("click", (event) => {
   let type = $(event.target).attr("data-type")
-  if(type == 'localstorage') selectStorage = localstorage
-  if(type == 'gistStorage') selectStorage = gistStorage
-  if(type == 'htmlStorage') selectStorage = htmlStorage
-  if(type == 'webStorage') selectStorage = webStorage
+  if (type == 'localstorage') selectStorage = localstorage
+  if (type == 'gistStorage') selectStorage = gistStorage
+  if (type == 'htmlStorage') selectStorage = htmlStorage
+  if (type == 'webStorage') selectStorage = webStorage
 
   $("#prjlist").empty();
   $("#prjlist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
@@ -58,7 +58,7 @@ $(".storageType").on("click", (event) => {
 
   //プロジェクト一覧取得
   selectStorage.loadList((json, type) => {
-      projectjsonCallback(json, type)
+    projectjsonCallback(json, type)
   });
 
 })
@@ -76,15 +76,15 @@ function openFirst() {
   $("#filelist li:first").addClass("uk-active");
 }
 
-fileContainer.onOpenFile( (filename) => {
+fileContainer.onOpenFile((filename) => {
   refreshTab(filename)
 });
-fileContainer.onCloseFile( (filename) => {
+fileContainer.onCloseFile((filename) => {
   refreshTab(filename)
 });
 
 //タブの更新
-function refreshTab (filename) {
+function refreshTab(filename) {
   $("#edittab").empty();
   const tab = $('<li><a></a></li>');
   tab.on("click", (event) => {
@@ -101,110 +101,110 @@ function refreshTab (filename) {
     _tab.attr('id', key);
     _tab.children("a").append(key).append($('<a class="uk-icon-hover uk-icon-close" style="padding-left: 10px; display: inline-block; #display: inline;"></a>'));
     $("#edittab").append(_tab);
-    if (key==filename) {
+    if (key == filename) {
       //_tab.addClass('uk-active');
       index = i
     }
   })
-  if(index==-1){
+  if (index == -1) {
     const editorContainer = document.getElementById("container")
-    editorContainer.style.display='none'
-  }else{
+    editorContainer.style.display = 'none'
+  } else {
     $.UIkit.switcher('#edittab').show(index)
   }
 }
 
 //Fileを開く
 //Editorに開いたファイルをセット
-function fileOpen(filename){
-  currentFile = fileContainer.openFile(filename,EditorFileData,monaco)
+function fileOpen(filename) {
+  currentFile = fileContainer.openFile(filename, EditorFileData, monaco)
   const editorContainer = document.getElementById("container")
-  if(!currentFile) {
-    editorContainer.style.display='none'
+  if (!currentFile) {
+    editorContainer.style.display = 'none'
     return
-  }else{
-    editorContainer.style.display=''
+  } else {
+    editorContainer.style.display = ''
     let data = currentFile.getEditorData();
     //refreshTab(data)
     editor.setModel(data.model);
     editor.restoreViewState(data.state);
     editor.focus();
-  } 
+  }
 }
 
 //Editorの内容をcurrentFileに保存
 //currentFileをFileに保存
-function saveState(){
-    if(currentFile){
-        let data = currentFile.getEditorData();
-        //let currentState = editor.saveViewState();
-        //let currentModel = editor.getModel();
-        //data.state = currentState;
+function saveState() {
+  if (currentFile) {
+    let data = currentFile.getEditorData();
+    //let currentState = editor.saveViewState();
+    //let currentModel = editor.getModel();
+    //data.state = currentState;
 
-        if(currentFile.setEditorData(data)){
-          data.state = editor.saveViewState();
-          fileContainer.putFile(currentFile);
-        }
+    if (currentFile.setEditorData(data)) {
+      data.state = editor.saveViewState();
+      fileContainer.putFile(currentFile);
     }
+  }
 }
 
-refreshViewLogic.onload( (url) => {
+refreshViewLogic.onload((url) => {
   $("#url").val(url)
-  $("#popout").attr('href',url)
+  $("#popout").attr('href', url)
 })
 
 // iframe内のコンテンツを更新
-function refreshView (url) {
+function refreshView(url) {
   let frame = document.getElementById("child-frame");
-  refreshViewLogic.refreshView(frame,url)
+  refreshViewLogic.refreshView(frame, url)
 }
 
 //プロジェクトファイルの読み込み
-function loadProject (url, type, cb) {
+function loadProject(url, type, cb) {
   changeleftTab(2)
   $.UIkit.notify("load..", { status: 'success', timeout: 1000 });
   $("#filelist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   //iframeの初期化
   refreshView("./blank.html");
   //localから取得
-  if(!url || type == "local"){
+  if (!url || type == "local") {
     localstorage.loadDraft(fileContainer, url, (fileContainer) => {
       // refreshFileList()
       openFirst()
-      return (cb)?cb():true
+      return (cb) ? cb() : true
     })
-  }else if(type == "gist"){
-      gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          // refreshFileList();
-          openFirst();
-          return (cb)?cb():true;
-      })
-  }else if(type == "html"){
-      htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          // refreshFileList();
-          openFirst();
-          return (cb)?cb():true;
-      })
-  }else if(type == "web"){
-      webStorage.loadDraft(fileContainer, url, (fileContainer) => {
-          // refreshFileList();
-          openFirst();
-          return (cb)?cb():true;
-      })
+  } else if (type == "gist") {
+    gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "html") {
+    htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "web") {
+    webStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
   }
 }
 
 
-filelist.onOpenFile( (path) => {
+filelist.onOpenFile((path) => {
   fileOpen(path);
 })
 
-function fileRename () {
-  $('#filelist .uk-active').each( (index, element) => {
+function fileRename() {
+  $('#filelist .uk-active').each((index, element) => {
     const filename = $(element).attr("data-uri");
     UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
-      console.log('newName '+newName);
-      fileContainer.renameFile(filename,newName);
+      console.log('newName ' + newName);
+      fileContainer.renameFile(filename, newName);
       // refreshFileList();
     }, () => {
       console.log('Rejected.');
@@ -213,11 +213,11 @@ function fileRename () {
   });
 }
 
-function fileDelete () {
+function fileDelete() {
   $('#filelist .uk-active').each((index, element) => {
     const filename = $(element).attr("data-uri");
-    UIkit.modal.confirm('<p>Delete '+ filename +' File </p>', () => {
-      console.log('filename '+filename);
+    UIkit.modal.confirm('<p>Delete ' + filename + ' File </p>', () => {
+      console.log('filename ' + filename);
       fileContainer.removeFile(filename);
       // refreshFileList();
     }, () => {
@@ -227,56 +227,56 @@ function fileDelete () {
   });
 };
 
-fileContainer.onChangeMetas( () => {
+fileContainer.onChangeMetas(() => {
   $("#title").empty();
   $("#title").text(fileContainer.getProjectName());
 });
 
 //ファイルセットが変更された場合
 //File一覧の更新
-fileContainer.onChangeFiles( (filename) => {
+fileContainer.onChangeFiles((filename) => {
   refreshTab(filename)
   filelist.refreshFileList()
   $.contextMenu({
     selector: '#filelist',
     // define the elements of the menu
     items: {
-      "delete": { name: "Delete", callback: (key, options) => {fileDelete()} },
-      "rename": { name: "Rename", callback: (key, options) => {fileRename()} }
+      "delete": { name: "Delete", callback: (key, options) => { fileDelete() } },
+      "rename": { name: "Rename", callback: (key, options) => { fileRename() } }
     }
     // there's more, have a look at the demos and docs...
   })
 })
 
 //プロジェクト一覧表示
-function projectjsonCallback (json, type) {
+function projectjsonCallback(json, type) {
   $("#prjlist").empty();
 
   const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
   prj.on("click", (event) => {
     loadProject($(event.target).attr("data-url"), type, () => {
-      fileContainer.refreshCache(EditorFileData,monaco);
+      fileContainer.refreshCache(EditorFileData, monaco);
     })
   });
 
   json.rows.forEach((val, i) => {
     // [{description, id, public},,]
     let _prj = prj.clone(true);
-    _prj.children('.project').attr('data-url',val.id);
-    _prj.children('.project').append(' '+val.description);
+    _prj.children('.project').attr('data-url', val.id);
+    _prj.children('.project').append(' ' + val.description);
     $("#prjlist").append(_prj);
   });
 }
 
 // コンパイル処理の実行
 // /test/に出力する
-function compileAll () {
-    $.UIkit.notify("compile..", {status:'success',timeout : 1000});
-    // cachesLogic.refreshCache(fileContainer);
-    builderLogic.compileAll(fileContainer, '', '/public/', () => {
-        $.UIkit.notify("success..", {status:'success',timeout : 1000});
-        refreshView("./public/index.html");
-    })
+function compileAll() {
+  $.UIkit.notify("compile..", { status: 'success', timeout: 1000 });
+  // cachesLogic.refreshCache(fileContainer);
+  builderLogic.compileAll(fileContainer, '', '/public/', () => {
+    $.UIkit.notify("success..", { status: 'success', timeout: 1000 });
+    refreshView("./public/index.html");
+  })
 }
 
 var arg = new Object();
@@ -288,26 +288,26 @@ for (var i = 0; pair[i]; i++) {
 
 //View///////////////////////////////////////////////////
 $(document).ready(() => {
-    const editorContainer = document.getElementById("container");
-    editor = monaco.editor.create(editorContainer, {
-      automaticLayout: true,
-      model: null
-    });
-    let url = "";
-    let type = "localStorage";
-    url  = arg["q"] || arg["g"] || arg["ga"]
-    type = arg["t"] || "localStorage"
+  const editorContainer = document.getElementById("container");
+  editor = monaco.editor.create(editorContainer, {
+    automaticLayout: true,
+    model: null
+  });
+  let url = "";
+  let type = "localStorage";
+  url = arg["q"] || arg["g"] || arg["ga"]
+  type = arg["t"] || "localStorage"
 
-    //URLの引数からプロジェクト取得、コンパイルの実行
-    loadProject(url, type, () => {
-      compileAll();
-      fileContainer.refreshCache(EditorFileData,monaco);
-    });
+  //URLの引数からプロジェクト取得、コンパイルの実行
+  loadProject(url, type, () => {
+    compileAll();
+    fileContainer.refreshCache(EditorFileData, monaco);
+  });
 
-    //プロジェクト一覧取得
-    selectStorage.loadList((json, type) => {
-        projectjsonCallback(json, type)
-    });
+  //プロジェクト一覧取得
+  selectStorage.loadList((json, type) => {
+    projectjsonCallback(json, type)
+  });
 
   $("#run").on("click", (event) => {
     compileAll();
@@ -315,44 +315,44 @@ $(document).ready(() => {
 
   $("#test").on("click", (event) => {
     loadProject("8e670a377e30a60520705d916a434a22", "gist", () => {
-      fileContainer.refreshCache(EditorFileData,monaco);
+      fileContainer.refreshCache(EditorFileData, monaco);
     })
   });
 
   $(".samples").on("click", (event) => {
-    loadProject($(event.currentTarget).attr("data-url"),"html",() => {
-      fileContainer.refreshCache(EditorFileData,monaco);
+    loadProject($(event.currentTarget).attr("data-url"), "html", () => {
+      fileContainer.refreshCache(EditorFileData, monaco);
     })
   });
-  
+
   $("#refresh").on("click", (event) => {
     refreshView($("#url").val())
   })
 
-  $("#url").keypress( ( e ) => {
-    if ( e.which == 13 ) {
+  $("#url").keypress((e) => {
+    if (e.which == 13) {
       refreshView($("#url").val())
       return false //submit 停止
     }
-  } )
+  })
   $("#history_back").on("click", (event) => {
     $("#child-frame")[0].contentWindow.history.back()
-  } )
+  })
   $("#history_forward").on("click", (event) => {
     $("#child-frame")[0].contentWindow.history.forward()
-  } )
-    
+  })
+
   $(".test1").on("click", (event) => {
-    if(mode > 0) mode--
+    if (mode > 0) mode--
     changeleftTab(mode)
   });
   $(".test2").on("click", (event) => {
-    if(mode <= 2) mode++
+    if (mode <= 2) mode++
     changeleftTab(mode)
   });
 
   if (!navigator.serviceWorker) {
-    $("#popout").css('display','none')
+    $("#popout").css('display', 'none')
   }
 
   $("#gist").on("click", (event) => {
@@ -377,19 +377,19 @@ $(document).ready(() => {
   });
 
   $("#titleEdit").on("click", (event) => {
-      const title = $("#title").text();
-      UIkit.modal.prompt('<p>title</p>', title, (newTitle) => {
-        console.log('newTitle '+newTitle);
-        fileContainer.setProjectName(newTitle);
-        // refreshFileList();
-      }, () => {
-        console.log('Rejected.');
-        return;
-      });
+    const title = $("#title").text();
+    UIkit.modal.prompt('<p>title</p>', title, (newTitle) => {
+      console.log('newTitle ' + newTitle);
+      fileContainer.setProjectName(newTitle);
+      // refreshFileList();
+    }, () => {
+      console.log('Rejected.');
+      return;
+    });
   });
 
   $("#newfile").on("click", (event) => {
-      UIkit.modal.prompt(`
+    UIkit.modal.prompt(`
 <h3>New File</h3>
 <h4>File Types Cheatsheet</h4>
 <ul class="uk-list uk-list-striped uk-width-medium-1-3">
@@ -398,30 +398,30 @@ $(document).ready(() => {
     <li><b>JavaScript</b> <span>.js</span> <span title="ECMASCRIPT6">.es6</span></li>
 </ul>
 <p>File Name:</p>`, '', (newFile) => {
-        let file = new EditorFileData(monaco)
-        file.setFilename(newFile);
-        file.setContent("");
-        fileContainer.putFile(file);
-        // refreshFileList();
-      }, () => {
-        console.log('Rejected.');
-        return;
-      });
+      let file = new EditorFileData(monaco)
+      file.setFilename(newFile);
+      file.setContent("");
+      fileContainer.putFile(file);
+      // refreshFileList();
+    }, () => {
+      console.log('Rejected.');
+      return;
+    });
   });
 
   $('#container').bind('blur keypress change', (e) => {
     saveState()
   });
 
-  $(window).keydown( (e) => {
-    if(e.keyCode === 120){
-        compileAll();
-        return false;
-      }
-    if(e.ctrlKey){
-      if(e.keyCode === 83){
+  $(window).keydown((e) => {
+    if (e.keyCode === 120) {
+      compileAll();
+      return false;
+    }
+    if (e.ctrlKey) {
+      if (e.keyCode === 83) {
         localstorage.saveDraft(fileContainer);
-        fileContainer.refreshCache(EditorFileData,monaco);
+        fileContainer.refreshCache(EditorFileData, monaco);
         return false;
       }
     }

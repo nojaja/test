@@ -1,5 +1,5 @@
 import treeview from 'jquery-treeview'
-import {EventEmitter} from 'events'
+import { EventEmitter } from 'events'
 
 //import 'jquery-treeview/jquery.treeview.css'
 
@@ -10,9 +10,9 @@ export class FileList {
         this.ev = new EventEmitter()
     }
 
-    onOpenFile (callback) {
+    onOpenFile(callback) {
         this.ev.on('open', callback)
-      }
+    }
 
     _refreshFileList(path = null) {
         let listid = (path) ? 'li[data-uri="' + path + '"]>ul' : '#filelist'

@@ -4,12 +4,12 @@ import FileData from '../model/FileData.js'
 
 
 export class WebStorage {
-    constructor () {
-        this.siteurl = './sample/container/' 
+    constructor() {
+        this.siteurl = './sample/container/'
     }
 
-    loadList (cb) {
-        $.getJSON(this.siteurl+'index.json').done((data) => {
+    loadList(cb) {
+        $.getJSON(this.siteurl + 'index.json').done((data) => {
             /*schema
                 data = {
                     rows : [
@@ -18,19 +18,19 @@ export class WebStorage {
                     ]
                 }
             */
-            return (cb)? cb(data, "web") : data
+            return (cb) ? cb(data, "web") : data
         })
     }
 
-    saveDraft (fileContainer){
+    saveDraft(fileContainer) {
     }
 
-    loadDraft (fileContainer,url,cb) {
-        $.getJSON(this.siteurl+url).done((data) => {
+    loadDraft(fileContainer, url, cb) {
+        $.getJSON(this.siteurl + url).done((data) => {
             fileContainer.setContainer(data);
-            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0]||"new project");
+            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0] || "new project");
             //console.log("fileContainer:" + fileContainer.getContainerJson());
-            return (cb)?cb(fileContainer):fileContainer.getContainerJson();
+            return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
         })
     }
 

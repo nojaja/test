@@ -2,25 +2,25 @@
 import FileData from '../model/FileData.js'
 import htmlparser from '@nojaja/htmlparser'
 import htmlcompiler from '@nojaja/htmlcompiler'
-import {EventEmitter} from 'events'
+import { EventEmitter } from 'events'
 
 export class RefreshView {
-    constructor (fileContainer) {
+    constructor(fileContainer) {
         this.fileContainer = fileContainer
         this.url = ''
-        this.ev = new EventEmitter ()        
+        this.ev = new EventEmitter()
         /**
         サービスワーカーの登録
         キャッシュファイルの制御を可能にする
         */
         if (navigator.serviceWorker) {
-            navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function(registraion) {
+            navigator.serviceWorker.register('./serviceWorker.bundle.js', { scope: './' }).then(function (registraion) {
                 registraion.update()
             })
         }
     }
 
-    parseHtml (rawHtml) {
+    parseHtml(rawHtml) {
         return htmlparser.parseDOM(rawHtml, {
             enforceEmptyTags: true,
             ignoreWhitespace: true,
@@ -30,11 +30,11 @@ export class RefreshView {
         })
     }
 
-    onload (callback) {
+    onload(callback) {
         this.ev.on('load', callback)
     }
 
-    test () {
+    test() {
         console.log('test')
         let index_app = new FileData()
         index_app.setFilename('/public/index_app.js')
@@ -325,9 +325,9 @@ export class RefreshView {
             </script>
         </body>
     </html>
-        `) 
+        `)
         this.fileContainer.putFile(index_html)
-        
+
         let frame = document.getElementById("child-frame");
         this.refreshView(frame, '/public/index.html', false)
     }
@@ -335,37 +335,37 @@ export class RefreshView {
     //////
     // 1つのファイルにローカルファイルを埋め込む
     //////
-    createSingleHtml (url) {
-        if(url.indexOf('.')==0)url=url.slice(1) // 1文字目のドットは削る
+    createSingleHtml(url) {
+        if (url.indexOf('.') == 0) url = url.slice(1) // 1文字目のドットは削る
         let file = this.fileContainer.getFile(url)
-        if(!file)return "404";
+        if (!file) return "404";
 
         let vdom = this.parseHtml(file.getContent())
-        
+
         let linkElementList = vdom.getElementsByTagName('link');
         let scriptElementList = vdom.getElementsByTagName('script');
         Object.keys(linkElementList).forEach((key) => {
             let el = linkElementList[key]
             let srcdata = el.getAttribute('href')
-            let src = (srcdata && srcdata[0])? srcdata[0].data : null
+            let src = (srcdata && srcdata[0]) ? srcdata[0].data : null
             if (src && src.indexOf('//') == -1) {
                 let file = this.fileContainer.getFile(src)
-                if(file){
+                if (file) {
                     let el2 = el.parentNode.insertBefore('style', el)
                     let child = el.createTextNode(file.getContent())
                     el2.appendChild(child)
                     el2.setAttribute('type', 'text/css')
-                    vdom.removeChild(el); 
+                    vdom.removeChild(el);
                 }
             }
         })
         Object.keys(scriptElementList).forEach((key) => {
             let el = scriptElementList[key]
             let srcdata = el.getAttribute('src')
-            let src = (srcdata && srcdata[0])? srcdata[0].data : null
+            let src = (srcdata && srcdata[0]) ? srcdata[0].data : null
             if (src && src.indexOf('//') == -1) {
                 let file = this.fileContainer.getFile(src)
-                if(file){
+                if (file) {
                     let child = el.createTextNode(file.getContent())
                     el.appendChild(child)
                     el.removeAttribute('src')
@@ -376,15 +376,15 @@ export class RefreshView {
         let compiler = new Compiler([builder], {})
         compiler.compile(vdom.children)
         return builder.getNodes()
-    }   
+    }
     // iframe内のコンテンツを更新
     //htmlElement: ifremeのelement document.getElementById("Iframe");
-    refreshView (htmlElement,url,flg=true) {
+    refreshView(htmlElement, url, flg = true) {
         this.url = url
         if (flg && navigator.serviceWorker) {
             htmlElement.addEventListener('load', () => {
                 this.ev.emit('load', this.url)
-             })
+            })
             // iframe内のコンテンツを更新
             htmlElement.setAttribute("src", this.url)
             //document.getElementById("#url")
@@ -392,7 +392,7 @@ export class RefreshView {
         } else {
             // iframe内のコンテンツを更新
             htmlElement.setAttribute("srcdoc", "");
-        
+
             let contents = this.createSingleHtml(this.url)
             htmlElement.src = "./blank.html";
 
@@ -401,7 +401,7 @@ export class RefreshView {
             })
 
             htmlElement.onload = () => {
-                htmlElement.onload=function(){};
+                htmlElement.onload = function () { };
                 //htmlElement.contentWindow.location.replace(this.url)
                 htmlElement.contentDocument.open();
                 htmlElement.contentDocument.write(contents);
@@ -409,22 +409,22 @@ export class RefreshView {
             }
         }
     }
-    
+
     stringify(str) {
         var cache = [];
         return JSON.stringify(
             str,
             function (key, value) {
-            if (typeof value === "object" && value !== null) {
-                if (cache.indexOf(value) !== -1) {
-                // Circular reference found, discard key
-                return;
+                if (typeof value === "object" && value !== null) {
+                    if (cache.indexOf(value) !== -1) {
+                        // Circular reference found, discard key
+                        return;
+                    }
+                    // Store value in our collection
+                    cache.push(value);
                 }
-                // Store value in our collection
-                cache.push(value);
-            }
-            if (key == "parentNode") return;
-            return value;
+                if (key == "parentNode") return;
+                return value;
             },
             "\t"
         )

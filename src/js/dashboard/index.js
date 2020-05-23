@@ -11,7 +11,7 @@ import '../../css/style.css'
 var webStorage = new WebStorage();
 
 //プロジェクト一覧表示
-function projectjsonCallback (json, type) {
+function projectjsonCallback(json, type) {
   console.log(json);
   $("#prjlist").empty();
 
@@ -26,7 +26,7 @@ function projectjsonCallback (json, type) {
   // [{description, id, public},,]
   json.rows.forEach((val, i) => {
     let _prj = prj.clone(true);
-    _prj.children('.file').attr('href','editor.html?q='+val.id+'&t='+type);
+    _prj.children('.file').attr('href', 'editor.html?q=' + val.id + '&t=' + type);
     _prj.find('.uk-panel-title').append(val.description);
     $("#prjlist").append(_prj);
   });
@@ -44,7 +44,7 @@ function stringify(str) {
   var cache = [];
   return JSON.stringify(
     str,
-    function(key, value) {
+    function (key, value) {
       if (typeof value === "object" && value !== null) {
         if (cache.indexOf(value) !== -1) {
           // Circular reference found, discard key
