@@ -1,5 +1,5 @@
 import FileData from '../model/FileData.js'
-import Babel from '@babel/standalone'
+import * as Babel from '@babel/standalone'
 
 export class ES6Compiler {
     constructor(fileContainer) {
