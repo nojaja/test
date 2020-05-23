@@ -16443,7 +16443,7 @@ class FileContainer {
     })
 
     let gistdata = {
-      description: this.container.projectName + '\n' + this.container.description,
+      description: this.container.projectName ,
       public: this.container.public,
       files: Object.fromEntries(files)
     }
@@ -16637,4 +16637,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.e2ed2298442ec7de157a.js.map
+//# sourceMappingURL=map/dashboard.f6ce134c4ca53da906c0.js.map
