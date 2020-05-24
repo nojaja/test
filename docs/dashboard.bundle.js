@@ -16076,7 +16076,7 @@ __webpack_require__.r(__webpack_exports__);
 
 class WebStorage {
     constructor() {
-        this.siteurl = './sample/container/'
+        this.siteurl = './sample/sample_container/'
     }
 
     loadList(cb) {
@@ -16099,6 +16099,7 @@ class WebStorage {
     loadDraft(fileContainer, url, cb) {
         $.getJSON(this.siteurl + url).done((data) => {
             fileContainer.setContainer(data);
+            fileContainer.setId(fileContainer.getId())
             fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0] || "new project");
             //console.log("fileContainer:" + fileContainer.getContainerJson());
             return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
@@ -16174,7 +16175,7 @@ class FileContainer {
   }
 
   getId () {
-    return this.container.id || null
+    return this.container.id || Date.now() + Math.floor(1e4 + 9e4 * Math.random())
   }
 
   setGistId (gistid) {
@@ -16319,7 +16320,7 @@ class FileContainer {
     return false
   }
 
-  putFile (file) {
+  async putFile (file) {
     const filename = file.getFilename()
     this.container.files[filename] = file.getFileData()
     this.container.lastUpdatedTime = new Date().getTime()
@@ -16427,18 +16428,7 @@ class FileContainer {
   }
 
   getGistData () {
-    let siteeditor = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
-    siteeditor.setFilename('.siteeditor');
-    siteeditor.setContent("HelloWorld");
-    siteeditor.getFileData()
-    this.putFile(siteeditor)
-
-    let readme = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"]()
-    readme.setFilename('README.md');
-    readme.setContent("HelloWorld");
-    this.putFile(readme)
-    
-    let files = Object.entries(this.container.files).filter( (x, self) => (!x[1].content == "")).map(([key, value]) => {
+    let files = Object.entries(this.container.files).filter( (x, self) => (!x[1].content == "" && !x[1].filename.match(/^\/public\//))).map(([key, value]) => {
       return [key.replace(/\//g, '%2F'), {"filename": value.filename.replace(/\//g, '%2F'), "content": value.content}]
     })
 
@@ -16637,4 +16627,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.f6ce134c4ca53da906c0.js.map
+//# sourceMappingURL=map/dashboard.b8c7769581333e865462.js.map
