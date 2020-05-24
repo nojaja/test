@@ -36,6 +36,24 @@ let filelist = new FileList(fileContainer);
 
 let selectStorage = webStorage
 
+self.MonacoEnvironment = {
+  getWorkerUrl: function(moduleId, label) {
+    if (label === 'json') {
+      return './json.worker.bundle.js';
+    }
+    if (label === 'css') {
+      return './css.worker.bundle.js';
+    }
+    if (label === 'html') {
+      return './html.worker.bundle.js';
+    }
+    if (label === 'typescript' || label === 'javascript') {
+      return './ts.worker.bundle.js';
+    }
+    return './editor.worker.bundle.js';
+  },
+};
+
 /**
  * イベント操作系
  */
@@ -498,10 +516,12 @@ $(document).ready(() => {
   console.warn = (...param) => {
     console._warn(...param)
     let _param = param.map(val => { 
-      if(typeof val == 'object'){
+      if (typeof val == 'object'){
         return JSON.stringify(val)
-      }else{
+      } else if (typeof val === 'string'){
         return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      } else {
+        return val
       }
     });
     logPanel.append($(`<pre class="log warn">${_param}</pre>`));

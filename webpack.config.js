@@ -21,8 +21,14 @@ module.exports = {
     'editor': './js/editor/index.js',
     'dashboard': './js/dashboard/index.js',
     'serviceWorker': './serviceWorker/js/ws.js',
+    "editor.worker": 'monaco-editor/esm/vs/editor/editor.worker.js',
+    "json.worker": 'monaco-editor/esm/vs/language/json/json.worker',
+    "css.worker": 'monaco-editor/esm/vs/language/css/css.worker',
+    "html.worker": 'monaco-editor/esm/vs/language/html/html.worker',
+    "ts.worker": 'monaco-editor/esm/vs/language/typescript/ts.worker'
   },
   output: {
+		globalObject: 'self',
     filename: './[name].bundle.js',
     sourceMapFilename: './map/[id].[chunkhash].js.map',
     chunkFilename: './chunk/[id].[chunkhash].js',
