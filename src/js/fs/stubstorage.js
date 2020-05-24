@@ -26,17 +26,13 @@ export class StubStorage {
     }
 
     loadDraft(fileContainer, url, cb) {
-        console.log('loadDraft',this.siteurl + url)
         $.getJSON(this.siteurl + url).done((data) => {
-            console.log('loadDraft2',this.siteurl + url)
             fileContainer.setContainer(data);
             fileContainer.setId(fileContainer.getId())
-            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0] || "new project");
-            console.log("fileContainer:" + fileContainer.getContainerJson());
+            fileContainer.setProjectName(data.description.split(/\r\n|\r|\n/)[0] || "new project")
             return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
         }).fail((jqXHR, textStatus, errorThrown) => {
-            console.log('loadDraft2.fail',jqXHR, textStatus, errorThrown)
-            console.warn("gist save error", errorThrown);
+            console.log('gist save error',jqXHR, textStatus, errorThrown)
             $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
         })
     }

@@ -23,7 +23,7 @@ export class ES6Compiler {
             //await this.cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
             //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
         } catch (e) {
-            console.log(e);
+            console.error(e);
             UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
             //エラー箇所の表示
             //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, [

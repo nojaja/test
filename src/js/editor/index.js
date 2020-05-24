@@ -118,7 +118,6 @@ function projectjsonCallback(json, type) {
   const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
   prj.on("click", (event) => {
     loadProject($(event.target).attr("data-url"), type, () => {
-      console.log('projectjsonCallback.click')
       fileContainer.refreshCache(EditorFileData, monaco);
     })
   });
@@ -163,7 +162,6 @@ function loadProject(url, type, cb) {
     })
   } else if (type == "stub") {
     stubStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      console.log('stub')
       openFirst();
       return (cb) ? cb() : true;
     })
@@ -172,9 +170,7 @@ function loadProject(url, type, cb) {
 
 //１つ目のファイルを開く
 function openFirst() {
-  console.log('openFirst')
   let files = fileContainer.getFiles()
-  console.log('openFirst',files)
   if (files.length > 0) {
     fileOpen(files[0]);
     $("#filelist").children("li").removeClass("uk-active");
@@ -435,5 +431,80 @@ $(document).ready(() => {
       }
     }
   });
+
+  console._log = console.log
+  console._debug = console.debug
+  console._error = console.error
+  console._info = console.info
+  console._trace = console.trace
+  console._warn = console.warn
+  let logPanel = $('#log-panel')
+  console.log = (...param) => {
+    console._log(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+
+    logPanel.append($(`<pre class="log">${_param}</pre>`));
+  }
+  console.debug = (...param) => {
+    console._debug(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+    logPanel.append($(`<pre class="log">${_param}</pre>`));
+  }
+  console.error = (...param) => {
+    console._error(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+    logPanel.append($(`<pre class="log error">${_param}</pre>`));
+  }
+  console.info = (...param) => {
+    console._info(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+    logPanel.append($(`<pre class="log">${_param}</pre>`));
+  }
+  console.trace = (...param) => {
+    console._trace(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+    logPanel.append($(`<pre class="log">${_param}</pre>`));
+  }
+  console.warn = (...param) => {
+    console._warn(...param)
+    let _param = param.map(val => { 
+      if(typeof val == 'object'){
+        return JSON.stringify(val)
+      }else{
+        return val.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      }
+    });
+    logPanel.append($(`<pre class="log warn">${_param}</pre>`));
+  }
 });
 
