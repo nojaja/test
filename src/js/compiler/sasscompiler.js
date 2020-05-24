@@ -21,7 +21,7 @@ export class SassCompiler {
                 cssfile.setFilename(outpath + filename + '.css')
                 cssfile.setType('text/css; charset=UTF-8')
                 cssfile.setContent(result.text)
-                this.fileContainer.putFile(cssfile)
+                await this.fileContainer.putFile(cssfile)
 
                 //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
                 //await this.cachesLogic.saveCache(filename+'.css',result.text,'text/css; charset=UTF-8');

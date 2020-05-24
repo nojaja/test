@@ -9,6 +9,8 @@ import LocalStorage from '../fs/localstorage.js'
 import GistStorage from '../fs/giststorage.js'
 import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
+import StubStorage from '../fs/stubstorage.js'
+
 import BuilderLogic from './builderlogic.js'
 import RefreshView from './refreshView.js'
 import FileList from './filelistlogic.js'
@@ -27,6 +29,7 @@ let localstorage = new LocalStorage();
 let gistStorage = new GistStorage();
 let htmlStorage = new HtmlStorage();
 let webStorage = new WebStorage();
+let stubStorage = new StubStorage();
 let builderLogic = new BuilderLogic(fileContainer);
 let refreshViewLogic = new RefreshView(fileContainer);
 let filelist = new FileList(fileContainer);
@@ -95,6 +98,7 @@ $(".storageType").on("click", (event) => {
   if (type == 'gistStorage') selectStorage = gistStorage
   if (type == 'htmlStorage') selectStorage = htmlStorage
   if (type == 'webStorage') selectStorage = webStorage
+  if (type == 'stubStorage') selectStorage = stubStorage
 
   $("#prjlist").empty();
   $("#prjlist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
@@ -114,6 +118,7 @@ function projectjsonCallback(json, type) {
   const prj = $('<li ><a  class="project" data-url=""><i class="uk-icon-folder"></i></a></li>');
   prj.on("click", (event) => {
     loadProject($(event.target).attr("data-url"), type, () => {
+      console.log('projectjsonCallback.click')
       fileContainer.refreshCache(EditorFileData, monaco);
     })
   });
@@ -138,25 +143,27 @@ function loadProject(url, type, cb) {
   // URL指定がない場合はlocalから取得
   if (!url || type == "local") {
     localstorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList()
       openFirst()
       return (cb) ? cb() : true
     })
   } else if (type == "gist") {
     gistStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
       openFirst();
       return (cb) ? cb() : true;
     })
   } else if (type == "html") {
     htmlStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
       openFirst();
       return (cb) ? cb() : true;
     })
   } else if (type == "web") {
     webStorage.loadDraft(fileContainer, url, (fileContainer) => {
-      // refreshFileList();
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "stub") {
+    stubStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      console.log('stub')
       openFirst();
       return (cb) ? cb() : true;
     })
@@ -165,9 +172,16 @@ function loadProject(url, type, cb) {
 
 //１つ目のファイルを開く
 function openFirst() {
-  fileOpen(fileContainer.getFiles()[0]);
-  $("#filelist").children("li").removeClass("uk-active");
-  $("#filelist li:first").addClass("uk-active");
+  console.log('openFirst')
+  let files = fileContainer.getFiles()
+  console.log('openFirst',files)
+  if (files.length > 0) {
+    fileOpen(files[0]);
+    $("#filelist").children("li").removeClass("uk-active");
+    $("#filelist li:first").addClass("uk-active");
+  } else {
+    filelist.refreshFileList()
+  }
 }
 
 //Fileを開く
@@ -233,7 +247,7 @@ function saveState() {
     //let currentState = editor.saveViewState();
     //let currentModel = editor.getModel();
     //data.state = currentState;
-    
+
     if (currentFile.setEditorData(data)) {
       data.state = editor.saveViewState();
       fileContainer.putFile(currentFile);
@@ -256,6 +270,12 @@ function compileAll() {
 function refreshView(url) {
   let frame = document.getElementById("child-frame");
   refreshViewLogic.refreshView(frame, url)
+}
+
+// Projectの保存
+function saveAll() {
+  localstorage.saveDraft(fileContainer);
+  fileContainer.refreshCache(EditorFileData, monaco);
 }
 
 // ファイル名変更
@@ -318,11 +338,15 @@ $(document).ready(() => {
     projectjsonCallback(json, type)
   });
 
+  $("#save").on("click", (event) => {
+    saveAll();
+  });
+
   $("#run").on("click", (event) => {
     compileAll();
   });
 
-  $(".samples").on("click", (event) => {
+  $("#load").on("click", (event) => {
     loadProject($(event.currentTarget).attr("data-url"), "html", () => {
       fileContainer.refreshCache(EditorFileData, monaco);
     })
@@ -406,8 +430,7 @@ $(document).ready(() => {
     }
     if (e.ctrlKey) {
       if (e.keyCode === 83) {
-        localstorage.saveDraft(fileContainer);
-        fileContainer.refreshCache(EditorFileData, monaco);
+        saveAll()
         return false;
       }
     }

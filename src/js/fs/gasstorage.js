@@ -42,6 +42,7 @@ export class GasStorage {
                 let file = new FileData();
                 file.setFilename("index.ahtml")
                 file.setContent(json.content)
+                fileContainer.setId(fileContainer.getId())
                 fileContainer.putFile(file)
 
                 // console.log("fileContainer:" + fileContainer.getContainerJson())

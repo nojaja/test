@@ -1,0 +1,39 @@
+{
+    "id": null,
+    "files": {
+        "index.html": {
+            "filename": "index.html",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "html",
+            "size": 0,
+            "truncated": false,
+            "content": "<html>\r\n<head>\r\n    <title>VueJs Introduction</title>\r\n    <link rel='stylesheet prefetch' href='main.css' />\r\n    <script type = \"text/javascript\" src = \"//cdn.jsdelivr.net/npm/vue/dist/vue.js\"></script>\r\n    <script src=\"main.js\"></script>\r\n</head>\r\n<body>\r\n    <div id = \"intro\" style = \"text-align:center;\">\r\n        <h1>{{ message }}</h1>\r\n    </div>\r\n</body>\r\n</html>\r\n",
+            "description": ""
+        },
+        "main.css": {
+            "filename": "main.css",
+            "fileType": "txt",
+            "type": "text/css",
+            "language": "css",
+            "size": 0,
+            "truncated": false,
+            "content": "",
+            "description": ""
+        },
+        "main.js": {
+            "filename": "main.js",
+            "fileType": "txt",
+            "type": "text/javascript",
+            "language": "JavaScript",
+            "size": 0,
+            "truncated": false,
+            "content": "\r\nwindow.onload = () => {\r\n    new Vue({\r\n        el: '#intro',\r\n        data: {\r\n            message: 'My first VueJS Task'\r\n        }\r\n    });\r\n}\r\n",
+            "description": ""
+        }
+    },
+    "public": true,
+    "description": "",
+    "projectName": "new project",
+    "lastUpdatedTime": 1590306355496
+}

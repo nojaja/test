@@ -1,0 +1,39 @@
+{
+  "id": null,
+  "files": {
+    "index.html": {
+      "filename": "index.html",
+      "fileType": "txt",
+      "type": "text/html",
+      "language": "html",
+      "size": 0,
+      "truncated": false,
+      "content": "<!DOCTYPE html>\r\n<html>\r\n<head>\r\n    <meta charset=\"UTF-8\" />\r\n    <title>Hello World</title>\r\n    <link rel='stylesheet prefetch' href='main.css' />\r\n    <script src=\"//unpkg.com/react@16/umd/react.development.js\"></script>\r\n    <script src=\"//unpkg.com/react-dom@16/umd/react-dom.development.js\"></script>\r\n    <script src=\"main.js\"></script>\r\n</head>\r\n<body>\r\n    <div id=\"timer-example\"></div>\r\n</body>\r\n</html>",
+      "description": ""
+    },
+    "main.css": {
+      "filename": "main.css",
+      "fileType": "txt",
+      "type": "text/css",
+      "language": "css",
+      "size": 0,
+      "truncated": false,
+      "content": "",
+      "description": ""
+    },
+    "main.js": {
+      "filename": "main.js",
+      "fileType": "txt",
+      "type": "text/javascript",
+      "language": "JavaScript",
+      "size": 0,
+      "truncated": false,
+      "content": "class Timer extends React.Component {\r\n  constructor(props) {\r\n    super(props);\r\n    this.state = { seconds: 0 };\r\n  }\r\n\r\n  tick() {\r\n    this.setState(state => ({\r\n      seconds: state.seconds + 1\r\n    }));\r\n  }\r\n\r\n  componentDidMount() {\r\n    this.interval = setInterval(() => this.tick(), 1000);\r\n  }\r\n\r\n  componentWillUnmount() {\r\n    clearInterval(this.interval);\r\n  }\r\n\r\n  render() {\r\n    return React.createElement(\"div\", null, \"Seconds: \", this.state.seconds);\r\n  }\r\n}\r\n\r\nlet render = () => {\r\n    ReactDOM.render(\r\n        React.createElement(Timer, null),\r\n        document.getElementById('timer-example')\r\n    )\r\n}\r\n\r\nwindow.onload = () => {\r\n    /* render initial component */\r\n    render();\r\n}\r\n",
+      "description": ""
+    }
+  },
+  "public": true,
+  "description": "",
+  "projectName": "new project",
+  "lastUpdatedTime": 1590305582797
+}

@@ -15,7 +15,7 @@ export class BuilderLogic {
     }
 
     //全てのsourceのcompile
-    compileAll(fileContainer, srcpath = '', outpath, cb) {
+    async compileAll(fileContainer, srcpath = '', outpath, cb) {
         let _compileAll = async () => {
             let compileResolve = (filename) => {
                 return new Promise((resolve) => {

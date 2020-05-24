@@ -1,0 +1,39 @@
+{
+  "id": null,
+  "files": {
+    "index.html": {
+      "filename": "index.html",
+      "fileType": "txt",
+      "type": "text/html",
+      "language": "html",
+      "size": 0,
+      "truncated": false,
+      "content": "<html>\r\n<head>\r\n    <link rel='stylesheet prefetch' href='main.css' />\r\n    <script src=\"//cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js\"></script>\r\n    <script src=\"main.js\"></script>\r\n</head>\r\n<body>\r\n    \r\n</body>\r\n</html>",
+      "description": ""
+    },
+    "main.css": {
+      "filename": "main.css",
+      "fileType": "txt",
+      "type": "text/css",
+      "language": "css",
+      "size": 0,
+      "truncated": false,
+      "content": "",
+      "description": ""
+    },
+    "main.js": {
+      "filename": "main.js",
+      "fileType": "txt",
+      "type": "text/javascript",
+      "language": "JavaScript",
+      "size": 0,
+      "truncated": false,
+      "content": "",
+      "description": ""
+    }
+  },
+  "public": true,
+  "description": "",
+  "projectName": "new project",
+  "lastUpdatedTime": 1590301198929
+}

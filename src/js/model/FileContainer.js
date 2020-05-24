@@ -48,7 +48,7 @@ export class FileContainer {
   }
 
   getId () {
-    return this.container.id || null
+    return this.container.id || Date.now() + Math.floor(1e4 + 9e4 * Math.random())
   }
 
   setGistId (gistid) {
@@ -193,7 +193,7 @@ export class FileContainer {
     return false
   }
 
-  putFile (file) {
+  async putFile (file) {
     const filename = file.getFilename()
     this.container.files[filename] = file.getFileData()
     this.container.lastUpdatedTime = new Date().getTime()
@@ -301,18 +301,7 @@ export class FileContainer {
   }
 
   getGistData () {
-    let siteeditor = new FileData()
-    siteeditor.setFilename('.siteeditor');
-    siteeditor.setContent("HelloWorld");
-    siteeditor.getFileData()
-    this.putFile(siteeditor)
-
-    let readme = new FileData()
-    readme.setFilename('README.md');
-    readme.setContent("HelloWorld");
-    this.putFile(readme)
-    
-    let files = Object.entries(this.container.files).filter( (x, self) => (!x[1].content == "")).map(([key, value]) => {
+    let files = Object.entries(this.container.files).filter( (x, self) => (!x[1].content == "" && !x[1].filename.match(/^\/public\//))).map(([key, value]) => {
       return [key.replace(/\//g, '%2F'), {"filename": value.filename.replace(/\//g, '%2F'), "content": value.content}]
     })
 

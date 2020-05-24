@@ -50,7 +50,7 @@ export class AHtmlCompiler {
         domfile.setFilename(outpath + filename + '_dom.json')
         domfile.setType('application/json')
         domfile.setContent(this.stringify(parseData))
-        this.fileContainer.putFile(domfile)
+        await this.fileContainer.putFile(domfile)
 
         //await this.cachesLogic.saveCache(filename+'_dom.json',this.stringify(parseData),'application/json');
         compiler1.compile(parseData); //jsonオブジェクトを各種コードに変換します
@@ -67,7 +67,7 @@ export class AHtmlCompiler {
         componentfile.setFilename(outpath + filename + '_component.js')
         componentfile.setType('text/javascript; charset=UTF-8')
         componentfile.setContent(webComponentParser.getResult())
-        this.fileContainer.putFile(componentfile)
+        await this.fileContainer.putFile(componentfile)
         //await this.cachesLogic.saveCache(filename+'_component.js',webComponentParser.getResult());
 
         // data.app.model.setValue(reactRootParser.getResult());
@@ -76,7 +76,7 @@ export class AHtmlCompiler {
         appfile.setFilename(outpath + filename + '_app.js')
         appfile.setType('text/javascript; charset=UTF-8')
         appfile.setContent(webComponentParser.getResult())
-        this.fileContainer.putFile(appfile)
+        await this.fileContainer.putFile(appfile)
         //await this.cachesLogic.saveCache(filename+'_app.js',reactRootParser.getResult());
 
         //targetFile.setEditorData(data)
@@ -174,7 +174,7 @@ export class AHtmlCompiler {
         htmlfile.setFilename(outpath + filename + '.html')
         htmlfile.setType('text/html; charset=UTF-8')
         htmlfile.setContent(builder.getNodes())
-        this.fileContainer.putFile(htmlfile)
+        await this.fileContainer.putFile(htmlfile)
 
         //await this.cachesLogic.saveCache(filename+'.html',builder.getNodes(),'text/html; charset=UTF-8');
     }

@@ -25,6 +25,7 @@ export class LocalStorage {
     }
 
     saveDraft(fileContainer) {
+        this.updateInfoFile(fileContainer)
         // ローカルストレージに最新の状態を保存
         //const name = 'draftContainer'+location.pathname.replace(/\//g, '.');
         const prjName = 'Container_' + fileContainer.getId()
@@ -39,20 +40,39 @@ export class LocalStorage {
         if (localStorage.getItem(name1)) {
             fileContainer.setContainerJson(localStorage.getItem(name1));
         } else {
-            const prjId = Date.now() + Math.floor(1e4 + 9e4 * Math.random())
+            fileContainer.init()
 
             const source = null;
             const file = new FileData();
             file.setFilename("index.html");
             file.setContent(source);
-
-            fileContainer.setId(prjId)
             fileContainer.putFile(file);
         }
+        fileContainer.setId(fileContainer.getId())
         fileContainer.setProjectName(fileContainer.getProjectName() || "new project")
         // console.log("fileContainer:" + fileContainer.getContainerJson());
         return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();
     }
 
+    updateInfoFile(fileContainer) {
+        const siteeditor = new FileData()
+        siteeditor.setFilename('.siteeditor.md');
+        siteeditor.setContent(`{"description": "
+# ${fileContainer.getProjectName()}
+        
+This is a project created by [SiteEditor](https://nojaja.github.io/SiteEditor/editor.html)
+        
+To run it, please go [here](https://nojaja.github.io/SiteEditor/editor.html?q=${fileContainer.getGistId()}&t=gist)
+        
+---
+",
+"setting": {
+        "main": "index.html",
+        "dependencies": []
+    }
+}`);
+        siteeditor.getFileData()
+        fileContainer.putFile(siteeditor)
+    }
 }
 export default LocalStorage

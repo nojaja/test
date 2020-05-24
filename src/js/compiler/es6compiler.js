@@ -18,7 +18,7 @@ export class ES6Compiler {
             jsfile.setFilename(outpath + filename + '.js')
             jsfile.setType('text/javascript; charset=UTF-8')
             jsfile.setContent(parseData.code)
-            this.fileContainer.putFile(jsfile)
+            await this.fileContainer.putFile(jsfile)
 
             //await this.cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
             //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, { range: new monaco.Range(1,1,1,1), options : { } });

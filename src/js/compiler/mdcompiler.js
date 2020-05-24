@@ -18,7 +18,7 @@ export class MDCompiler {
         htmlfile.setFilename(outpath + filename + '.html')
         htmlfile.setType('text/html; charset=UTF-8')
         htmlfile.setContent(parseData)
-        this.fileContainer.putFile(htmlfile)
+        await this.fileContainer.putFile(htmlfile)
         //await this.cachesLogic.saveCache(filename+'.html',parseData,'text/html; charset=UTF-8');
     }
 

@@ -32,7 +32,7 @@ export class HtmlStorage {
             file.setFilename("index.html");
             file.setContent(data);
             fileContainer.putFile(file);
-
+            fileContainer.setId(fileContainer.getId())
             fileContainer.setProjectName($(data).find("title").text() || "new project");
             // console.log("fileContainer:" + fileContainer.getContainerJson());
             return (cb) ? cb(fileContainer) : fileContainer.getContainerJson();

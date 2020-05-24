@@ -36,7 +36,9 @@ export class GistStorage {
                     xhr.setRequestHeader("Authorization", "token " + this.tokens)
                 }
             }).done((response) => {
-                let list = { rows: response }
+                // '.siteeditor'があるgistだけに絞る
+                let fileslist = response.filter( (x, i, self) => (x.files && (x.files['.siteeditor'] || x.files['.siteeditor.md'])))
+                let list = { rows: fileslist }
                 localStorage.setItem('gittoken', this.tokens)
                 return (callback) ? callback(list, "gist") : list
             }).fail((jqXHR, textStatus, errorThrown) => {
@@ -48,6 +50,8 @@ export class GistStorage {
 
     async saveDraft(fileContainer) {
         if(await this.getToken()){
+            this.updateInfoFile(fileContainer)
+
             $.UIkit.notify("Share Gist..", { status: 'success', timeout: 1000 });
     
             let sendType = "POST";
@@ -92,11 +96,32 @@ export class GistStorage {
             })
             let data = conv(response)
             fileContainer.setContainer(data);
+            fileContainer.setId(fileContainer.getId())
             fileContainer.setProjectName(data.projectName || data.description.split(/\r\n|\r|\n/)[0] || "new project");
             // console.log("fileContainer:" + fileContainer.getContainerJson());
             return (callback) ? callback(fileContainer) : fileContainer.getContainerJson();
         })
     }
 
+    updateInfoFile(fileContainer) {
+        const siteeditor = new FileData()
+        siteeditor.setFilename('.siteeditor.md');
+        siteeditor.setContent(`{"description": "
+# ${fileContainer.getProjectName()}
+        
+This is a project created by [SiteEditor](https://nojaja.github.io/SiteEditor/editor.html)
+        
+To run it, please go [here](https://nojaja.github.io/SiteEditor/editor.html?q=${fileContainer.getGistId()}&t=gist)
+        
+---
+",
+"setting": {
+        "main": "index.html",
+        "dependencies": []
+    }
+}`);
+        siteeditor.getFileData()
+        fileContainer.putFile(siteeditor)
+    }
 }
 export default GistStorage
