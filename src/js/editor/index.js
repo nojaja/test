@@ -82,7 +82,6 @@ fileContainer.onChangeMetas(() => {
 //ファイルセットが変更された場合
 //File一覧の更新
 fileContainer.onChangeFiles((filename) => {
-  console.log('onChangeFiles',filename)
   refreshTab(filename)
   filelist.refreshFileList()
   $.contextMenu({
