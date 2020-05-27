@@ -2,8 +2,10 @@ import FileData from '../model/FileData.js'
 import * as Babel from '@babel/standalone'
 
 export class ES6Compiler {
-    constructor(fileContainer) {
+    constructor(fileContainer, logger) {
         this.fileContainer = fileContainer
+        this.logger = logger
+        this.error = logger.getError()
     }
 
     async compile(targetFile, outpath) {
@@ -23,8 +25,7 @@ export class ES6Compiler {
             //await this.cachesLogic.saveCache(filename+'.js',parseData.code,'text/javascript; charset=UTF-8');
             //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, { range: new monaco.Range(1,1,1,1), options : { } });
         } catch (e) {
-            console.error(e);
-            UIkit.notify(e.toString(), { status: 'warning', timeout: 1000 });
+            this.error(e)
             //エラー箇所の表示
             //todo if(data)data.decorations = data.model.deltaDecorations(data.decorations, [
             //todo     { range: new monaco.Range(e.loc.line,1,e.loc.line,1), options: { isWholeLine: true, linesDecorationsClassName: 'warningLineDecoration' }},

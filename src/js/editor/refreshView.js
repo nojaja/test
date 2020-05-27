@@ -377,12 +377,13 @@ export class RefreshView {
         compiler.compile(vdom.children)
         return builder.getNodes()
     }
+
     // iframe内のコンテンツを更新
     //htmlElement: ifremeのelement document.getElementById("Iframe");
     refreshView(htmlElement, url, flg = true) {
         this.url = url
         if (flg && navigator.serviceWorker) {
-            htmlElement.addEventListener('load', () => {
+            htmlElement.addEventListener('load', (event) => {
                 this.ev.emit('load', this.url)
             })
             // iframe内のコンテンツを更新
@@ -399,7 +400,6 @@ export class RefreshView {
             htmlElement.addEventListener('load', () => {
                 this.ev.emit('load', this.url)
             })
-
             htmlElement.onload = () => {
                 htmlElement.onload = function () { };
                 //htmlElement.contentWindow.location.replace(this.url)

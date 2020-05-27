@@ -6,8 +6,10 @@ import htmlcompiler from '@nojaja/htmlcompiler'
 //var htmlparser = Tautologistics.NodeHtmlParser;
 
 export class AHtmlCompiler {
-    constructor(fileContainer) {
+    constructor(fileContainer, logger) {
         this.fileContainer = fileContainer
+        this.logger = logger
+        this.error = logger.getError()
     }
 
     parseHtml(rawHtml) {
