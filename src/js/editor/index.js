@@ -82,6 +82,7 @@ fileContainer.onChangeMetas(() => {
 //ファイルセットが変更された場合
 //File一覧の更新
 fileContainer.onChangeFiles((filename) => {
+  console.log('onChangeFiles',filename)
   refreshTab(filename)
   filelist.refreshFileList()
   $.contextMenu({
@@ -240,7 +241,7 @@ function refreshTab(filename) {
     _tab.attr('id', key);
     _tab.children("a").append(key).append($('<a class="uk-icon-hover uk-icon-close" style="padding-left: 10px; display: inline-block; #display: inline;"></a>'));
     $("#edittab").append(_tab);
-    if (key == filename) {
+    if (currentFile && key == currentFile.getFilename()) {
       //_tab.addClass('uk-active');
       index = i
     }
