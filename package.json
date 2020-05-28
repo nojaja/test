@@ -21,7 +21,7 @@
   "homepage": "https://nojaja.github.io/SiteEditor/",
   "dependencies": {
     "@babel/standalone": "^7.9.6",
-    "@nojaja/htmlcompiler": "^1.0.3",
+    "@nojaja/htmlcompiler": "^1.0.4",
     "@nojaja/htmlparser": "git+https://github.com/nojaja/node-htmlparser.git",
     "cssom": "git+https://github.com/nojaja/CSSOM.git",
     "hard-source-webpack-plugin": "^0.13.1",
