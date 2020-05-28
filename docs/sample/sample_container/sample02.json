@@ -1,45 +1,39 @@
 {
     "v": 0.1,
-    "id": "f1cd24525b1639a36bc344fefed89314",
+    "id": "",
     "files": {
-        ".siteeditor.md": {
-            "filename": ".siteeditor.md",
+        "index.html": {
+            "filename": "index.html",
             "fileType": "txt",
-            "type": "text/plain",
-            "language": "Markdown",
-            "size": 0,
+            "type": "text/html",
+            "language": "html",
+            "size": 1259,
             "truncated": false,
-            "content": "{\"description\": \"\n# React Calculator\n        \nThis is a project created by [SiteEditor](https://nojaja.github.io/SiteEditor/editor.html)\n        \nTo run it, please go [here](https://nojaja.github.io/SiteEditor/editor.html?q=f1cd24525b1639a36bc344fefed89314&t=gist)\n        \n---\n\",\n\"setting\": {\n        \"main\": \"index.html\",\n        \"dependencies\": []\n    }\n}",
+            "content": "<html>\n<head>\n    <script src=\"//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>\n    <link rel='stylesheet prefetch' href='main.css' />\n    <script src=\"main.js\"></script>\n</head>\n<body>\n<div class=\"back\"></div>\n<div id=\"button\">\n  <!--<img src=\"https://pp.vk.me/c624230/v624230976/43e7b/T5WjDtwt80M.jpg\" alt=\"\" />--><svg version=\"1.1\" id=\"Capa_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n\t width=\"45.412px\" height=\"45.413px\" viewBox=\"0 0 45.412 45.413\" style=\"enable-background:new 0 0 45.412 45.413;\"\n\t xml:space=\"preserve\">\n\t<g>\n\t\t<path style=\"fill:#FFDCB9;\" d=\"M45.412,16.024c0-6.918-5.668-12.547-12.635-12.547c-4.103,0-7.754,1.951-10.063,4.969\n\t\t\tc-2.311-3.018-5.965-4.969-10.07-4.969C5.672,3.477,0,9.105,0,16.024c0,10.422,14.892,25.911,22.715,25.911\n\t\t\tc1.185,0,2.531-0.358,3.965-0.998c0,0-5.476-4.086-7.683-5.672C13.625,31.402,5.143,22.639,5.143,16.024\n\t\t\tc0-4.082,3.365-7.403,7.5-7.403c4.135,0,7.5,3.321,7.5,7.403c0,1.42,1.151,2.572,2.572,2.572c1.42,0,2.57-1.152,2.57-2.572\n\t\t\tc0-4.082,3.361-7.403,7.492-7.403s7.492,3.321,7.492,7.403c0,6.723-8.544,15.977-14.113,19.411l4.394,3.244\n\t\t\tC37.761,33.575,45.412,23.497,45.412,16.024z\"/>\n\t</g>\n</svg></div>\n</body>\n</html>",
             "description": ""
-        },
-        "index.ahtml": {
-            "filename": "index.ahtml",
-            "content": "<html>\n<head>\n    <meta name=\"viewport\" content=\"width=400, height=600, initial-scale=0.8, maximum-scale=1\">\n    <script src=\"https://npmcdn.com/number-to-locale-string@1.0.1/polyfill.number.toLocaleString.js\"></script>\n    <link rel='stylesheet prefetch' href='main.css' />\n    <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Roboto:100'>\n    <script src=\"main.js\"></script>\n</head>\n<body>\n    <div id=\"wrapper\">\n        <div id=\"app\">\n            <Calculator />\n        </div>\n    </div>\n<element name=\"Calculator\">\n  <script language='es6'>\n        constructor() {\n            super();\n            this.state = {\n                value: 0,\n                displayValue: '0',\n                operator: null,\n                waitingForOperand: false\n            };\n            this.clearDisplay = this.displayValue !== '0';\n            this.clearText = this.clearDisplay ? 'C' : 'AC';\n        };\n\n        inputDigit(digit) {\n            let _this = this;\n            return function () {\n                let value = _this.state.value * 10 + digit\n                _this.setState({\n                    value: value,\n                    displayValue: String(value),\n                    waitingForOperand: false\n                })\n            }\n        }\n        \n        inputDot() {\n        };\n  </script>\n  <template>\n            <div className=\"calculator\">\n                <Calculatordisplay value={this.state.displayValue}/>\n                <div className=\"calculator-keypad\">\n                <div className=\"input-keys\">\n                    <div className=\"function-keys\">\n                    <Calculatorkey className=\"key-clear\" onPress={this.inputDigit(0)}>{this.clearText}</Calculatorkey>\n                    <Calculatorkey className=\"key-sign\" onPress={this.inputDigit(0)}>±</Calculatorkey>\n                    <Calculatorkey className=\"key-percent\" onPress={this.inputDigit(0)}>%</Calculatorkey>\n                    </div>\n                    <div className=\"digit-keys\">\n                        <Calculatorkey className=\"key-0\" onPress={this.inputDigit(0)}>0</Calculatorkey>\n                        <Calculatorkey className=\"key-dot\" onPress={this.inputDot()}>●</Calculatorkey>\n                        <Calculatorkey className=\"key-1\" onPress={this.inputDigit(1)}>1</Calculatorkey>\n                        <Calculatorkey className=\"key-2\" onPress={this.inputDigit(2)}>2</Calculatorkey>\n                        <Calculatorkey className=\"key-3\" onPress={this.inputDigit(3)}>3</Calculatorkey>\n                        <Calculatorkey className=\"key-4\" onPress={this.inputDigit(4)}>4</Calculatorkey>\n                        <Calculatorkey className=\"key-5\" onPress={this.inputDigit(5)}>5</Calculatorkey>\n                        <Calculatorkey className=\"key-6\" onPress={this.inputDigit(6)}>6</Calculatorkey>\n                        <Calculatorkey className=\"key-7\" onPress={this.inputDigit(7)}>7</Calculatorkey>\n                        <Calculatorkey className=\"key-8\" onPress={this.inputDigit(8)}>8</Calculatorkey>\n                        <Calculatorkey className=\"key-9\" onPress={this.inputDigit(9)}>9</Calculatorkey>\n                    </div>\n                </div>\n                <div className=\"operator-keys\">\n                    <Calculatorkey className=\"key-divide\" onPress={this.inputDigit(0)}>÷</Calculatorkey>\n                    <Calculatorkey className=\"key-multiply\" onPress={this.inputDigit(0)}>×</Calculatorkey>\n                    <Calculatorkey className=\"key-subtract\" onPress={this.inputDigit(0)}>−</Calculatorkey>\n                    <Calculatorkey className=\"key-add\" onPress={this.inputDigit(0)}>+</Calculatorkey>\n                    <Calculatorkey className=\"key-equals\" onPress={this.inputDigit(0)}>=</Calculatorkey>\n                </div>\n            </div>\n  </template>\n</element>\n<element name=\"Autoscalingtext\">\n  <template>\n      <div\n        className=\"auto-scaling-text\"\n      >{this.props.children}</div>\n  </template>\n</element>\n\n<element name=\"Calculatordisplay\">\n  <template>\n      <div className=\"calculator-display\">\n        <Autoscalingtext>{this.props.value}</Autoscalingtext>\n      </div>\n  </template>\n</element>\n\n<element name=\"Calculatorkey\">\n  <template>\n      <div onClick={this.props.onPress}>\n        <button className='calculator-key {this.props.className}'>{this.props.children}</button>\n      </div>\n  </template>\n</element>\n</body>\n</html>",
-            "type": "text/plain",
-            "language": null,
-            "size": 4425,
-            "truncated": false
         },
         "main.css": {
             "filename": "main.css",
-            "content": "html {\n  box-sizing: border-box;\n}\n*, *:before, *:after {\n  box-sizing: inherit;\n}\n\nbody {\n  margin: 0;\n  font: 100 14px 'Roboto';\n}\n\nbutton {\n  display: block;\n  background: none;\n  border: none;\n  padding: 0;\n  font-family: inherit;\n  user-select: none;\n  cursor: pointer;\n  outline: none;\n  \n  -webkit-tap-highlight-color: rgba(0,0,0,0);\n}\n\nbutton:active {\n  box-shadow: inset 0px 0px 80px 0px rgba(0,0,0,0.25);\n}\n\n#wrapper {\n  height: 100vh;\n  \n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n#app {\n  width: 320px;\n  height: 520px;\n  position: relative;\n}\n\n.calculator {\n  width: 100%;\n  height: 100%;\n  background: black;\n  \n  display: flex;\n  flex-direction: column;\n}\n\n#wrapper .calculator {\n  box-shadow: 0px 0px 20px 0px #aaa;\n}\n\n.calculator-display {\n  color: white;\n  background: #1c191c;\n  line-height: 130px;\n  font-size: 6em;\n  \n  flex: 1;\n}\n\n.auto-scaling-text {\n  display: inline-block;\n}\n\n.calculator-display .auto-scaling-text {\n  padding: 0 30px;\n  position: absolute;\n  right: 0;\n  transform-origin: right;\n}\n\n.calculator-keypad {\n  height: 400px;\n  \n  display: flex;\n}\n\n.calculator .input-keys {\n  width: 240px;\n}\n\n.calculator .function-keys {\n  display: flex;\n}\n\n.calculator .digit-keys {\n  background: #e0e0e7;\n  \n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap-reverse;\n}\n\n.calculator-key {\n  width: 80px;\n  height: 80px;\n  border-top: 1px solid #777;\n  border-right: 1px solid #666;  \n  text-align: center;\n  line-height: 80px;\n}\n.calculator .function-keys .calculator-key {\n  font-size: 2em;\n}\n.calculator .function-keys .key-multiply {\n  line-height: 50px;\n}\n.calculator .digit-keys .calculator-key {\n  font-size: 2.25em;\n}\n.calculator .digit-keys .key-0 {\n  width: 160px;\n  text-align: left;\n  padding-left: 32px;\n}\n.calculator .digit-keys .key-dot {\n  padding-top: 1em;\n  font-size: 0.75em;\n}\n.calculator .operator-keys .calculator-key {\n  color: white;\n  border-right: 0;\n  font-size: 3em;\n}\n\n.calculator .function-keys {\n  background: linear-gradient(to bottom, rgba(202,202,204,1) 0%, rgba(196,194,204,1) 100%);\n}\n.calculator .operator-keys {\n  background:  linear-gradient(to bottom, rgba(252,156,23,1) 0%, rgba(247,126,27,1) 100%);\n}",
+            "content": ".back {\n  position: fixed;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  background: url(http://artem.anmedio.ru/dev/denis/1+2.jpg) center center #22181e no-repeat;\n  background-size: cover;\n}\n\n#source-heart {\n  width: 20px;\n  height: 20px;\n  position: fixed;\n  right: 30px;\n  top: 30px;\n}\n\n#button {\n  width: 100px;\n  height: 100px;\n  left: 50%;\n  top: 50%;\n  margin: -50px;\n  background: #22181e;\n  position: fixed;\n  border-radius: 50px;\n  box-sizing: border-box;\n  color: black;\n  text-align: center;\n  padding: 25px 0 0 3px;\n  font-family: monospace;\n  font-size: 40px;\n  cursor: pointer;\n  z-index: 20;\n  box-shadow: 0 0 20px -5px #22181e;\n  overflow: hidden;\n}\n#button img {\n  position: absolute;\n  left: -73%;\n  top: 0;\n  width: 180%;\n}\n#button svg {\n  width: 50%;\n  height: 50%;\n  left: 50%;\n  top: 50%;\n  position: absolute;\n  transform: translateX(-50%) translateY(-45%);\n}\n\n.heart {\n  position: fixed;\n  width: 50px;\n  z-index: 10;\n  height: 50px;\n  transform: translateX(-50%) translateY(-50%) scale(1.5);\n  opacity: 1;\n  transition: .5s ease;\n  opacity: 0;\n}\n\n@keyframes show-heart {\n  0% {\n    opacity: 0;\n    transform: translateX(-50%) translateY(-50%) scale(1.5) rotateZ(-15deg);\n  }\n  50% {\n    opacity: .8;\n  }\n  100% {\n    opacity: 0;\n    left: 50%;\n    top: 50%;\n    transform: translateX(-50%) translateY(-50%) scale(0.2) rotateZ(15deg);\n    display: none;\n  }\n}",
             "type": "text/css",
             "language": "CSS",
-            "size": 2200,
+            "size": 1393,
             "truncated": false
         },
-        "main.es6": {
-            "filename": "main.es6",
-            "content": "//",
-            "type": "text/plain",
+        "main.js": {
+            "filename": "main.js",
+            "fileType": "txt",
+            "type": "text/javascript",
             "language": "JavaScript",
-            "size": 2,
-            "truncated": false
+            "size": 913,
+            "truncated": false,
+            "content": "var color = ['#f9a363','#8c1346','#d13d3c','#e2663b'];\nfunction addHeart(){\n  let randomColor = Math.floor(Math.random() * (4));\n  let randomX = Math.floor(Math.random() * (100));\n  let randomY = Math.floor(Math.random() * (100));\n  let svg = '<svg style=\"top:'+randomY+'%; left: '+randomX+'%;\" class=\"heart\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 23.217 23.217\" style=\"enable-background:new 0 0 23.217 23.217;\" xml:space=\"preserve\"><g><path style=\"fill:'+color[randomColor]+';\" d=\"M11.608,21.997c-22.647-12.354-6.268-27.713,0-17.369C17.877-5.716,34.257,9.643,11.608,21.997z\" /></g></svg>';\n  $(\"body\").append(svg);\n}\nfunction deleteHearts(){\n  $('.heart:lt(100)').remove();\n}\nfunction centerHeart(){\n  $(\".heart\").css('-webkit-animation','show-heart 4s ease');\n}\nsetInterval(addHeart,50);\nsetInterval(centerHeart,200);\nsetInterval(deleteHearts,8000);",
+            "description": ""
         }
     },
     "public": true,
-    "createdTime": 1528893454000,
-    "lastUpdatedTime": 1590284019531,
-    "description": "React Calculator",
-    "projectName": "React Calculator"
+    "createdTime": 1515039553000,
+    "lastUpdatedTime": 1590213724414,
+    "description": "simple demo02",
+    "projectName": "simple demo02"
 }

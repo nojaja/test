@@ -1,0 +1,39 @@
+{
+    "id": "",
+    "files": {
+        "index.html": {
+            "filename": "index.html",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "html",
+            "size": 0,
+            "truncated": false,
+            "content": "<html>\r\n<head>\r\n    <link rel='stylesheet prefetch' href='main.css' />\r\n</head>\r\n<body>\r\n    <canvas id=\"screensaver\"></canvas>\r\n    <script src=\"main.js\"></script>\r\n</body>\r\n</html>",
+            "description": ""
+        },
+        "main.css": {
+            "filename": "main.css",
+            "fileType": "txt",
+            "type": "text/css",
+            "language": "css",
+            "size": 0,
+            "truncated": false,
+            "content": "body {\r\n  background-color: black;\r\n}",
+            "description": ""
+        },
+        "main.js": {
+            "filename": "main.js",
+            "fileType": "txt",
+            "type": "text/javascript",
+            "language": "JavaScript",
+            "size": 0,
+            "truncated": false,
+            "content": "/* Create Canvas */\r\nconst canvas = document.getElementById(\"screensaver\");\r\nconst context = canvas.getContext(\"2d\");\r\n\r\nconst resizeCanvas = () => { // responsive canvas\r\n  context.canvas.width = innerWidth;\r\n  context.canvas.height = innerHeight;\r\n}\r\nresizeCanvas();\r\n\r\nwindow.addEventListener(\"resize\", ()=> {\r\n  resizeCanvas();\r\n});\r\n\r\n\r\n/* Create Screensaver Images */\r\nconst screensaverImg = (imgSrc, imgWidth, imgHeight, numOfFrames) => {\r\n  const image = new Image();\r\n  image.src = imgSrc;\r\n  image.width = imgWidth;\r\n  image.height = imgHeight;\r\n  image.frames = numOfFrames;\r\n  return image;\r\n}\r\n\r\nconst smParrotImg = screensaverImg(\r\n  \"https://github.com/karlyhoffman/party-parrot-screensaver/blob/master/app/assets/img/parrot-x-sm.png?raw=true\",\r\n  640,\r\n  64,\r\n  10\r\n);\r\nconst mdParrotImg = screensaverImg(\r\n  \"https://github.com/karlyhoffman/party-parrot-screensaver/blob/master/app/assets/img/parrot-x-md.png?raw=true\",\r\n  960,\r\n  96,\r\n  10\r\n);\r\nconst lgParrotImg = screensaverImg(\r\n  \"https://github.com/karlyhoffman/party-parrot-screensaver/blob/master/app/assets/img/parrot-x-lg.png?raw=true\",\r\n  1280,\r\n  128,\r\n  10\r\n);\r\nconst dadParrotImg = screensaverImg(\r\n  \"https://raw.githubusercontent.com/karlyhoffman/party-parrot-screensaver/master/app/assets/img/dad_parrot.png\",\r\n  1010,\r\n  81,\r\n  8\r\n);\r\n\r\nconst partyAnimals = [];\r\n\r\n/* Screensaver Image Constructor */\r\nfunction NewPartyParrot( image, startingXpos, startingYpos, speed, headBobbSpeed ) {\r\n  this.image = image;\r\n  this.width = image.width;\r\n  this.height = image.height;\r\n  image.frames === undefined ? this.frames = 1 : this.frames = image.frames;\r\n  this.xCoor = startingXpos;              // starting x coordinate\r\n  this.yCoor = startingYpos;              // staring y coordinate\r\n  this.xDirection = speed;                // x speed\r\n  this.yDirection = speed;                // y speed\r\n  this.headBobbingSpeed = headBobbSpeed;  // lower = faster, higher = slower\r\n  this.frameIndex = 0;\r\n  this.count = 0;\r\n\r\n  partyAnimals.push(this);\r\n\r\n  this.renderParrot = () => {\r\n    context.drawImage(\r\n      this.image,\r\n      this.frameIndex * this.width / this.frames,   // frame x-position\r\n      0,                                            // frame y-position\r\n      this.width / this.frames,                     // image width\r\n      this.height,                                  // image height\r\n      this.xCoor,                                   // canvas x-coordinates\r\n      this.yCoor,                                   // canvas y-coordinates\r\n      this.width / this.frames,                     // scale image x\r\n      this.height                                   // scale image y\r\n    );\r\n  };\r\n\r\n  this.spriteAnimation = () => {\r\n    this.count += 1;\r\n    if (this.count > this.headBobbingSpeed) {\r\n      this.count = 0;\r\n      if (this.frameIndex < this.frames - 1) {\r\n        this.frameIndex += 1;\r\n      } else {\r\n        this.frameIndex = 0;\r\n      }\r\n    }\r\n  };\r\n\r\n  this.moveParrot = () => {\r\n    // check x bounds\r\n    if (this.xCoor + this.height < canvas.width && this.xCoor >= 0) {\r\n      this.xCoor += this.xDirection; // keep going same direction\r\n    } else { // change directions\r\n      this.xDirection = this.xDirection * -1;\r\n      this.xCoor += this.xDirection;\r\n    }\r\n\r\n    // check y bounds\r\n    if (this.yCoor + this.height < canvas.height && this.yCoor >= 0) {\r\n      this.yCoor += this.yDirection; // keep going same direction\r\n    } else { // change directions\r\n      this.yDirection = this.yDirection * -1;\r\n      this.yCoor += this.yDirection;\r\n    }\r\n  };\r\n\r\n  this.animate = () => {\r\n    this.renderParrot();\r\n    this.spriteAnimation();\r\n    this.moveParrot();\r\n  };\r\n\r\n  // this.animate when images load\r\n  this.party = () => {\r\n    this.image.onload = this.animate();\r\n  };\r\n}\r\n\r\n/* Create Instances   =   (image, startingXpos, startingYpos, speed/direction, headBobbSpeed) */\r\n// const smallParrot = new NewPartyParrot(smParrotImg, 400, 50, -1, 5);\r\nconst mediumParrot = new NewPartyParrot(mdParrotImg, 0, 0, 3, 2);\r\n// const bigParrot = new NewPartyParrot(lgParrotImg, 1000, 0, 8, 1);\r\n// const dadParrot = new NewPartyParrot(dadParrotImg, 1000, 0, 4, 2);\r\n\r\nconst partyParrots = () => { // animate each instance\r\n  context.clearRect(0, 0, canvas.width, canvas.height);\r\n  partyAnimals.forEach((image)=> {\r\n    image.party();\r\n  });\r\n  window.requestAnimationFrame(partyParrots);\r\n}\r\npartyParrots();\r\n",
+            "description": ""
+        }
+    },
+    "public": true,
+    "description": "",
+    "projectName": "Party Parrot Screensaver",
+    "lastUpdatedTime": 1590679204229
+}
