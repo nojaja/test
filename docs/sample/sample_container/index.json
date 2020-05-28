@@ -1,6 +1,6 @@
 {
     "rows" : [
-        {"description" : "sample01", "id" : "sample01.json", "public" : true },
+        {"description" : "simple demo01", "id" : "sample01.json", "public" : true },
         {"description" : "sample02", "id" : "sample02.json", "public" : true },
         {"description" : "Test1 redux sample", "id" : "sample03.json", "public" : true },
         {"description" : "Test2 uikit-sortable sample", "id" : "sample04.json", "public" : true },
