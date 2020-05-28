@@ -1,7 +1,7 @@
 {
     "rows" : [
         {"description" : "simple demo01", "id" : "sample01.json", "public" : true },
-        {"description" : "sample02", "id" : "sample02.json", "public" : true },
+        {"description" : "simple demo02", "id" : "sample02.json", "public" : true },
         {"description" : "Test1 redux sample", "id" : "sample03.json", "public" : true },
         {"description" : "Test2 uikit-sortable sample", "id" : "sample04.json", "public" : true },
         {"description" : "Test3 component sample-React Calculator", "id" : "sample05.json", "public" : true },
@@ -12,6 +12,7 @@
         {"description" : "Test8 React Routing v4 sample", "id" : "sample10.json", "public" : true },
         {"description" : "Test9 w3c sample#2", "id" : "sample11.json", "public" : true },
         {"description" : "Test10 uikit_with_react-router_v4", "id" : "sample12.json", "public" : true },
-        {"description" : "Test11 w3c sample#3 dashboard", "id" : "sample13.json", "public" : true }
+        {"description" : "Test11 w3c sample#3 dashboard", "id" : "sample13.json", "public" : true },
+        {"description" : "Party Parrot Screensaver", "id" : "sample14.json", "public" : true }        
     ]
 }

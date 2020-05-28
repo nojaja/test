@@ -91,8 +91,25 @@ export class AHtmlCompiler {
         }
         let headElements = parseData.getElementsByTagName("head");
         headElements.forEach(function (headElement) {
+
             //head配下に追加
             let addpoint = headElement.getElementsByTagName("script")[0];
+            {
+                let newElement = headElement.createElement("script")
+                let child = newElement.createTextNode(`
+window.onerror = window.parent.logger.getOnerror()
+console.log = window.parent.logger.getLog()
+console.debug = window.parent.logger.getDebug()
+console.error = window.parent.logger.getError()
+console.info = window.parent.logger.getInfo()
+console.trace = window.parent.logger.getTrace()
+console.warn = window.parent.logger.getWarn()
+//# sourceURL=debug.js`)
+                newElement.appendChild(child)
+                headElement.insertBefore(newElement, addpoint)
+                addpoint = newElement;
+            }
+
             {
                 let newElement = headElement.createElement("script");
                 let child = newElement.createTextNode(reactRootParser.getResult() + "\n//# sourceURL=app.js");
