@@ -16093,6 +16093,9 @@ class WebStorage {
         })
     }
 
+    //deleteDraft(fileContainer, url) {
+    //}
+
     saveDraft(fileContainer) {
     }
 
@@ -16627,4 +16630,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.0fa1b7d3890feb30b7b4.js.map
+//# sourceMappingURL=map/dashboard.50d87fe2e1033a07052b.js.map
