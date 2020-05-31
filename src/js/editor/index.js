@@ -297,7 +297,7 @@ function fileRename() {
   $('#filelist .uk-active').each((index, element) => {
     const filename = $(element).attr("data-uri");
     UIkit.modal.prompt('<p>Rename File Name</p>', filename, (newName) => {
-      console.log('newName ' + newName);
+      console.log('fileRename: filename:'+filename+' to newName :' + newName);
       fileContainer.renameFile(filename, newName);
       // refreshFileList();
     }, () => {
