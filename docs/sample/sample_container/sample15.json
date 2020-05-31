@@ -1,0 +1,39 @@
+{
+    "v": 0.1,
+    "id": "",
+    "files": {
+        "index.html": {
+            "filename": "index.html",
+            "fileType": "txt",
+            "type": "text/html",
+            "language": "html",
+            "size": 1259,
+            "truncated": false,
+            "content": "<html>\n<head>\n    <script src=\"//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js\"></script>\n    <link rel='stylesheet prefetch' href='main.css' />\n    <script src=\"main.js\"></script>\n</head>\n<body>\n<div class=\"back\"></div>\n<div id=\"button\">\n  <!--<img src=\"https://pp.vk.me/c624230/v624230976/43e7b/T5WjDtwt80M.jpg\" alt=\"\" />--><svg version=\"1.1\" id=\"Capa_1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\"\n\t width=\"45.412px\" height=\"45.413px\" viewBox=\"0 0 45.412 45.413\" style=\"enable-background:new 0 0 45.412 45.413;\"\n\t xml:space=\"preserve\">\n\t<g>\n\t\t<path style=\"fill:#FFDCB9;\" d=\"M45.412,16.024c0-6.918-5.668-12.547-12.635-12.547c-4.103,0-7.754,1.951-10.063,4.969\n\t\t\tc-2.311-3.018-5.965-4.969-10.07-4.969C5.672,3.477,0,9.105,0,16.024c0,10.422,14.892,25.911,22.715,25.911\n\t\t\tc1.185,0,2.531-0.358,3.965-0.998c0,0-5.476-4.086-7.683-5.672C13.625,31.402,5.143,22.639,5.143,16.024\n\t\t\tc0-4.082,3.365-7.403,7.5-7.403c4.135,0,7.5,3.321,7.5,7.403c0,1.42,1.151,2.572,2.572,2.572c1.42,0,2.57-1.152,2.57-2.572\n\t\t\tc0-4.082,3.361-7.403,7.492-7.403s7.492,3.321,7.492,7.403c0,6.723-8.544,15.977-14.113,19.411l4.394,3.244\n\t\t\tC37.761,33.575,45.412,23.497,45.412,16.024z\"/>\n\t</g>\n</svg></div>\n</body>\n</html>",
+            "description": ""
+        },
+        "main.css": {
+            "filename": "main.css",
+            "content": ".back {\n  position: fixed;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  background: url(http://artem.anmedio.ru/dev/denis/1+2.jpg) center center #22181e no-repeat;\n  background-size: cover;\n}\n\n#source-heart {\n  width: 20px;\n  height: 20px;\n  position: fixed;\n  right: 30px;\n  top: 30px;\n}\n\n#button {\n  width: 100px;\n  height: 100px;\n  left: 50%;\n  top: 50%;\n  margin: -50px;\n  background: #22181e;\n  position: fixed;\n  border-radius: 50px;\n  box-sizing: border-box;\n  color: black;\n  text-align: center;\n  padding: 25px 0 0 3px;\n  font-family: monospace;\n  font-size: 40px;\n  cursor: pointer;\n  z-index: 20;\n  box-shadow: 0 0 20px -5px #22181e;\n  overflow: hidden;\n}\n#button img {\n  position: absolute;\n  left: -73%;\n  top: 0;\n  width: 180%;\n}\n#button svg {\n  width: 50%;\n  height: 50%;\n  left: 50%;\n  top: 50%;\n  position: absolute;\n  transform: translateX(-50%) translateY(-45%);\n}\n\n.heart {\n  position: fixed;\n  width: 50px;\n  z-index: 10;\n  height: 50px;\n  transform: translateX(-50%) translateY(-50%) scale(1.5);\n  opacity: 1;\n  transition: .5s ease;\n  opacity: 0;\n}\n\n@keyframes show-heart {\n  0% {\n    opacity: 0;\n    transform: translateX(-50%) translateY(-50%) scale(1.5) rotateZ(-15deg);\n  }\n  50% {\n    opacity: .8;\n  }\n  100% {\n    opacity: 0;\n    left: 50%;\n    top: 50%;\n    transform: translateX(-50%) translateY(-50%) scale(0.2) rotateZ(15deg);\n    display: none;\n  }\n}",
+            "type": "text/css",
+            "language": "CSS",
+            "size": 1393,
+            "truncated": false
+        },
+        "main.js": {
+            "filename": "main.js",
+            "fileType": "txt",
+            "type": "text/javascript",
+            "language": "JavaScript",
+            "size": 913,
+            "truncated": false,
+            "content": "var color = ['#f9a363','#8c1346','#d13d3c','#e2663b'];\nfunction addHeart(){\n  let randomColor = Math.floor(Math.random() * (4));\n  let randomX = Math.floor(Math.random() * (100));\n  let randomY = Math.floor(Math.random() * (100));\n  let svg = '<svg style=\"top:'+randomY+'%; left: '+randomX+'%;\" class=\"heart\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" x=\"0px\" y=\"0px\" viewBox=\"0 0 23.217 23.217\" style=\"enable-background:new 0 0 23.217 23.217;\" xml:space=\"preserve\"><g><path style=\"fill:'+color[randomColor]+';\" d=\"M11.608,21.997c-22.647-12.354-6.268-27.713,0-17.369C17.877-5.716,34.257,9.643,11.608,21.997z\" /></g></svg>';\n  $(\"body\").append(svg);\n}\nfunction deleteHearts(){\n  $('.heart:lt(100)').remove();\n}\nfunction centerHeart(){\n  $(\".heart\").css('-webkit-animation','show-heart 4s ease');\n}\nsetInterval(addHeart,50);\nsetInterval(centerHeart,200);\nsetInterval(deleteHearts,8000);",
+            "description": ""
+        }
+    },
+    "public": true,
+    "createdTime": 1515039553000,
+    "lastUpdatedTime": 1590213724414,
+    "description": "simple demo02",
+    "projectName": "simple demo02"
+}

@@ -16343,7 +16343,7 @@ class FileContainer {
 
   renameFile (filename, newName) {
     if (filename in this.container.files) {
-      if (!newName in this.container.files) {
+      if (!(newName in this.container.files)) {
         let file = new _FileData_js__WEBPACK_IMPORTED_MODULE_0__["default"](this.container.files[filename])
         file.setFilename(newName)
         delete this.container.files[filename]
@@ -16627,4 +16627,4 @@ if (typeof window !== 'undefined') {
 /***/ })
 
 /******/ });
-//# sourceMappingURL=map/dashboard.af674356090158b10682.js.map
+//# sourceMappingURL=map/dashboard.0fa1b7d3890feb30b7b4.js.map
