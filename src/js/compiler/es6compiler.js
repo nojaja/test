@@ -6,6 +6,7 @@ export class ES6Compiler {
         this.fileContainer = fileContainer
         this.logger = logger
         this.error = logger.getError()
+        this.info = logger.getInfo()
     }
 
     async compile(targetFile, outpath) {

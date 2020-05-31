@@ -22,6 +22,9 @@ export class StubStorage {
         })
     }
 
+    //deleteDraft(fileContainer, url) {
+    //}
+
     saveDraft(fileContainer) {
     }
 

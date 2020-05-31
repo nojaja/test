@@ -146,8 +146,36 @@ function projectjsonCallback(json, type) {
     _prj.children('.project').attr('data-url', val.id);
     _prj.children('.project').append(' ' + val.description);
     $("#prjlist").append(_prj);
+
+    $.contextMenu({
+      selector: `#prjlist > li:nth-child(${i}) > a`,
+      // define the elements of the menu
+      items: {
+        "delete": { name: "Delete", callback: (key, options) => { 
+          const ele = options.$trigger[0]
+          const filename = ele.getAttribute("data-url")
+          projectDelete(filename)
+        } }
+      }
+    })
   });
 }
+
+// Project削除
+function projectDelete(filename) {
+  if(!selectStorage.deleteDraft){
+    $.UIkit.notify("It's a storage that can't be deleted.", { status: 'warning', timeout: 1000 });
+    return
+  }
+  UIkit.modal.confirm('<p>Delete ' + filename + ' Project </p>', () => {
+    console.log('filename ' + filename);
+    selectStorage.deleteDraft(fileContainer, filename)
+    // refreshFileList();
+  }, () => {
+    console.log('Rejected.');
+    return;
+  })
+};
 
 //プロジェクトファイルの読み込み
 function loadProject(url, type, cb) {

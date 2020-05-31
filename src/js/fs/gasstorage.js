@@ -27,6 +27,9 @@ export class GasStorage {
             return (cb) ? cb(list, "gas") : list
         })
     }
+    
+    //deleteDraft(fileContainer, url) {
+    //}
 
     saveDraft(fileContainer) {
     }

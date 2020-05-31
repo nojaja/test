@@ -48,6 +48,28 @@ export class GistStorage {
         }
     }
 
+    deleteDraft(fileContainer, url) {
+        let sendType = "DELETE"
+        let _gisturl = gisturl + "/" + fileContainer.getGistId();
+        if (fileContainer.getGistId()) {
+            $.ajax({
+                url: _gisturl,
+                type: sendType,
+                dataType: 'json',
+                beforeSend: (xhr) => {
+                    xhr.setRequestHeader("Authorization", "token " + this.tokens);
+                }
+            }).done((response) => {
+                $.UIkit.notify("delete!", { status: 'success', timeout: 1000 })
+                localStorage.setItem('gittoken', this.tokens)
+                fileContainer.setGistId(response.id)
+            }).fail((jqXHR, textStatus, errorThrown) => {
+                console.warn("gist delete error", errorThrown);
+                $.UIkit.notify("error..", { status: 'error', timeout: 1000 });
+            })
+        }
+    }
+
     async saveDraft(fileContainer) {
         if(await this.getToken()){
             this.updateInfoFile(fileContainer)

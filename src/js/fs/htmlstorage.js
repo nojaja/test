@@ -19,6 +19,9 @@ export class HtmlStorage {
         return (cb) ? cb(json, "html") : json
     }
 
+    //deleteDraft(fileContainer, url) {
+    //}
+
     saveDraft(fileContainer) {
     }
 

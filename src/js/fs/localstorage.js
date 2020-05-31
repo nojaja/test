@@ -24,6 +24,13 @@ export class LocalStorage {
         return (cb) ? cb(json, "local") : json
     }
 
+    deleteDraft(fileContainer, path) {
+        const name1 = path || 'draftContainer' + location.pathname.replace(/\//g, '.');
+        if (localStorage.getItem(name1)) {
+            localStorage.removeItem(name1)
+        }
+    }
+
     saveDraft(fileContainer) {
         this.updateInfoFile(fileContainer)
         // ローカルストレージに最新の状態を保存

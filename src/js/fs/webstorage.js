@@ -22,6 +22,9 @@ export class WebStorage {
         })
     }
 
+    //deleteDraft(fileContainer, url) {
+    //}
+
     saveDraft(fileContainer) {
     }
 
