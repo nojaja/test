@@ -10,6 +10,7 @@ import GistStorage from '../fs/giststorage.js'
 import HtmlStorage from '../fs/htmlstorage.js'
 import WebStorage from '../fs/webstorage.js'
 import StubStorage from '../fs/stubstorage.js'
+import GDrivestorage from '../fs/gDrivestorage.js'
 
 import BuilderLogic from './builderlogic.js'
 import RefreshView from './refreshView.js'
@@ -30,6 +31,7 @@ let gistStorage = new GistStorage();
 let htmlStorage = new HtmlStorage();
 let webStorage = new WebStorage();
 let stubStorage = new StubStorage();
+let gDrivestorage = new GDrivestorage();
 let builderLogic = new BuilderLogic(fileContainer);
 let refreshViewLogic = new RefreshView(fileContainer);
 let filelist = new FileList(fileContainer);
@@ -117,7 +119,8 @@ $(".storageType").on("click", (event) => {
   if (type == 'htmlStorage') selectStorage = htmlStorage
   if (type == 'webStorage') selectStorage = webStorage
   if (type == 'stubStorage') selectStorage = stubStorage
-
+  if (type == 'gDrivestorage') selectStorage = gDrivestorage
+  
   $("#prjlist").empty();
   $("#prjlist").html('<li><i class="uk-icon-spinner uk-icon-spin"></i></li>');
   mode++
@@ -208,6 +211,11 @@ function loadProject(url, type, cb) {
     })
   } else if (type == "stub") {
     stubStorage.loadDraft(fileContainer, url, (fileContainer) => {
+      openFirst();
+      return (cb) ? cb() : true;
+    })
+  } else if (type == "gdrive") {
+    gDrivestorage.loadDraft(fileContainer, url, (fileContainer) => {
       openFirst();
       return (cb) ? cb() : true;
     })
@@ -426,6 +434,9 @@ $(document).ready(() => {
 
   $("#gist").on("click", (event) => {
     gistStorage.saveDraft(fileContainer)
+  });
+  $("#gdrive").on("click", (event) => {
+    gDrivestorage.saveDraft(fileContainer)
   });
 
   $("#titleEdit").on("click", (event) => {
